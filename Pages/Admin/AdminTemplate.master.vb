@@ -1,4 +1,5 @@
 Imports System.Data
+Imports HapagDB
 
 Partial Class Pages_Admin_AdminTemplate
     Inherits System.Web.UI.MasterPage

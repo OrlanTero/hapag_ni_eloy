@@ -1,5 +1,5 @@
 Imports System.Data
-
+Imports HapagDB
 Partial Class Pages_Customer_CustomerSpecialOffers
     Inherits System.Web.UI.Page
     Dim Connect As New Connection()

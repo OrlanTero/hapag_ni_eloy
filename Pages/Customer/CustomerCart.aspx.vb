@@ -3,6 +3,7 @@ Imports System.Web.Services
 Imports System.Web.Script.Serialization
 Imports System.Data.SqlClient
 Imports Newtonsoft.Json
+Imports HapagDB
 
 ' Define the Discount class
 Public Class Discount
@@ -1529,29 +1530,38 @@ Partial Class Pages_Customer_CustomerCart
     ' Helper method to show alert messages
     Protected Sub ShowAlert(ByVal message As String, Optional ByVal isSuccess As Boolean = True)
         ' Check if the page has a master page with ShowAlert method
-        If Me.Master IsNot Nothing AndAlso TypeOf Me.Master Is Pages_Customer_CustomerTemplate Then
-        Dim masterPage As Pages_Customer_CustomerTemplate = DirectCast(Me.Master, Pages_Customer_CustomerTemplate)
-        masterPage.ShowAlert(message, isSuccess)
-        Else
-            ' Fallback to show alert using JavaScript
-            Dim alertClass As String = If(isSuccess, "alert-success", "alert-danger")
-            Dim script As String = String.Format("showAlertMessage('{0}', '{1}');", message.Replace("'", "\'"), alertClass)
-            
-            If Not ClientScript.IsStartupScriptRegistered("AlertScript") Then
-                ClientScript.RegisterStartupScript(Me.GetType(), "AlertScript", script, True)
-            End If
-            
-            ' Also update alert message panel if it exists
-            If alertMessage IsNot Nothing Then
-                alertMessage.Visible = True
-                AlertLiteral.Text = message
-                
-                ' Apply appropriate CSS class
-                If isSuccess Then
-                    alertMessage.Attributes("class") = "alert-message alert-success"
-                Else
-                    alertMessage.Attributes("class") = "alert-message alert-danger"
+        If Me.Master IsNot Nothing Then
+            Try
+                ' Access the ShowAlert method on the master page using reflection
+                Dim masterShowAlertMethod As System.Reflection.MethodInfo = Me.Master.GetType().GetMethod("ShowAlert")
+                If masterShowAlertMethod IsNot Nothing Then
+                    masterShowAlertMethod.Invoke(Me.Master, New Object() {message, isSuccess})
+                    Return
                 End If
+            Catch ex As Exception
+                ' Fallback to local alert if reflection fails
+                System.Diagnostics.Debug.WriteLine("Error calling master ShowAlert: " & ex.Message)
+            End Try
+        End If
+
+        ' Fallback to show alert using JavaScript
+        Dim alertClass As String = If(isSuccess, "alert-success", "alert-danger")
+        Dim script As String = String.Format("showAlertMessage('{0}', '{1}');", message.Replace("'", "\'"), alertClass)
+        
+        If Not ClientScript.IsStartupScriptRegistered("AlertScript") Then
+            ClientScript.RegisterStartupScript(Me.GetType(), "AlertScript", script, True)
+        End If
+        
+        ' Also update alert message panel if it exists
+        If alertMessage IsNot Nothing Then
+            alertMessage.Visible = True
+            AlertLiteral.Text = message
+            
+            ' Apply appropriate CSS class
+            If isSuccess Then
+                alertMessage.Attributes("class") = "alert-message alert-success"
+            Else
+                alertMessage.Attributes("class") = "alert-message alert-danger"
             End If
         End If
     End Sub

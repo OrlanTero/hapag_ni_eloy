@@ -2,7 +2,7 @@
 Imports System.Web.UI.WebControls
 Imports System.Data
 Imports System.Data.SqlClient
-
+Imports HapagDB
 Partial Class LandingPage
     Inherits System.Web.UI.Page
 

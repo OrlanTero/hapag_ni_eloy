@@ -1,7 +1,7 @@
 Imports System.Data
 Imports System.Web.UI.HtmlControls
 Imports System.Web.UI
-
+Imports HapagDB
 Partial Class Pages_Customer_CustomerOrders
     Inherits System.Web.UI.Page
     Dim Connect As New Connection()

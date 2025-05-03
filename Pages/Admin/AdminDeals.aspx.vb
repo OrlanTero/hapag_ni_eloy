@@ -1,4 +1,5 @@
 ﻿Imports System.Data
+Imports HapagDB
 
 Partial Class Pages_Admin_AdminDeals
     Inherits System.Web.UI.Page

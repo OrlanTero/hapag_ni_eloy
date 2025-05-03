@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="CustomerCart.aspx.vb" Inherits="Pages_Customer_CustomerCart" MasterPageFile="~/Pages/Customer/CustomerTemplate.master" %>
+<%@ MasterType VirtualPath="~/Pages/Customer/CustomerTemplate.master" %>
 <%@ Register Assembly="System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" Namespace="System.Web.UI" TagPrefix="asp" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">

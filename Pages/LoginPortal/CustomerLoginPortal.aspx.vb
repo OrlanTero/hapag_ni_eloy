@@ -1,4 +1,6 @@
-﻿Partial Class CustomerLoginPortal
+﻿Imports HapagDB
+
+Partial Class CustomerLoginPortal
     Inherits System.Web.UI.Page
 
     Dim Util As New DBUtils()

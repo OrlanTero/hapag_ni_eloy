@@ -3,6 +3,7 @@ Imports System.Data.SqlClient
 Imports System.Web.UI
 Imports System.Web.UI.WebControls
 Imports System.Web.UI.HtmlControls
+Imports HapagDB
 
 Partial Class Pages_Admin_AdminOrders
     Inherits System.Web.UI.Page

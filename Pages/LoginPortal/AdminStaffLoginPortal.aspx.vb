@@ -1,5 +1,6 @@
 ﻿Imports System.Data
 Imports System.Web.Security
+Imports HapagDB
 
 Partial Class Pages_LoginPortal_AdminStaffLoginPortal
     Inherits System.Web.UI.Page

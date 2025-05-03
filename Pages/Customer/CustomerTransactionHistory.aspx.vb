@@ -3,7 +3,7 @@ Imports System.Data.SqlClient
 Imports System.Collections.Generic
 Imports System.Web.UI.WebControls
 Imports System.Configuration
-
+Imports HapagDB
 ' Remove the User class definition as it's likely conflicting with an existing User class
 ' Public Class User
 '     Public Property user_id As Integer

@@ -1,5 +1,6 @@
 ﻿Imports Microsoft.VisualBasic
 Imports System.Data
+Imports HapagDB
 
 Public Class DBUtils
     Dim Connect As New Connection()

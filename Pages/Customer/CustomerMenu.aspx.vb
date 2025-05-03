@@ -1,4 +1,5 @@
 ﻿Imports System.Data
+Imports HapagDB
 
 Partial Class Pages_Customer_CustomerMenu
     Inherits System.Web.UI.Page

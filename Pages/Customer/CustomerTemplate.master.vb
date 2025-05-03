@@ -1,4 +1,5 @@
 Imports System.Data
+Imports HapagDB
 
 Partial Class Pages_Customer_CustomerTemplate
     Inherits System.Web.UI.MasterPage

@@ -1,5 +1,5 @@
 ﻿Imports System.Data
-
+Imports HapagDB
 Public Class Pages_Customer_RegisterPortal
     Inherits System.Web.UI.Page
 

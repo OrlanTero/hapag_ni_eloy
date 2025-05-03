@@ -1,4 +1,5 @@
 Imports System.Data.SqlClient
+Imports HapagDB
 
 Partial Class Pages_LoginPortal_ResetPassword
     Inherits System.Web.UI.Page

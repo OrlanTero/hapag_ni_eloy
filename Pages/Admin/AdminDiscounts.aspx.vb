@@ -2,6 +2,7 @@ Imports System.Data
 Imports System.Text
 Imports System.Web.UI.HtmlControls
 Imports System.Web.UI.WebControls
+Imports HapagDB
 
 Partial Class Pages_Admin_AdminDiscounts
     Inherits System.Web.UI.Page

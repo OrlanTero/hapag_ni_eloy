@@ -1,5 +1,6 @@
 ﻿Imports System.Data
 Imports System.IO
+Imports HapagDB
 
 Partial Class Pages_Admin_AdminMenu
     Inherits System.Web.UI.Page
