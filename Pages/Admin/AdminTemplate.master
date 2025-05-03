@@ -1,0 +1,349 @@
+<%@ Master Language="VB" AutoEventWireup="false" CodeFile="AdminTemplate.master.vb" Inherits="Pages_Admin_AdminTemplate" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>Admin Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="./../../StyleSheets/Layout.css" rel="stylesheet" type="text/css" />
+    <link href="./../../StyleSheets/Admin.css" rel="stylesheet" type="text/css" />
+    <link href="./../../StyleSheets/Containers.css" rel="stylesheet" type="text/css" />
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+    <!-- Add additional stylesheets as needed -->
+    <style type="text/css">
+        /* Alert message styles */
+        .alert-message {
+            display: none;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+        }
+        
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        /* Dropdown styles */
+        .dropdown-container {   
+            position: relative;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+        }
+        
+        .dropdown-container:hover .dropdown-menu {
+            display: block;
+        }
+        
+        .dropdown-menu a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-menu a:hover {
+            background-color: #f1f1f1;
+            color: #000;
+        }
+        
+        /* Mobile dropdown */
+        @media screen and (max-width: 768px) {
+            .dropdown-menu {
+                position: static;
+                box-shadow: none;
+                width: 100%;
+                padding-left: 30px;
+            }
+            
+            .dropdown-container:hover .dropdown-menu {
+                display: none;
+            }
+            
+            .dropdown-container.active .dropdown-menu {
+                display: block;
+            }
+            
+            .dropdown-toggle {
+                cursor: pointer;
+            }
+        }
+
+        .user-profile {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #619F2B;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            text-transform: uppercase;
+            font-weight: 500;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .user-details {
+            flex: 1;
+            min-width: 0; /* For text truncation to work */
+        }
+        
+        .user-name {
+            color: #FFFFFF;
+            font-weight: 500;
+            font-size: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: 2px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-role {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            background-color: rgba(209, 41, 41, 0.1);
+            border: 1px solid rgba(209, 41, 41, 0.2);
+            border-radius: 6px;
+            color: #FFFFFF;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(209, 41, 41, 0.2);
+            border-color: rgba(209, 41, 41, 0.3);
+        }
+        
+        .logout-btn i {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        .nav-menu a:hover {
+            background-color: #f1f1f1;
+            color: #000;
+        }
+
+        /* Logout button styles */
+        .logout-btn {
+            color: #dc3545 !important;
+            font-weight: bold !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .logout-btn:hover {
+            background-color: #dc3545 !important;
+            color: #fff !important;
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="MasterScriptManager" runat="server" EnablePageMethods="true"></asp:ScriptManager>
+        
+        <!-- Alert Message -->
+        <div id="alertMessage" runat="server" class="alert-message">
+            <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
+        </div>
+        
+        <div class="page-container">
+            <!-- Admin Sidebar -->
+            <div class="admin-sidebar">
+                <!-- User Profile Section -->
+                <div class="user-profile">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <asp:Literal ID="UserInitialsLiteral" runat="server"></asp:Literal>
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">
+                                <asp:Literal ID="UserDisplayNameLiteral" runat="server"></asp:Literal>
+                            </div>
+                            <div class="user-role">Administrator</div>
+                        </div>
+                    </div>
+                    <asp:LinkButton ID="LogoutButton" runat="server" CssClass="logout-btn" OnClick="LogoutButton_Click">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </asp:LinkButton>
+                </div>
+
+                <div class="logo">
+                    <img src="../../Assets/Images/logo-removebg-preview.png" alt="Logo" />
+                </div>
+                <div class="nav-links">
+                    <a href="AdminDashboard.aspx">
+                        <img src="../../Assets/Images/icons/dashboard icon black.png" class="black" />
+                        <img src="../../Assets/Images/icons/dasboard icon white.png" class="white" />
+                        <span>📊 Dashboard</span>
+                    </a>
+
+                    <a href="AdminMenu.aspx">
+                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
+                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
+                        <span>🍽️ Menu</span>
+                    </a> 
+
+                    <a href="AdminMenuCategories.aspx">
+                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
+                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
+                        <span>📑 Categories</span>
+                    </a>
+
+                    <a href="AdminMenuTypes.aspx">
+                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
+                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
+                        <span>🏷️ Types</span>
+                    </a>
+
+                    <a href="AdminOrders.aspx">
+                        <img src="../../Assets/Images/icons/order-black.png" class="black" />
+                        <img src="../../Assets/Images/icons/order-white.png" class="white" />
+                        <span>📦 Orders</span>
+                    </a>
+
+                    <a href="AdminAccounts.aspx" id="navAccounts" runat="server">ACCOUNTS</a>
+                    <a href="AdminDiscounts.aspx" id="navDiscounts" runat="server">DISCOUNTS</a>
+                    <a href="AdminDeals.aspx" id="navDeals" runat="server">DEALS</a>
+                    <asp:LinkButton ID="NavLogoutButton" runat="server" CssClass="logout-btn" OnClick="LogoutButton_Click">LOGOUT</asp:LinkButton>
+
+                    <div class="dropdown-container">
+                        <a href="javascript:void(0);" class="dropdown-toggle">
+                            <img src="../../Assets/Images/icons/administrator-black.png" class="black" />
+                            <img src="../../Assets/Images/icons/administrator-white.png" class="white" />
+                            <span>⚙️ Administrator</span>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="AdminDeals.aspx">🏷️ Deals</a>
+                            <a href="AdminPromotions.aspx">🎯 Promotions</a>
+                            <a href="AdminDiscounts.aspx">💰 Discounts</a>
+                        </div>
+                    </div>
+
+                    <a href="Admin Transaction.aspx">
+                        <img src="../../Assets/Images/icons/transaction-black.png" class="black" />
+                        <img src="../../Assets/Images/icons/transaction-white.png" class="white" />
+                        <span>💳 Transactions</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="main-content">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                </asp:ContentPlaceHolder>
+            </div>
+        </div>
+    </form>
+
+    <script type="text/javascript">
+        // Mobile menu toggle
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            var sidebar = document.querySelector('.admin-sidebar');
+            var mainContent = document.querySelector('.main-content');
+            
+            if (sidebar.style.width === '250px' || sidebar.style.width === '') {
+                sidebar.style.width = '0';
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '250px';
+                mainContent.style.marginLeft = '250px';
+            }
+        });
+        
+        // Dropdown toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            
+            dropdownToggles.forEach(function(toggle) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    this.parentElement.classList.toggle('active');
+                });
+            });
+            
+            // Set active class based on current page
+            var currentPage = window.location.pathname.split('/').pop();
+            var navLinks = document.querySelectorAll('.nav-links a');
+            var dropdownLinks = document.querySelectorAll('.dropdown-menu a');
+            
+            navLinks.forEach(function(link) {
+                var href = link.getAttribute('href');
+                if (href === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+            
+            dropdownLinks.forEach(function(link) {
+                var href = link.getAttribute('href');
+                if (href === currentPage) {
+                    link.classList.add('active');
+                    link.parentElement.parentElement.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

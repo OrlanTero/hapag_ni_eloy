@@ -1,0 +1,110 @@
+/* Container Shadows */
+.content-container {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.content-header {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+}
+
+.alert-message {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.form-container {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    background: #fff;
+    margin-bottom: 20px;
+}
+
+.cart-container, .orders-container, .transaction-container {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    background: #fff;
+    margin-bottom: 20px;
+}
+
+.cart-item, .order-card, .transaction-card {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #fff;
+    transition: box-shadow 0.3s ease;
+}
+
+.cart-item:hover, .order-card:hover, .transaction-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.empty-cart, .empty-orders, .empty-transactions {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    background: #fff;
+}
+
+.filter-section {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background: #fff;
+}
+
+.delivery-info-panel {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 15px;
+    background: #fff;
+}
+
+.order-actions {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 10px;
+    background: #fff;
+    margin-top: 10px;
+}
+
+/* Admin specific containers */
+.image-panel {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 10px;
+    background: #fff;
+}
+
+.dropdown-menu {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .content-container, .form-container, .cart-container, .orders-container, .transaction-container {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+    }
+    
+    .cart-item, .order-card, .transaction-card {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+    }
+} 

@@ -1,0 +1,913 @@
+﻿@font-face {
+    font-family: 'CustomFont';
+    src: url('./../Assets/Fonts/Kodchasan-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MoonDance';
+    src: url('./../Assets/Fonts/MoonDance-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body 
+{
+    padding: 0;
+    margin: 0;
+    font-family: CustomFont;
+}
+
+.root-container {}
+
+.root-container .top-navbar 
+{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: #fff;
+}
+
+.top-navbar .left
+{
+ float: left;
+ margin-left: 20px;
+ margin-top: -10px;
+}
+.top-navbar img 
+{
+   width: 150px;
+   height: auto;  
+}
+
+.top-navbar .right 
+{
+    float: right;
+    margin-right: 100px;
+}
+
+.top-navbar .right ul 
+{
+    display: flex;
+    text-align: center;
+    padding: 10px;
+}
+
+.top-navbar .right ul li 
+{
+     margin: 10px;
+     list-style-type: none;
+     text-decoration: none;
+     border-radius: 15px;
+     padding: 5px 20px;
+     cursor: hand;
+}
+
+.top-navbar .right ul li.active 
+{
+      background: #FCA418;
+      color: #fff;
+}
+
+.top-navbar .right ul a 
+{
+    text-decoration: none;
+    color: #050505;
+}
+
+.main-container 
+{
+ width: 100vw;
+ height: calc(100vh - 100px);
+ position: relative;
+ top: 100px;
+}
+
+.main-container .main-background 
+{
+   width: 100%;
+   height: 100%;
+   background-position: center;
+   background-repeat: no-repeat;
+   background-size: 100% 100%;
+   background-position-y: 10px; 
+   position: absolute;
+}
+
+.main-container .main-headline 
+{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    top: 50px;
+    position: relative;
+}
+
+.main-container .main-headline  h1 
+{
+    font-size: 80px;  
+    font-family: MoonDance;  
+}
+
+.main-container .main-headline  p 
+{
+    width: 28%;   
+    font-size: 20px; 
+    text-align: center;
+    top: -50px;
+    position: relative;
+}
+
+.main-container .main-headline .buttons 
+{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.main-container .main-headline .buttons a 
+{
+    text-decoration: none;
+}
+
+.main-container .main-headline .buttons .ui-button 
+{
+    width: 200px;
+    height: 60px;
+    border-radius: 6px;
+    background: #FCA418;
+    margin: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: #fff;
+    cursor: hand;
+}
+
+
+/** LOGIN PORTAL **/
+
+.main-container .side-background 
+{
+    position: fixed; 
+    top: 0;
+    right: 0;
+    width: 30%;
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.main-container .left-side-background 
+{
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+}
+
+.main-container 
+{
+    position: relative;
+}
+
+.main-container .main-auth-container 
+{
+    position: absolute;
+    top: 5%;
+    left: 15%;
+    width: 550px;
+    height: 550px;
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.main-container .main-auth-container.signup 
+{
+   left: auto;
+   right: 15%;    
+}
+
+.main-container .main-auth-container .head 
+{
+    position: relative;
+  
+}
+
+.main-container .main-auth-container .body 
+{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    top: -50px;
+}
+
+.main-container .main-auth-container .body  .form-group 
+{
+    margin: 10px;
+}
+
+.main-container .main-auth-container .body .form-group label 
+{
+    display: block;
+    margin: 5px;
+    font-size: 20px;
+}
+
+.main-container .main-auth-container .body .form-group input 
+{
+    margin: 5px;    
+    border-radius: 25px;
+    width: 250px;
+    height: 30px;
+    border: 1px solid #ebeeee;
+    padding: 10px 12px;
+    font-size: 16px;
+}
+
+.main-container .main-auth-container .body .form-group input[type=button] 
+{
+    width: 230px;
+    height: 45px;
+    font-size: 24px;
+    border-radius: 15px;
+    background: #FCA418;
+    color: #fff;
+    cursor: pointer;
+}
+
+.main-container .main-auth-container.signup .body .form-group input[type=button]  
+{
+    background: #FFC233;    
+}
+
+.main-container .main-auth-container .body .form-group p 
+{
+    margin-top: 10px;
+    
+}
+
+.main-container .main-auth-container .body .form-group a 
+{
+    color: #FCA418;
+    text-decoration: none;
+}
+
+.main-container .main-auth-container.signup .body .form-group a  
+{
+    color: #6B0504;
+}
+
+.main-container .main-auth-container .head::after 
+{
+    content: "";
+    position: absolute;
+    right: 0;
+    top: calc(50% - 10px);
+    width: 100px;
+    height: 20px;
+    
+}
+
+
+.main-container .main-auth-container .head::before 
+{
+    content: "";
+    position: absolute;
+    left: 0;
+    top: calc(50% - 10px);
+    width: 100px;
+    height: 20px;
+    
+}
+
+.main-container .main-auth-container.signup .head::after, .main-container .main-auth-container.signup .head::before      
+{
+    width: 80px; 
+}
+
+
+.main-container .main-auth-container .head h1 
+{
+    font-size: 60px;
+    text-align: center;
+}
+
+.main-container .main-auth-container .head h3 
+{
+    font-size: 30px;
+    text-align: left;
+    margin-top:-30px;
+    margin-left:20PX;
+    margin-bottom: 70px;
+}
+
+/** ADMIN DASHBOARD **/
+
+.sidenav{
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #2c3e50;
+  overflow-x: hidden;
+  padding-top: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.dropbtn 
+{
+  margin-left:10px; 
+  font-size: 20px;
+  color: #000000;
+  background-color: #E6E6E6;
+  border:none;
+  width:300;
+  height: 100%;
+  margin-right:-600px;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.show 
+{
+    display:block;
+}
+
+.sidenav a{
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  padding-left: 20px; 
+  font-size: 20px;
+  color: #000000;
+  background-color: #E6E6E6;
+  display: block;
+}
+
+.sidenav a:hover, .dropbtn:hover{
+  background-color: #619F2B;
+  color:#fff;
+}
+
+.sidenav a img.white, .dropbtn img.white
+{
+    display:none;
+}
+
+.sidenav a:hover img.black, .dropbtn:hover img.black
+{
+    display:none;
+}
+
+.sidenav a:hover img.white, .dropbtn:hover img.white
+{
+    display:inline;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+.icons img
+{
+    height:30px;
+    width:30px;
+    padding-top: 12px;
+    margin-right:10px;
+}
+
+.right 
+{
+    height:150px;
+    width:150px;
+    margin-bottom:20px;
+    margin-left: 40px;
+    padding-top: 12px;
+}
+
+/* Standard Admin Container Styles */
+.form-dashboard,
+.form-messages,
+.form-menu,
+.form-menu1,
+.form-menu2,
+.Panel1,
+.main-auth-container,
+.sidenav,
+.transaction-container,
+.transaction-details,
+.transaction-items,
+.transaction-summary {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    margin: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Form Container Base Styles */
+.form-dashboard,
+.form-messages,
+.form-menu,
+.form-menu1,
+.form-menu2 {
+    position: relative;
+    width: auto;
+    min-height: 200px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Specific Container Adjustments */
+.form-dashboard {
+    margin-top: 20px;
+    margin-right: 5%;
+    width: 1190px;
+    height: 450px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.form-messages {
+    margin-top: 13%;
+    margin-right: 5%;
+    width: 1190px;
+    height: 550px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.form-menu,
+.form-menu1 {
+    margin-right: 45%;
+    width: 550px;
+    height: auto;
+    min-height: 300px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.form-menu2 {
+    margin-right: 7%;
+    width: 1150px;
+    height: 400px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.Panel1 {
+    position: absolute;
+    top: 2%;
+    right: 2%;
+    width: 400px;
+    height: 200px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Form Elements */
+.form-menu h2,
+.form-menu1 h2,
+.form-menu2 h2 {
+    margin: 20px;
+    font-size: 20px;
+    color: #333;
+}
+
+.form-menu h3,
+.form-menu1 h3,
+.form-menu2 h3 {
+    margin: 10px 20px;
+    font-size: 15px;
+    color: #666;
+}
+
+.form-menu input,
+.form-menu1 input,
+.form-menu2 input {
+    margin: 10px 20px;
+    border-radius: 25px;
+    height: 40px;
+    border: 1px solid #ebeeee;
+    padding: 10px 12px;
+    font-size: 16px;
+    width: calc(100% - 40px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.form-menu input:focus,
+.form-menu1 input:focus,
+.form-menu2 input:focus {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: #619F2B;
+}
+
+.form-menu .dropdown,
+.form-menu1 .dropdown,
+.form-menu2 .dropdown {
+    margin: 10px 20px;
+    border-radius: 25px;
+    height: 40px;
+    border: 1px solid #ebeeee;
+    padding: 10px 12px;
+    font-size: 16px;
+    width: calc(100% - 40px);
+}
+
+/* Layout Helpers */
+.left {
+    float: left;
+    width: 50%;
+}
+
+.right {
+    float: right;
+    width: 50%;
+}
+
+.left-textboxes,
+.right-textboxes {
+    width: 50%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* CRUD Buttons */
+.crudbuttons,
+.crudbuttons-menu {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.crudbuttons .green,
+.crudbuttons-menu .green,
+.crudbuttons .yellow,
+.crudbuttons-menu .yellow,
+.crudbuttons .red,
+.crudbuttons-menu .red {
+    background-color: #619F2B;
+    border: none;
+    padding: 10px 20px;
+    width: 150px;
+    height: 45px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.crudbuttons .yellow,
+.crudbuttons-menu .yellow {
+    background-color: #FFC233;
+}
+
+.crudbuttons .red,
+.crudbuttons-menu .red {
+    background-color: #dc3545;
+}
+
+.crudbuttons .green:hover,
+.crudbuttons-menu .green:hover,
+.crudbuttons .yellow:hover,
+.crudbuttons-menu .yellow:hover,
+.crudbuttons .red:hover,
+.crudbuttons-menu .red:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.table th {
+    background-color: #619F2B;
+    color: white;
+    padding: 15px;
+    text-align: left;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table td {
+    padding: 15px;
+    border-bottom: 1px solid #ebeeee;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.table tr:hover {
+    background-color: #f1f1f1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.table tr.active {
+    background: #619F2B;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Image Panel */
+#ImagePanel {
+    width: 200px;
+    height: 200px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    margin: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 1200px) {
+    .form-dashboard,
+    .form-messages,
+    .form-menu2 {
+        width: 95%;
+        margin: 20px auto;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .form-menu,
+    .form-menu1 {
+        width: 95%;
+        margin: 20px auto;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .left,
+    .right,
+    .left-textboxes,
+    .right-textboxes {
+        float: none;
+        width: 100%;
+    }
+    
+    .main-auth-container {
+        width: 95%;
+        left: 2.5%;
+        right: 2.5%;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+}
+
+/* Transaction Container Styles */
+.transaction-container {
+    width: 1190px;
+    min-height: 450px;
+    margin-right: 5%;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.transaction-details {
+    width: 100%;
+    margin: 20px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.transaction-items {
+    width: 100%;
+    margin: 20px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.transaction-summary {
+    width: 400px;
+    height: auto;
+    position: absolute;
+    top: 2%;
+    right: 2%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+/* Transaction Form Elements */
+.transaction-container h2,
+.transaction-details h2,
+.transaction-items h2,
+.transaction-summary h2 {
+    margin: 20px;
+    font-size: 20px;
+    color: #333;
+    border-bottom: 2px solid #619F2B;
+    padding-bottom: 10px;
+}
+
+.transaction-container h3,
+.transaction-details h3,
+.transaction-items h3,
+.transaction-summary h3 {
+    margin: 10px 20px;
+    font-size: 15px;
+    color: #666;
+}
+
+.transaction-container input,
+.transaction-details input,
+.transaction-items input,
+.transaction-summary input {
+    margin: 10px 20px;
+    border-radius: 25px;
+    height: 40px;
+    border: 1px solid #ebeeee;
+    padding: 10px 12px;
+    font-size: 16px;
+    width: calc(100% - 40px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.transaction-container input:focus,
+.transaction-details input:focus,
+.transaction-items input:focus,
+.transaction-summary input:focus {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: #619F2B;
+}
+
+.transaction-container .dropdown,
+.transaction-details .dropdown,
+.transaction-items .dropdown,
+.transaction-summary .dropdown {
+    margin: 10px 20px;
+    border-radius: 25px;
+    height: 40px;
+    border: 1px solid #ebeeee;
+    padding: 10px 12px;
+    font-size: 16px;
+    width: calc(100% - 40px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Transaction Table Styles */
+.transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.transaction-table th {
+    background-color: #619F2B;
+    color: white;
+    padding: 15px;
+    text-align: left;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-table td {
+    padding: 15px;
+    border-bottom: 1px solid #ebeeee;
+}
+
+.transaction-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.transaction-table tr:hover {
+    background-color: #f1f1f1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Transaction Status Badges */
+.status-badge {
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-pending {
+    background-color: #FFC233;
+    color: #333;
+}
+
+.status-completed {
+    background-color: #619F2B;
+    color: #fff;
+}
+
+.status-cancelled {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* Transaction Action Buttons */
+.transaction-actions {
+    display: flex;
+    gap: 10px;
+    margin: 20px;
+}
+
+.transaction-actions button {
+    padding: 10px 20px;
+    border-radius: 15px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.transaction-actions .view-btn {
+    background-color: #619F2B;
+}
+
+.transaction-actions .edit-btn {
+    background-color: #FFC233;
+}
+
+.transaction-actions .delete-btn {
+    background-color: #dc3545;
+}
+
+/* Responsive Adjustments for Transaction Containers */
+@media screen and (max-width: 1200px) {
+    .transaction-container {
+        width: 95%;
+        margin: 20px auto;
+    }
+    
+    .transaction-summary {
+        position: relative;
+        width: 95%;
+        margin: 20px auto;
+        top: 0;
+        right: 0;
+    }
+    
+    .transaction-actions {
+        flex-direction: column;
+    }
+    
+    .transaction-actions button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}

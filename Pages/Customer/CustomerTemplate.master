@@ -1,0 +1,350 @@
+<%@ Master Language="VB" CodeFile="CustomerTemplate.master.vb" Inherits="Pages_Customer_CustomerTemplate" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>HAPAG Filipino Restaurant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="./../../StyleSheets/Layout.css" rel="stylesheet" type="text/css" />
+    <link href="./../../StyleSheets/Customer.css" rel="stylesheet" type="text/css" />
+    <link href="./../../StyleSheets/Containers.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server">
+    </asp:ContentPlaceHolder>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo img {
+            height: 80px;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo img:hover {
+            transform: scale(1.05);
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        
+        .nav-menu a:hover {
+            color: #FFC107;
+        }
+        
+        .nav-menu a.active {
+            color: #FFC107;
+            font-weight: bold;
+        }
+        
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .cart-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .cart-icon i {
+            font-size: 32px;
+            color: #FFC107;
+        }
+        
+        .cart-icon img {
+            width: 38px;
+            height: 38px;
+            filter: brightness(0) saturate(100%) invert(67%) sepia(92%) saturate(389%) hue-rotate(358deg) brightness(103%) contrast(102%);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #FF5722;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(255, 87, 34, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 87, 34, 0);
+            }
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        
+        .page-hero {
+            background-color: #FFC107;
+            padding: 50px;
+            text-align: center;
+            color: #333;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+        
+        .page-hero h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .page-hero p {
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .page-curve {
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background-color: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .alert-message {
+            padding: 15px;
+            margin: 20px auto;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            max-width: 1200px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .alert-icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 30px 50px;
+            text-align: center;
+            margin-top: auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        footer p {
+            margin: 0;
+        }
+        
+        /* Common content styles */
+        .content-container {
+            padding: 40px 20px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        
+        /* Master page section title - more specific selector to avoid conflicts */
+        .main-content .section-title {
+            text-align: center;
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        /* Master page section title underline - can be customized per page */
+        .main-content .section-title:after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background-color: #FFC107;
+        }
+        
+        /* Class to hide section title underline where needed */
+        .no-underline:after {
+            display: none !important;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #FFC107;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #FF9800;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-menu {
+                margin-top: 15px;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .page-hero {
+                padding: 30px 15px;
+            }
+            
+            .content-container {
+                padding: 30px 15px;
+            }
+            
+            .alert-message {
+                margin: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="MasterScriptManager" runat="server" EnablePageMethods="true"></asp:ScriptManager>
+        
+        <div class="header">
+                <div class="logo">
+                <a href="CustomerDashboard.aspx">
+                    <img src="../../Assets/Images/logo-removebg-preview.png" alt="HAPAG Logo" />
+                </a>
+            </div>
+            <div class="nav-menu">
+                <a href="CustomerDashboard.aspx" id="navHome" runat="server">HOME</a>
+                <a href="CustomerSpecialOffers.aspx" id="navOffers" runat="server">SPECIAL OFFERS</a>
+                <a href="CustomerMenu.aspx" id="navMenu" runat="server">MENU</a>
+                <a href="CustomerCart.aspx" id="navCart" runat="server">CART</a>
+                <a href="CustomerOrders.aspx" id="navOrders" runat="server">MY ORDERS</a>
+                <a href="CustomerTransactionHistory.aspx" id="navTransaction" runat="server">HISTORY</a>
+                <a href="CustomerProfile.aspx" id="navProfile" runat="server">MY PROFILE</a>
+                <asp:LinkButton ID="LogoutButton" runat="server" CssClass="logout-btn" OnClick="LogoutButton_Click">LOGOUT</asp:LinkButton>
+                </div>
+            <div class="cart-icon">
+                <a href="CustomerCart.aspx">
+                        <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">
+                        <asp:Literal ID="CartCountLiteral" runat="server">0</asp:Literal>
+                    </span>
+                    </a>
+                </div>
+            </div>
+
+        <!-- Alert Message -->
+        <div id="alertMessage" runat="server" class="alert-message" visible="false">
+            <i class="fas fa-info-circle alert-icon"></i>
+            <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
+        </div>
+        
+            <div class="main-content">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                </asp:ContentPlaceHolder>
+            </div>
+        
+        <footer>
+            <p>&copy; <%= DateTime.Now.Year %> HAPAG Filipino Restaurant. All rights reserved.</p>
+        </footer>
+    </form>
+</body>
+</html> 

@@ -1,0 +1,484 @@
+﻿
+
+
+@font-face {
+    font-family: 'CustomFont';
+    src: url('./../Assets/Fonts/Kodchasan-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MoonDance';
+    src: url('./../Assets/Fonts/MoonDance-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body 
+{
+    padding: 0;
+    margin: 0;
+    font-family: CustomFont;
+}
+
+.root-container {}
+
+.root-container .top-navbar 
+{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: #fff;
+}
+
+.top-navbar .left
+{
+ float: left;
+ margin-left: 20px;
+ margin-top: -10px;
+}
+.top-navbar img 
+{
+   width: 150px;
+   height: auto;  
+}
+
+.top-navbar .right .left
+{
+    float: right;
+    margin-right: 100px;
+}
+
+.top-navbar .right ul 
+{
+    display: flex;
+    text-align: center;
+    padding: 10px;
+}
+
+.top-navbar .right ul li 
+{
+     margin: 10px;
+     list-style-type: none;
+     text-decoration: none;
+     border-radius: 15px;
+     padding: 5px 20px;
+     cursor: hand;
+}
+
+.top-navbar .right ul li.active 
+{
+      background: #FCA418;
+      color: #fff;
+}
+
+.top-navbar .right ul a 
+{
+    text-decoration: none;
+    color: #050505;
+}
+
+.main-container 
+{
+ width: 100vw;
+ height: calc(100vh - 100px);
+ position: relative;
+ top: 100px;
+}
+
+.main-container .main-background 
+{
+   width: 100%;
+   height: 100%;
+   background-position: center;
+   background-repeat: no-repeat;
+   background-size: 100% 100%;
+   background-position-y: 10px; 
+   position: absolute;
+}
+
+.main-container .main-headline 
+{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    top: 50px;
+    position: relative;
+}
+
+.main-container .main-headline  h1 
+{
+    font-size: 80px;  
+    font-family: MoonDance;  
+}
+
+.main-container .main-headline  p 
+{
+    width: 28%;   
+    font-size: 20px; 
+    text-align: center;
+    top: -50px;
+    position: relative;
+}
+
+.main-container .main-headline .buttons 
+{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.main-container .main-headline .buttons a 
+{
+    text-decoration: none;
+}
+
+.main-container .main-headline .buttons .ui-button 
+{
+    width: 200px;
+    height: 60px;
+    border-radius: 6px;
+    background: #FCA418;
+    margin: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: #fff;
+    cursor: hand;
+}
+
+
+/** REGISTER PORTAL **/
+
+.register-main-container .right-side-background 
+{
+    position: fixed; 
+    top: 0;
+    right: 0;
+    width: 20%;
+    height: 80vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.register-main-container .right-side-background 
+{
+    position: fixed; 
+    top: 0;
+    right: 0;
+    width: 40%;
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+}
+
+.register-main-container
+{
+    position: relative;
+}
+
+.register-main-container .register-main-auth-container 
+{
+    position: absolute;
+   margin-top:80px;
+    right: 15%;
+    width: 420px;
+    height: 550px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 1px 25px 42px -10px rgba(0,0,0,0.31);
+}
+
+.register-main-container .register-main-auth-container.login 
+{
+   right: auto;
+   left: 15%;    
+}
+
+.register-main-container .register-main-auth-container .left-head 
+{
+    position: relative;
+    padding: 30px;
+}
+
+.register-main-container .register-main-auth-container .left-body 
+{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    top: -50px;
+}
+
+.register-main-container .register-main-auth-container .left-body  .left-form-group 
+{
+    margin: 10px;
+}
+
+.register-main-container .register-main-auth-container .left-body .left-form-group label 
+{
+    display: block;
+    margin: 5px;
+    font-size: 20px;
+}
+
+.register-main-container .register-main-auth-container .left-body .left-form-group input 
+{
+    margin: 5px;    
+    border-radius: 25px;
+    width: 250px;
+    height: 30px;
+    border: 1px solid #ebeeee;
+    padding: 10px 12px;
+    font-size: 16px;
+}
+
+.register-main-container .register-main-auth-container .left-body .left-form-group input[type=button] 
+{
+    width: 230px;
+    height: 45px;
+    font-size: 24px;
+    border-radius: 4px;
+    background: #FCA418;
+    color: #fff;
+    cursor: pointer;
+}
+
+.register-main-container .register-main-auth-container.login .left-body .left-form-group input[type=button]  
+{
+    background: #FCA418;    
+}
+
+.register-main-container .register-main-auth-container .left-body .left-form-group p 
+{
+    margin-top: 10px;
+    
+}
+
+.register-main-container .register-main-auth-container .left-body .left-form-group a 
+{
+    color: #FCA418;
+    text-decoration: none;
+}
+
+.register-main-container .register-main-auth-container.login .left-body .left-form-group a  
+{
+    color: #FCA418;
+}
+
+.register-main-container .register-main-auth-container .left-head::after 
+{
+    content: "";
+    position: absolute;
+    right: 0;
+    top: calc(50% - 10px);
+    width: 100px;
+    height: 20px;
+    background: #45290B;
+}
+
+
+.register-main-container .register-main-auth-container .left-head::before 
+{
+    content: "";
+    position: absolute;
+    left: 0;
+    top: calc(50% - 10px);
+    width: 100px;
+    height: 20px;
+    background: #45290B;
+}
+
+.main-auth-container.signup {
+    height: auto !important;
+    margin-top: -5%;
+    width: 30% !important;
+    left: 55% !important;
+}
+
+.main-auth-container.signup .form-group {
+    width: 60% !important;
+}
+
+.main-auth-container.signup .form-group input {
+    width: 100% !important;
+}
+
+
+.register-main-container .register-main-auth-container.signup {
+    height: auto;
+}
+.register-main-container .register-main-auth-container.signup .left-head::after, .register-main-container .register-main-auth-container.login .left-head::before      
+{
+    width: 80px; 
+}
+
+
+.register-main-container .register-main-auth-container .left-head h1 
+{
+    font-size: 60px;
+    text-align: center;
+}
+
+
+
+/** LOGIN PORTAL **/
+
+.main-container .side-background 
+{
+    position: fixed; 
+    top: 0;
+    right: 0;
+    width: 30%;
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.main-container .left-side-background 
+{
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 58%;
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+}
+
+.main-container 
+{
+    position: relative;
+}
+
+.main-container .main-auth-container 
+{
+    position: absolute;
+    top: 5%;
+    left: 15%;
+    width: 450px;
+    height: 550px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 1px 25px 42px -10px rgba(0,0,0,0.31);
+}
+
+.main-container .main-auth-container.signup 
+{
+   left: auto;
+   right: 15%;    
+}
+
+.main-container .main-auth-container .head 
+{
+    position: relative;
+    padding: 30px;
+}
+
+.main-container .main-auth-container .body 
+{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    top: -50px;
+}
+
+.main-container .main-auth-container .body  .form-group 
+{
+    margin: 10px;
+}
+
+.main-container .main-auth-container .body .form-group label 
+{
+    display: block;
+    margin: 5px;
+    font-size: 20px;
+}
+
+.main-container .main-auth-container .body .form-group input 
+{
+    margin: 5px;    
+    border-radius: 25px;
+    width: 250px;
+    height: 30px;
+    border: 1px solid #ebeeee;
+    padding: 10px 12px;
+    font-size: 16px;
+}
+
+.main-container .main-auth-container .body .form-group input[type=button] 
+{
+    width: 230px;
+    height: 45px;
+    font-size: 24px;
+    border-radius: 4px;
+    background: #FCA418;
+    color: #fff;
+    cursor: pointer;
+}
+
+.main-container .main-auth-container.signup .body .form-group input[type=button]  
+{
+    background: #6B0504;    
+}
+
+.main-container .main-auth-container .body .form-group p 
+{
+    margin-top: 10px;
+    
+}
+
+.main-container .main-auth-container .body .form-group a 
+{
+    color: #FCA418;
+    text-decoration: none;
+}
+
+.main-container .main-auth-container.signup .body .form-group a  
+{
+    color: #6B0504;
+}
+
+.main-container .main-auth-container .head::after 
+{
+    content: "";
+    position: absolute;
+    right: 0;
+    top: calc(50% - 10px);
+    width: 100px;
+    height: 20px;
+    background: #45290B;
+}
+
+
+.main-container .main-auth-container .head::before 
+{
+    content: "";
+    position: absolute;
+    left: 0;
+    top: calc(50% - 10px);
+    width: 100px;
+    height: 20px;
+    background: #45290B;
+}
+
+.main-container .main-auth-container.signup .head::after, .main-container .main-auth-container.signup .head::before      
+{
+    width: 80px; 
+}
+
+
+.main-container .main-auth-container .head h1 
+{
+    font-size: 60px;
+    text-align: center;
+}
