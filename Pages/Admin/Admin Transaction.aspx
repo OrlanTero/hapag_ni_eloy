@@ -215,24 +215,24 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <!-- Mobile Menu Toggle -->
-    <button class="menu-toggle" id="menuToggle">
-        <i class="fa fa-bars"></i> Menu
-    </button>
-    
-    <!-- Content Container -->
-    <div class="content-container">
-        <!-- Content Header -->
-        <div class="content-header">
-            <h1>Manage Transactions</h1>
+                <!-- Mobile Menu Toggle -->
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fa fa-bars"></i> Menu
+                </button>
+                
+                <!-- Content Container -->
+                <div class="content-container">
+                    <!-- Content Header -->
+                    <div class="content-header">
+                        <h1>Manage Transactions</h1>
             <p>View transaction details and update payment status</p>
-        </div>
-        
-        <!-- Alert Message -->
-        <div class="alert-message" id="alertMessage" runat="server" visible="false">
-            <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
-        </div>
-        
+                    </div>
+                    
+                    <!-- Alert Message -->
+                    <div class="alert-message" id="alertMessage" runat="server" visible="false">
+                        <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
+                    </div>
+                    
         <!-- Transaction Details -->
         <div class="transaction-details" id="transactionDetails" runat="server" visible="false">
             <h2>Transaction Details</h2>
@@ -272,43 +272,43 @@
             <div class="detail-row">
                 <div class="detail-label">Delivery Fee:</div>
                 <div class="detail-value"><asp:Literal ID="DeliveryFeeLiteral" runat="server"></asp:Literal></div>
-            </div>
+                            </div>
             
             <div class="detail-row">
                 <div class="detail-label">Total Amount:</div>
                 <div class="detail-value"><asp:Literal ID="TotalAmountLiteral" runat="server"></asp:Literal></div>
-            </div>
-            
+                        </div>
+                        
             <div class="detail-row">
                 <div class="detail-label">Customer:</div>
                 <div class="detail-value"><asp:Literal ID="CustomerLiteral" runat="server"></asp:Literal></div>
-            </div>
+                            </div>
             
             <div class="detail-row">
                 <div class="detail-label">Sender Name:</div>
                 <div class="detail-value"><asp:Literal ID="SenderNameLiteral" runat="server"></asp:Literal></div>
-            </div>
+                            </div>
             
             <div class="detail-row">
                 <div class="detail-label">Sender Number:</div>
                 <div class="detail-value"><asp:Literal ID="SenderNumberLiteral" runat="server"></asp:Literal></div>
-            </div>
-            
+                        </div>
+                        
             <div class="detail-row">
                 <div class="detail-label">Driver Name:</div>
                 <div class="detail-value"><asp:Literal ID="DriverNameLiteral" runat="server"></asp:Literal></div>
-            </div>
+                            </div>
             
             <div class="detail-row">
                 <div class="detail-label">Tracking URL:</div>
                 <div class="detail-value"><asp:Literal ID="TrackingUrlLiteral" runat="server"></asp:Literal></div>
-            </div>
+                            </div>
             
             <div class="detail-row">
                 <div class="detail-label">Est. Delivery Time:</div>
                 <div class="detail-value"><asp:Literal ID="EstDeliveryLiteral" runat="server"></asp:Literal></div>
-            </div>
-            
+                        </div>
+                        
             <div class="detail-row">
                 <div class="detail-label">Current Status:</div>
                 <div class="detail-value"><asp:Literal ID="StatusLiteral" runat="server"></asp:Literal></div>
@@ -329,26 +329,26 @@
                 <div class="form-row">
                     <asp:Button ID="UpdateStatusBtn" runat="server" Text="Update Status" CssClass="btn btn-primary" ClientIDMode="Static" />
                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Table Container -->
-    <div class="content-container">
-        <div class="content-header">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Table Container -->
+                <div class="content-container">
+                    <div class="content-header">
             <h1>All Transactions</h1>
             <p>Click on a row to view transaction details</p>
-        </div>
-        <div class="table-responsive">
+                    </div>
+                    <div class="table-responsive">
             <asp:Table ID="Table1" runat="server" CssClass="table table-striped table-hover" ClientIDMode="Static">
-            </asp:Table>
-        </div>
-    </div>
-    
-    <!-- Footer -->
-    <div class="footer">
-        <p>&copy; <%= DateTime.Now.Year %> Food Ordering System. All rights reserved.</p>
-    </div>
+                        </asp:Table>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="footer">
+                    <p>&copy; <%= DateTime.Now.Year %> Food Ordering System. All rights reserved.</p>
+                </div>
 
     <script type="text/javascript">
         // Mobile menu toggle
@@ -394,8 +394,8 @@
 
             for(const row of rows) {
                 if(row.cells.length > 1) { // Skip header row
-                    row.addEventListener("click", function() {
-                        Highlight(rows, row);
+                row.addEventListener("click", function() {
+                    Highlight(rows, row);
                         ViewTransactionDetails(row);
                     });
                 }
@@ -480,17 +480,17 @@
                 }
                 
                 // Fallback to local implementation
-                const alertMessage = document.getElementById("alertMessage");
+            const alertMessage = document.getElementById("alertMessage");
                 
                 if (!alertMessage) {
                     console.error("Alert message element not found");
                     return;
                 }
-                
-                alertMessage.className = "alert-message";
-                alertMessage.classList.add("alert-" + type);
-                alertMessage.innerHTML = message;
-                alertMessage.style.display = "block";
+            
+            alertMessage.className = "alert-message";
+            alertMessage.classList.add("alert-" + type);
+            alertMessage.innerHTML = message;
+            alertMessage.style.display = "block";
                 
                 // Auto-hide after 5 seconds
                 setTimeout(function() {

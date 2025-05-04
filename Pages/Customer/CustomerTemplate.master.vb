@@ -57,6 +57,8 @@ Partial Class Pages_Customer_CustomerTemplate
             navOrders.Attributes.Remove("class")
             navProfile.Attributes.Remove("class")
             navTransaction.Attributes.Remove("class")
+            navSupport.Attributes.Remove("class")
+            navCart.Attributes.Remove("class")
             
             ' Set active class based on current page
             Select Case currentPage
@@ -72,6 +74,10 @@ Partial Class Pages_Customer_CustomerTemplate
                     navProfile.Attributes.Add("class", "active")
                 Case "customertransactionhistory.aspx"
                     navTransaction.Attributes.Add("class", "active")
+                Case "customersupport.aspx"
+                    navSupport.Attributes.Add("class", "active")
+                Case "customercart.aspx"
+                    navCart.Attributes.Add("class", "active")
             End Select
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error setting active navigation: " & ex.Message)

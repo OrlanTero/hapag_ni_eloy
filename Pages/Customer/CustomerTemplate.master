@@ -319,6 +319,7 @@
                 <a href="CustomerOrders.aspx" id="navOrders" runat="server">MY ORDERS</a>
                 <a href="CustomerTransactionHistory.aspx" id="navTransaction" runat="server">HISTORY</a>
                 <a href="CustomerProfile.aspx" id="navProfile" runat="server">MY PROFILE</a>
+                <a href="CustomerSupport.aspx" id="navSupport" runat="server">SUPPORT</a>
                 <asp:LinkButton ID="LogoutButton" runat="server" CssClass="logout-btn" OnClick="LogoutButton_Click">LOGOUT</asp:LinkButton>
                 </div>
             <div class="cart-icon">
