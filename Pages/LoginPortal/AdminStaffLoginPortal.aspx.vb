@@ -49,6 +49,12 @@ Partial Class Pages_LoginPortal_AdminStaffLoginPortal
                 user.username = userData("username")
                 user.display_name = userData("display_name")
                 user.role = If(userType = 1, "admin", "staff")
+                
+                ' Debug logging
+                System.Diagnostics.Debug.WriteLine("=== USER LOGIN ===")
+                System.Diagnostics.Debug.WriteLine("Username: " & user.username)
+                System.Diagnostics.Debug.WriteLine("Role: " & user.role)
+                System.Diagnostics.Debug.WriteLine("User Type: " & userType)
 
                 Session("CURRENT_SESSION") = user
 
@@ -99,14 +105,14 @@ Partial Class Pages_LoginPortal_AdminStaffLoginPortal
     Private Sub RedirectBasedOnRole()
         Dim user As User = DirectCast(Session("CURRENT_SESSION"), User)
         If user IsNot Nothing Then
-            Select Case user.role.ToLower()
-                Case "admin"
-                    Response.Redirect("~/Pages/Admin/AdminDashboard.aspx")
-                Case "staff"
-                    Response.Redirect("~/Pages/Staff/StaffDashboard.aspx")
-                Case Else
-                    Response.Redirect("~/Default.aspx")
-            End Select
+            ' Debug logging
+            System.Diagnostics.Debug.WriteLine("=== REDIRECTING USER ===")
+            System.Diagnostics.Debug.WriteLine("Username: " & user.username)
+            System.Diagnostics.Debug.WriteLine("Role: " & user.role)
+            System.Diagnostics.Debug.WriteLine("Redirecting to: ~/Pages/Admin/AdminDashboard.aspx")
+            
+            ' Both admin and staff will go to AdminDashboard.aspx
+            Response.Redirect("~/Pages/Admin/AdminDashboard.aspx")
         End If
     End Sub
 

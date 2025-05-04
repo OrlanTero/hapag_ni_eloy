@@ -130,6 +130,21 @@ Partial Class Pages_Customer_CustomerOrders
 
                 orderItemsRepeater.DataSource = itemsConnect.Data
                 orderItemsRepeater.DataBind()
+                
+                ' Set the item count in the order summary
+                Dim itemCountLiteral As Literal = DirectCast(e.Item.FindControl("ItemCountLiteral"), Literal)
+                If itemCountLiteral IsNot Nothing Then
+                    If itemsConnect.DataCount > 0 Then
+                        ' Count total items including quantities
+                        Dim totalItems As Integer = 0
+                        For Each row As DataRow In itemsConnect.Data.Tables(0).Rows
+                            totalItems += Convert.ToInt32(row("quantity"))
+                        Next
+                        itemCountLiteral.Text = totalItems.ToString()
+                    Else
+                        itemCountLiteral.Text = "0"
+                    End If
+                End If
 
                 ' Handle Reorder button visibility based on status
                 Dim reorderButton As LinkButton = DirectCast(e.Item.FindControl("ReorderButton"), LinkButton)

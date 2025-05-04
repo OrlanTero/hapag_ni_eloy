@@ -57,11 +57,7 @@ Partial Class Pages_Customer_CustomerTransactionHistory
                         columns += row("COLUMN_NAME").ToString() & ", "
                     Next
                     
-                    ' Show the column names in an alert
-                    Dim masterPage As Pages_Customer_CustomerTemplate = CType(Me.Master, Pages_Customer_CustomerTemplate)
-                    If masterPage IsNot Nothing Then
-                        masterPage.ShowAlert("Debug: Orders table columns: " & columns, True)
-                    End If
+                
                 End If
             Catch ex As Exception
                 ' Error checking schema

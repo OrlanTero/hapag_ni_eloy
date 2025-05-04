@@ -3,7 +3,7 @@ Imports System.IO
 Imports HapagDB
 
 Partial Class Pages_Admin_AdminMenu
-    Inherits System.Web.UI.Page
+    Inherits AdminBasePage
     Private menuController As New MenuController()
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
@@ -11,6 +11,22 @@ Partial Class Pages_Admin_AdminMenu
             LoadCategories()
             LoadTypes()
             ViewTable()
+            
+            ' Check if the page should be in read-only mode (for staff)
+            If IsReadOnlyMode() Then
+                System.Diagnostics.Debug.WriteLine("AdminMenu: Page is in read-only mode")
+                SetPageToReadOnly()
+                ShowViewOnlyNotice()
+                
+                ' Also disable specific buttons
+                If AddBtn IsNot Nothing Then AddBtn.Enabled = False
+                If EditBtn IsNot Nothing Then EditBtn.Enabled = False
+                If RemoveBtn IsNot Nothing Then RemoveBtn.Enabled = False
+                If ClearBtn IsNot Nothing Then ClearBtn.Enabled = False
+                If UploadBtn IsNot Nothing Then UploadBtn.Enabled = False
+            Else
+                System.Diagnostics.Debug.WriteLine("AdminMenu: Page is in full access mode")
+            End If
         End If
     End Sub
 
@@ -348,6 +364,20 @@ Partial Class Pages_Admin_AdminMenu
             End If
             
             AlertLiteral.Text = message
+        End Try
+    End Sub
+
+    ' Display a notification for view-only mode
+    Private Sub ShowViewOnlyNotice()
+        Try
+            Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+            If masterPage IsNot Nothing Then
+                masterPage.ShowInfo("You have view-only access to this page. Editing functionality is restricted.")
+            End If
+        Catch ex As Exception
+            ' Fallback if master page alert fails
+            ClientScript.RegisterStartupScript(Me.GetType(), "ViewOnlyAlert", 
+                "alert('You have view-only access to this page. Editing functionality is restricted.');", True)
         End Try
     End Sub
 End Class

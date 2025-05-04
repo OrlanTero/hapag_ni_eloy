@@ -2,10 +2,53 @@
 Imports HapagDB
 
 Partial Class Pages_Admin_AdminAccounts
-    Inherits System.Web.UI.Page
+    Inherits AdminBasePage
     Private userController As New UserController()
+    
+    Private ReadOnly Property IsViewOnly As Boolean
+        Get
+            Return IsStaffUser() And Not IsAdminUser()
+        End Get
+    End Property
+
+    Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
+        ' Check if we're in view-only mode and disable editing controls
+        If IsViewOnly Then
+            DisableEditingControls()
+            ShowViewOnlyNotice()
+        End If
+    End Sub
+    
+    Private Sub DisableEditingControls()
+        ' Disable buttons
+        If AddBtn IsNot Nothing Then AddBtn.Enabled = False
+        If EditBtn IsNot Nothing Then EditBtn.Enabled = False
+        If RemoveBtn IsNot Nothing Then RemoveBtn.Enabled = False
+        
+        ' Optional: Add visual indication that buttons are disabled
+        If AddBtn IsNot Nothing Then AddBtn.CssClass = AddBtn.CssClass & " disabled"
+        If EditBtn IsNot Nothing Then EditBtn.CssClass = EditBtn.CssClass & " disabled"
+        If RemoveBtn IsNot Nothing Then RemoveBtn.CssClass = RemoveBtn.CssClass & " disabled"
+    End Sub
+    
+    Private Sub ShowViewOnlyNotice()
+        Try
+            ' Use the master page's notice method if it exists
+            Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+            masterPage.ShowInfo("You are in view-only mode. Editing functionality is restricted.")
+        Catch ex As Exception
+            ' Fallback to local message display if master page method fails
+            ShowAlert("You are in view-only mode. Editing functionality is restricted.")
+        End Try
+    End Sub
 
     Protected Sub AddBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles AddBtn.Click
+        ' Check if user is in view-only mode
+        If IsViewOnly Then
+            ShowViewOnlyNotice()
+            Return
+        End If
+        
         Dim username = UsernameTxt.Text
         Dim password = PasswordTxt.Text
         Dim display_name = DisplayNameTxt.Text
@@ -67,6 +110,8 @@ Partial Class Pages_Admin_AdminAccounts
             Dim userTypeText As String = "Customer"
             If user.user_type = 1 Then
                 userTypeText = "Admin"
+            ElseIf user.user_type = 2 Then
+                userTypeText = "Staff"
             End If
             tableRow.Cells.Add(New TableCell() With {.Text = userTypeText})
 
@@ -76,6 +121,12 @@ Partial Class Pages_Admin_AdminAccounts
     End Sub
 
     Protected Sub EditBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles EditBtn.Click
+        ' Check if user is in view-only mode
+        If IsViewOnly Then
+            ShowViewOnlyNotice()
+            Return
+        End If
+        
         Dim user_id = UserIdTxt.Text
         Dim username = UsernameTxt.Text
         Dim password = PasswordTxt.Text
@@ -106,6 +157,12 @@ Partial Class Pages_Admin_AdminAccounts
     End Sub
 
     Protected Sub RemoveBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles RemoveBtn.Click
+        ' Check if user is in view-only mode
+        If IsViewOnly Then
+            ShowViewOnlyNotice()
+            Return
+        End If
+        
         Dim user_id = UserIdTxt.Text
 
         ' Use UserController to delete the user
@@ -133,8 +190,15 @@ Partial Class Pages_Admin_AdminAccounts
     End Sub
 
     Private Sub ShowAlert(ByVal message As String)
-        Dim script As String = "alert('" & message & "');"
-        ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+        Try
+            ' Use the master page's alert methods if possible
+            Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+            masterPage.ShowInfo(message)
+        Catch ex As Exception
+            ' Fallback to original alert method
+            Dim script As String = "alert('" & message & "');"
+            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+        End Try
     End Sub
 End Class
 

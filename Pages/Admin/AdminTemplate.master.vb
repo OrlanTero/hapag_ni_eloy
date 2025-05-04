@@ -16,6 +16,22 @@ Partial Class Pages_Admin_AdminTemplate
             Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
             UserDisplayNameLiteral.Text = currentUser.display_name
             UserInitialsLiteral.Text = GetInitials(currentUser.display_name)
+            
+            ' Update role display
+            If currentUser.role.ToLower() = "staff" Then
+                ' Update role display for staff
+                If userRoleDiv IsNot Nothing Then
+                    userRoleDiv.InnerText = "Staff"
+                End If
+                
+                ' Handle menu visibility based on role
+                HandleStaffPermissions()
+            Else
+                ' Hide staff-only features
+                If navCustomerSupport IsNot Nothing Then
+                    navCustomerSupport.Visible = False
+                End If
+            End If
         End If
     End Sub
 
@@ -68,5 +84,21 @@ Partial Class Pages_Admin_AdminTemplate
         alertMessage.Visible = True
         alertMessage.Attributes("class") = "alert-message alert-info"
         AlertLiteral.Text = message
+    End Sub
+
+    Private Sub HandleStaffPermissions()
+        ' Staff can only access specific pages
+        ' The restriction is implemented in each page's Load event
+        ' This method handles menu visibility
+        
+        ' Hide accounts management for staff
+        If navAccounts IsNot Nothing Then
+            navAccounts.Visible = False
+        End If
+        
+        ' Show staff-only pages
+        If navCustomerSupport IsNot Nothing Then
+            navCustomerSupport.Visible = True
+        End If
     End Sub
 End Class 

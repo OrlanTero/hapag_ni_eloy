@@ -3,16 +3,25 @@ Imports System.Collections.Generic
 Imports HapagDB
 
 Partial Class Pages_Admin_AdminDashboard
-    Inherits System.Web.UI.Page
+    Inherits AdminBasePage
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Not IsPostBack Then
-            ' Check if user is logged in
-            If Session("CURRENT_SESSION") Is Nothing Then
-                Response.Redirect("~/Pages/LoginPortal/AdminStaffLoginPortal.aspx")
+            ' Check for access denied message
+            If Session("ACCESS_DENIED_MESSAGE") IsNot Nothing Then
+                ' Use the master page's alert method
+                Try
+                    Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+                    If masterPage IsNot Nothing Then
+                        masterPage.ShowAlert(Session("ACCESS_DENIED_MESSAGE").ToString(), False)
+                    End If
+                Catch ex As Exception
+                    ' Fallback if master page alert fails
+                End Try
+                
+                ' Clear the message
+                Session("ACCESS_DENIED_MESSAGE") = Nothing
             End If
-
-            ' Master page will handle displaying user name and initials
             
             ' Load dashboard data
             LoadDashboardData()

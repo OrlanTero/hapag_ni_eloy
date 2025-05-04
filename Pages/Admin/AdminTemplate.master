@@ -304,7 +304,7 @@
                             <div class="user-name">
                                 <asp:Literal ID="UserDisplayNameLiteral" runat="server"></asp:Literal>
                             </div>
-                            <div class="user-role">Administrator</div>
+                            <div class="user-role" id="userRoleDiv" runat="server">Administrator</div>
                         </div>
                     </div>
                     <asp:LinkButton ID="LogoutButton" runat="server" CssClass="logout-btn" OnClick="LogoutButton_Click">
@@ -353,6 +353,10 @@
 
                     <a href="Admin Transaction.aspx">
                         <span><i class="fas fa-credit-card"></i> Transactions</span>
+                    </a>
+
+                    <a href="CustomerSupport.aspx" id="navCustomerSupport" runat="server">
+                        <span><i class="fas fa-headset"></i> Customer Support</span>
                     </a>
                 </div>
             </div>

@@ -41,97 +41,122 @@
                             </div>
                         </div>
                         
-                        <div class="order-items">
-                            <h3 class="order-section-title">Order Items</h3>
-                            <div class="order-items-container">
-                            <asp:Repeater ID="OrderItemsRepeater" runat="server">
-                                <ItemTemplate>
-                                    <div class="order-item">
-                                        <img src='<%# GetImageUrl(Eval("image").ToString()) %>' 
-                                             alt='<%# Eval("name") %>' class="item-image" 
-                                             onerror="this.src='../../Assets/Images/default-food.jpg'" />
-                                        <div class="item-details">
-                                            <h4><%# Eval("name") %></h4>
-                                                <div class="item-info">
-                                                    <span class="item-quantity">Qty: <strong><%# Eval("quantity") %></strong></span>
-                                                    <span class="item-price">PHP <%# Format(Eval("price"), "0.00") %></span>
-                                                </div>
-                                            </div>
-                                    </div>
-                                </ItemTemplate>
-                            </asp:Repeater>
+                        <!-- Order Summary -->
+                        <div class="order-summary">
+                            <div class="summary-row">
+                                <span class="summary-label">Items:</span>
+                                <span class="summary-value"><asp:Literal ID="ItemCountLiteral" runat="server"></asp:Literal></span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Total:</span>
+                                <span class="summary-value total-amount">PHP <%# Format(Eval("total_amount"), "0.00") %></span>
                             </div>
                         </div>
 
-                        <!-- Discounts and Promotions Section -->
-                        <asp:Panel ID="DiscountsPanel" runat="server" CssClass="discounts-panel">
-                            <h3 class="order-section-title">Applied Discounts & Promotions</h3>
-                            <div class="discounts-container">
-                                <asp:Repeater ID="DiscountsRepeater" runat="server">
-                                    <ItemTemplate>
-                                        <div class="discount-item">
-                                            <div class="discount-info">
-                                                <span class="discount-name"><%# Eval("name") %></span>
-                                                <span class="discount-value">
-                                                    <%# If(Eval("discount_type") = 1, 
-                                                        Eval("value") & "% off", 
-                                                        "PHP " & Format(Eval("value"), "0.00") & " off") %>
-                                                </span>
-                                            </div>
-                                            <div class="discount-amount">
-                                                -PHP <%# Format(Eval("discount_amount"), "0.00") %>
-                                            </div>
-                                        </div>
-                                    </ItemTemplate>
-                                </asp:Repeater>
+                        <!-- Expandable Sections -->
+                        <div class="expandable-sections">
+                            <!-- Order Items Section (Collapsible) -->
+                            <div class="expandable-section">
+                                <div class="section-header" onclick="toggleSection(this)">
+                                    <h3 class="order-section-title"><i class="fas fa-utensils"></i> Order Items</h3>
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                </div>
+                                <div class="section-content hidden">
+                                    <div class="order-items-container">
+                                        <asp:Repeater ID="OrderItemsRepeater" runat="server">
+                                            <ItemTemplate>
+                                                <div class="order-item">
+                                                    <img src='<%# GetImageUrl(Eval("image").ToString()) %>' 
+                                                        alt='<%# Eval("name") %>' class="item-image" 
+                                                        onerror="this.src='../../Assets/Images/default-food.jpg'" />
+                                                    <div class="item-details">
+                                                        <h4><%# Eval("name") %></h4>
+                                                        <div class="item-info">
+                                                            <span class="item-quantity">Qty: <strong><%# Eval("quantity") %></strong></span>
+                                                            <span class="item-price">PHP <%# Format(Eval("price"), "0.00") %></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </ItemTemplate>
+                                        </asp:Repeater>
+                                    </div>
+                                </div>
                             </div>
-                        </asp:Panel>
 
-                        <!-- Delivery Info Panel -->
-                        <asp:Panel ID="DeliveryInfoPanel" runat="server" CssClass="delivery-info-panel">
-                            <div class="delivery-info-header">
-                                <i class="fas fa-truck"></i> Delivery Tracking
-                            </div>
-                            <div class="delivery-details">
-                                <div class="tracking-status">
-                                    <div class="tracking-status-label">Current Status:</div>
-                                    <div class="tracking-status-value"><%# Eval("status").ToString().ToUpper() %></div>
+                            <!-- Discounts and Promotions Section (Collapsible) -->
+                            <asp:Panel ID="DiscountsPanel" runat="server" CssClass="expandable-section">
+                                <div class="section-header" onclick="toggleSection(this)">
+                                    <h3 class="order-section-title"><i class="fas fa-tag"></i> Discounts & Promotions</h3>
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
                                 </div>
-                                
-                                <div class="order-status-description">
-                                    <strong>What this means:</strong> 
-                                    <span class="status-explanation">
-                                        <%# GetStatusExplanation(Eval("status").ToString()) %>
-                                    </span>
+                                <div class="section-content hidden">
+                                    <div class="discounts-container">
+                                        <asp:Repeater ID="DiscountsRepeater" runat="server">
+                                            <ItemTemplate>
+                                                <div class="discount-item">
+                                                    <div class="discount-info">
+                                                        <span class="discount-name"><%# Eval("name") %></span>
+                                                        <span class="discount-value">
+                                                            <%# If(Eval("discount_type") = 1, 
+                                                                Eval("value") & "% off", 
+                                                                "PHP " & Format(Eval("value"), "0.00") & " off") %>
+                                                        </span>
+                                                    </div>
+                                                    <div class="discount-amount">
+                                                        -PHP <%# Format(Eval("discount_amount"), "0.00") %>
+                                                    </div>
+                                                </div>
+                                            </ItemTemplate>
+                                        </asp:Repeater>
+                                    </div>
                                 </div>
-                                
-                                <div class="delivery-item">
-                                    <span class="delivery-label">Delivery Service:</span>
-                                    <span class="delivery-value"><asp:Literal ID="DeliveryServiceLiteral" runat="server"></asp:Literal></span>
+                            </asp:Panel>
+
+                            <!-- Delivery Info Section (Collapsible) -->
+                            <asp:Panel ID="DeliveryInfoPanel" runat="server" CssClass="expandable-section">
+                                <div class="section-header" onclick="toggleSection(this)">
+                                    <h3 class="order-section-title"><i class="fas fa-truck"></i> Delivery Tracking</h3>
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
                                 </div>
-                                <div class="delivery-item">
-                                    <span class="delivery-label">Driver Name:</span>
-                                    <span class="delivery-value"><asp:Literal ID="DriverNameLiteral" runat="server"></asp:Literal></span>
+                                <div class="section-content hidden">
+                                    <div class="delivery-details">
+                                        <div class="tracking-status">
+                                            <div class="tracking-status-label">Current Status:</div>
+                                            <div class="tracking-status-value"><%# Eval("status").ToString().ToUpper() %></div>
+                                        </div>
+                                        
+                                        <div class="order-status-description">
+                                            <strong>What this means:</strong> 
+                                            <span class="status-explanation">
+                                                <%# GetStatusExplanation(Eval("status").ToString()) %>
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="delivery-item">
+                                            <span class="delivery-label">Delivery Service:</span>
+                                            <span class="delivery-value"><asp:Literal ID="DeliveryServiceLiteral" runat="server"></asp:Literal></span>
+                                        </div>
+                                        <div class="delivery-item">
+                                            <span class="delivery-label">Driver Name:</span>
+                                            <span class="delivery-value"><asp:Literal ID="DriverNameLiteral" runat="server"></asp:Literal></span>
+                                        </div>
+                                        <asp:Panel ID="TrackingPanel" runat="server" CssClass="delivery-item" Visible="false">
+                                            <span class="delivery-label">Tracking Link:</span>
+                                            <span class="delivery-value">
+                                                <asp:HyperLink ID="TrackingLink" runat="server" Target="_blank" CssClass="tracking-link">
+                                                    <i class="fas fa-map-marker-alt"></i> Track Delivery Location
+                                                </asp:HyperLink>
+                                            </span>
+                                        </asp:Panel>
+                                        <div class="tracking-note">
+                                            <p><i class="fas fa-info-circle"></i> Delivery information will be updated by our staff as your order is processed.</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <asp:Panel ID="TrackingPanel" runat="server" CssClass="delivery-item" Visible="false">
-                                    <span class="delivery-label">Tracking Link:</span>
-                                    <span class="delivery-value">
-                                        <asp:HyperLink ID="TrackingLink" runat="server" Target="_blank" CssClass="tracking-link">
-                                            <i class="fas fa-map-marker-alt"></i> Track Delivery Location
-                                        </asp:HyperLink>
-                                    </span>
-                                </asp:Panel>
-                                <div class="tracking-note">
-                                    <p><i class="fas fa-info-circle"></i> Delivery information will be updated by our staff as your order is processed. The restaurant admin will assign a delivery service and driver once your order is ready for delivery.</p>
-                                </div>
-                            </div>
-                        </asp:Panel>
+                            </asp:Panel>
+                        </div>
 
                         <div class="order-footer">
-                            <div class="order-total">
-                                <span>Total Amount:</span>
-                                <span class="total-amount">PHP <%# Format(Eval("total_amount"), "0.00") %></span>
-                            </div>
                             <div class="order-actions">
                                 <asp:LinkButton ID="ReorderButton" runat="server" CssClass="reorder-btn" 
                                                 CommandName="Reorder" CommandArgument='<%# Eval("order_id") %>'
@@ -174,6 +199,31 @@
             }
         }
 
+        function toggleSection(header) {
+            // Find the content section next to the header
+            var content = header.nextElementSibling;
+            
+            // Toggle the hidden class
+            content.classList.toggle('hidden');
+            
+            // Rotate the icon
+            var icon = header.querySelector('.toggle-icon');
+            icon.classList.toggle('rotate-icon');
+            
+            // If this is the delivery tracking section and it's being expanded,
+            // make it more noticeable for a moment
+            if (header.querySelector('.order-section-title').innerHTML.includes('Delivery Tracking') && 
+                !content.classList.contains('hidden')) {
+                var panel = header.closest('.expandable-section');
+                panel.classList.add('highlight-briefly');
+                
+                setTimeout(function() {
+                    panel.classList.remove('highlight-briefly');
+                }, 1500);
+            }
+        }
+
+        // Open the relevant section if needed when a new order is created
         function highlightOrder(orderId, immediate) {
             console.log("Highlighting order: " + orderId);
             
@@ -200,18 +250,26 @@
                     // Scroll the order into view
                     targetCard.scrollIntoView({ behavior: scrollBehavior, block: 'start' });
                     
+                    // Automatically expand all sections for this order
+                    var sections = targetCard.querySelectorAll('.section-header');
+                    sections.forEach(function(section) {
+                        toggleSection(section);
+                    });
+                    
                     // Make the delivery tracking section more noticeable
-                    var trackingPanel = targetCard.querySelector('.delivery-info-panel');
-                    if (trackingPanel) {
-                        trackingPanel.classList.add('highlighted-tracking');
+                    var trackingSection = targetCard.querySelector('.expandable-section:nth-child(3)');
+                    if (trackingSection) {
+                        trackingSection.classList.add('highlighted-tracking');
+                        
+                        // Remove highlight after 8 seconds
+                        setTimeout(function() {
+                            trackingSection.classList.remove('highlighted-tracking');
+                        }, 8000);
                     }
                     
-                    // Remove highlight after 8 seconds
+                    // Remove order highlight after 8 seconds
                     setTimeout(function() {
                         targetCard.classList.remove('highlighted-order');
-                        if (trackingPanel) {
-                            trackingPanel.classList.remove('highlighted-tracking');
-                        }
                     }, 8000);
                 }, 100);
             }
@@ -257,6 +315,7 @@
             border-radius: 12px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            margin-bottom: 15px;
         }
 
         .order-header {
@@ -386,22 +445,10 @@
 
         .order-footer {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             padding: 15px 20px;
             background: #f8f9fa;
-            border-top: 1px solid #eee;
-        }
-
-        .order-total {
-            font-size: 16px;
-            color: #2C3E50;
-        }
-
-        .total-amount {
-            font-weight: 600;
-            color: #619F2B;
-            margin-left: 10px;
         }
 
         .reorder-btn {
@@ -485,66 +532,119 @@
         }
 
         @media (max-width: 768px) {
-            .order-header {
+            .order-summary {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
-            }
-
-            .order-footer {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .order-actions {
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 10px;
-                justify-content: center;
+                gap: 8px;
             }
             
-            .reorder-btn,
-            .confirm-btn,
-            .cancel-btn {
-                flex: 1 1 auto;
-                min-width: 120px;
-                justify-content: center;
+            .summary-row {
+                width: 100%;
+                justify-content: space-between;
+                margin-right: 0;
             }
         }
 
-        .cancel-btn-container {
-            margin-top: 10px;
-            width: 100%;
+        /* New Order Summary Styles */
+        .order-summary {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
         }
 
-        .cancel-btn {
-            padding: 8px 16px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 6px;
+        .summary-row {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 10px;
+        }
+
+        .summary-value {
+            color: #2C3E50;
+        }
+
+        /* Expandable Sections Styles */
+        .expandable-sections {
+            border-bottom: 1px solid #eee;
+        }
+
+        .expandable-section {
+            border-bottom: 1px solid #f3f3f3;
+        }
+
+        .expandable-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
             cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .section-header:hover {
+            background-color: #f9f9f9;
+        }
+
+        .section-header .order-section-title {
+            margin: 0;
+            font-size: 16px;
+            color: #2C3E50;
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .toggle-icon {
             font-size: 14px;
-            transition: all 0.3s ease;
-            width: 100%;
-            justify-content: center;
+            color: #666;
+            transition: transform 0.3s ease;
         }
 
-        .cancel-btn:hover {
-            background-color: #bd2130;
+        .section-content {
+            padding: 15px 20px;
+            border-top: 1px solid #f3f3f3;
+            max-height: 500px;
+            overflow-y: auto;
         }
 
+        .hidden {
+            display: none;
+        }
+
+        .rotate-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Modified delivery info panel to match collapsible style */
         .delivery-info-panel {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            border-left: 5px solid #FFC107;
+            margin-top: 0;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            border-left: none;
+        }
+
+        /* Modified discounts panel to match collapsible style */
+        .discounts-panel {
+            margin-top: 0;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            border-left: none;
         }
 
         .delivery-info-header {
@@ -788,15 +888,6 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-        }
-
-        .discounts-panel {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            border-left: 5px solid #FFC107;
         }
 
         .discounts-container {

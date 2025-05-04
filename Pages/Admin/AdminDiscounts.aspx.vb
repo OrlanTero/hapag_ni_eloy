@@ -6,8 +6,13 @@ Imports System.Web.UI
 Imports HapagDB
 
 Partial Class Pages_Admin_AdminDiscounts
-    Inherits System.Web.UI.Page
+    Inherits AdminBasePage
     Private discountController As New DiscountController()
+    Private ReadOnly Property IsViewOnly As Boolean
+        Get
+            Return IsStaffUser() And Not IsAdminUser()
+        End Get
+    End Property
 
     Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
         ' Debug initialization of controls
@@ -28,6 +33,37 @@ Partial Class Pages_Admin_AdminDiscounts
         Else
             System.Diagnostics.Debug.WriteLine("NoRecords is null in Page_Init")
         End If
+
+        ' Check if we're in view-only mode and disable editing controls
+        If IsViewOnly Then
+            DisableEditingControls()
+            ShowViewOnlyNotice()
+        End If
+    End Sub
+
+    Private Sub DisableEditingControls()
+        ' Disable buttons
+        If AddBtn IsNot Nothing Then AddBtn.Enabled = False
+        If EditBtn IsNot Nothing Then EditBtn.Enabled = False
+        If DeleteBtn IsNot Nothing Then DeleteBtn.Enabled = False
+        If ClearBtn IsNot Nothing Then ClearBtn.Enabled = False
+
+        ' Optional: Add visual indication that buttons are disabled
+        If AddBtn IsNot Nothing Then AddBtn.CssClass = AddBtn.CssClass & " disabled"
+        If EditBtn IsNot Nothing Then EditBtn.CssClass = EditBtn.CssClass & " disabled"
+        If DeleteBtn IsNot Nothing Then DeleteBtn.CssClass = DeleteBtn.CssClass & " disabled"
+        If ClearBtn IsNot Nothing Then ClearBtn.CssClass = ClearBtn.CssClass & " disabled"
+    End Sub
+
+    Private Sub ShowViewOnlyNotice()
+        Try
+            ' Use the master page's notice method if it exists
+            Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+            masterPage.ShowInfo("You are in view-only mode. Editing functionality is restricted.")
+        Catch ex As Exception
+            ' Fallback to local message display if master page method fails
+            showAlert("You are in view-only mode. Editing functionality is restricted.", "info")
+        End Try
     End Sub
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load

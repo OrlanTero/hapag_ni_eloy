@@ -2,12 +2,25 @@
 Imports HapagDB
 
 Partial Class Pages_Admin_Admin_Transaction
-    Inherits System.Web.UI.Page
+    Inherits AdminBasePage
     Private transactionController As New TransactionController()
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Not IsPostBack Then
             ViewTable()
+            
+            ' Check if the page should be in read-only mode (for staff)
+            If IsReadOnlyMode() Then
+                System.Diagnostics.Debug.WriteLine("AdminTransaction: Page is in read-only mode")
+                SetPageToReadOnly()
+                ShowViewOnlyNotice()
+                
+                ' Explicitly disable status update controls
+                If UpdateStatusBtn IsNot Nothing Then UpdateStatusBtn.Enabled = False
+                If StatusDdl IsNot Nothing Then StatusDdl.Enabled = False
+            Else
+                System.Diagnostics.Debug.WriteLine("AdminTransaction: Page is in full access mode")
+            End If
         End If
         
         ' Handle view transaction details if posted back from client-side
@@ -262,6 +275,20 @@ Partial Class Pages_Admin_Admin_Transaction
             End Select
             
             AlertLiteral.Text = message
+        End Try
+    End Sub
+
+    ' Display a notification for view-only mode
+    Private Sub ShowViewOnlyNotice()
+        Try
+            Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+            If masterPage IsNot Nothing Then
+                masterPage.ShowInfo("You have view-only access to this page. Editing functionality is restricted.")
+            End If
+        Catch ex As Exception
+            ' Fallback if master page alert fails
+            ClientScript.RegisterStartupScript(Me.GetType(), "ViewOnlyAlert", 
+                "alert('You have view-only access to this page. Editing functionality is restricted.');", True)
         End Try
     End Sub
 End Class

@@ -6,7 +6,7 @@ Imports System.Web.UI.HtmlControls
 Imports HapagDB
 
 Partial Class Pages_Admin_AdminOrders
-    Inherits System.Web.UI.Page
+    Inherits AdminBasePage
     Private orderController As New OrderController()
     Private Connect As New Connection() ' Keep this for now as we'll migrate functionality gradually
 
