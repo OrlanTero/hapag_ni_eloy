@@ -1,156 +1,81 @@
-<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdminMenuCategories.aspx.vb" Inherits="Pages_Admin_AdminMenuCategories" %>
+<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdminMenuCategories.aspx.vb" Inherits="Pages_Admin_AdminMenuCategories" MasterPageFile="~/Pages/Admin/AdminTemplate.master" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <title>Menu Categories</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="./../../StyleSheets/Layout.css" rel="stylesheet" type="text/css" />
-    <link href="./../../StyleSheets/Admin.css" rel="stylesheet" type="text/css" />
     <link href="./../../StyleSheets/MenuManagement.css" rel="stylesheet" type="text/css" />
-</head>
-<body>
-    <form id="Form1" runat="server">
-        <div class="page-container">
-            <!-- Admin Sidebar -->
-            <div class="admin-sidebar">
-                <div class="logo">
-                    <img src="../../Assets/Images/logo-removebg-preview.png" alt="Logo" />
-                </div>
-                <div class="nav-links">
-                    <a href="AdminDashboard.aspx">
-                        <img src="../../Assets/Images/icons/dashboard icon black.png" class="black" />
-                        <img src="../../Assets/Images/icons/dasboard icon white.png" class="white" />
-                        <span>Dashboard</span>
-                    </a>
+</asp:Content>
 
-                    <a href="AdminMenu.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Menu</span>
-                    </a> 
-
-                    <a href="AdminMenuCategories.aspx" class="active">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Categories</span>
-                    </a>
-
-                    <a href="AdminMenuTypes.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Types</span>
-                    </a>
-
-                    <a href="AdminOrders.aspx">
-                        <img src="../../Assets/Images/icons/order-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/order-white.png" class="white" />
-                        <span>Orders</span>
-                    </a>
-
-                    <a href="AdminAccounts.aspx">
-                        <img src="../../Assets/Images/icons/account-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/account-white.png" class="white" />
-                        <span>Accounts</span>
-                    </a>
-
-                    <div class="dropdown-container">
-                        <a href="javascript:void(0);" class="dropdown-toggle">
-                            <img src="../../Assets/Images/icons/administrator-black.png" class="black" />
-                            <img src="../../Assets/Images/icons/administrator-white.png" class="white" />
-                            <span>Administrator</span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="AdminDeals.aspx">Deals</a>
-                            <a href="AdminPromotions.aspx">Promotions</a>
-                            <a href="AdminDiscounts.aspx">Discounts</a>
-                        </div>
-                    </div>
-
-                    <a href="Admin Transaction.aspx">
-                        <img src="../../Assets/Images/icons/transaction-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/transaction-white.png" class="white" />
-                        <span>Transactions</span>
-                    </a>
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fa fa-bars"></i> Menu
+    </button>
+    
+    <!-- Content Container -->
+    <div class="content-container">
+        <!-- Content Header -->
+        <div class="content-header">
+            <h1>Manage Menu Categories</h1>
+            <p>Add, edit, or remove menu categories. Click on a row in the table to select and edit a category.</p>
+        </div>
+        
+        <!-- Alert Message -->
+        <div class="alert-message" id="alertMessage" runat="server" visible="false">
+            <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
+        </div>
+        
+        <!-- Form Container -->
+        <div class="form-container">
+            <asp:TextBox ID="CategoryIdTxt" runat="server" Width="282px" RequiredFieldValidator1="true" hidden ClientIDMode="Static"></asp:TextBox>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <h3>Category Name:</h3>
+                    <asp:TextBox ID="CategoryNameTxt" runat="server" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
             
-            <!-- Main Content -->
-            <div class="main-content">
-                <!-- Mobile Menu Toggle -->
-                <button class="menu-toggle" id="menuToggle">
-                    <i class="fa fa-bars"></i> Menu
-                </button>
-                
-                <!-- Content Container -->
-                <div class="content-container">
-                    <!-- Content Header -->
-                    <div class="content-header">
-                        <h1>Manage Menu Categories</h1>
-                        <p>Add, edit, or remove menu categories. Click on a row in the table to select and edit a category.</p>
-                    </div>
-                    
-                    <!-- Alert Message -->
-                    <div class="alert-message" id="alertMessage" runat="server" visible="false">
-                        <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
-                    </div>
-                    
-                    <!-- Form Container -->
-                    <div class="form-container">
-                        <asp:TextBox ID="CategoryIdTxt" runat="server" Width="282px" RequiredFieldValidator1="true" hidden></asp:TextBox>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <h3>Category Name:</h3>
-                                <asp:TextBox ID="CategoryNameTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <h3>Description:</h3>
-                                <asp:TextBox ID="DescriptionTxt" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4"></asp:TextBox>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <h3>Status:</h3>
-                                <asp:DropDownList ID="StatusDdl" runat="server" CssClass="form-control">
-                                    <asp:ListItem Text="Active" Value="1"></asp:ListItem>
-                                    <asp:ListItem Text="Inactive" Value="0"></asp:ListItem>
-                                </asp:DropDownList>
-                            </div>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <asp:Button ID="AddBtn" runat="server" Text="ADD" CssClass="btn btn-primary" />
-                            <asp:Button ID="EditBtn" runat="server" Text="EDIT" CssClass="btn btn-secondary" />
-                            <asp:Button ID="RemoveBtn" runat="server" Text="REMOVE" CssClass="btn btn-danger" />
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Table Container -->
-                <div class="content-container">
-                    <div class="content-header">
-                        <h1>Categories</h1>
-                        <p>Click on a row to select and edit a category</p>
-                    </div>
-                    <div class="table-responsive">
-                        <asp:Table ID="Table1" runat="server" CssClass="table table-striped table-hover">
-                        </asp:Table>
-                    </div>
-                </div>
-                
-                <!-- Footer -->
-                <div class="footer">
-                    <p>&copy; <%= DateTime.Now.Year %> Food Ordering System. All rights reserved.</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <h3>Description:</h3>
+                    <asp:TextBox ID="DescriptionTxt" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <h3>Status:</h3>
+                    <asp:DropDownList ID="StatusDdl" runat="server" CssClass="form-control" ClientIDMode="Static">
+                        <asp:ListItem Text="Active" Value="1"></asp:ListItem>
+                        <asp:ListItem Text="Inactive" Value="0"></asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <asp:Button ID="AddBtn" runat="server" Text="ADD" CssClass="btn btn-primary" ClientIDMode="Static" />
+                <asp:Button ID="EditBtn" runat="server" Text="EDIT" CssClass="btn btn-secondary" ClientIDMode="Static" />
+                <asp:Button ID="RemoveBtn" runat="server" Text="REMOVE" CssClass="btn btn-danger" ClientIDMode="Static" />
+            </div>
         </div>
-    </form>
+    </div>
+    
+    <!-- Table Container -->
+    <div class="content-container">
+        <div class="content-header">
+            <h1>Categories</h1>
+            <p>Click on a row to select and edit a category</p>
+        </div>
+        <div class="table-responsive">
+            <asp:Table ID="Table1" runat="server" CssClass="table table-striped table-hover" ClientIDMode="Static">
+            </asp:Table>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; <%= DateTime.Now.Year %> Food Ordering System. All rights reserved.</p>
+    </div>
 
     <script type="text/javascript">
         // Mobile menu toggle
@@ -166,38 +91,6 @@
                 mainContent.style.marginLeft = '250px';
             }
         });
-        
-        // Dropdown toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-            
-            dropdownToggles.forEach(function(toggle) {
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    this.parentElement.classList.toggle('active');
-                });
-            });
-            
-            // Set active class based on current page
-            var currentPage = window.location.pathname.split('/').pop();
-            var navLinks = document.querySelectorAll('.nav-links a');
-            var dropdownLinks = document.querySelectorAll('.dropdown-menu a');
-            
-            navLinks.forEach(function(link) {
-                var href = link.getAttribute('href');
-                if (href === currentPage) {
-                    link.classList.add('active');
-                }
-            });
-            
-            dropdownLinks.forEach(function(link) {
-                var href = link.getAttribute('href');
-                if (href === currentPage) {
-                    link.classList.add('active');
-                    link.parentElement.parentElement.classList.add('active');
-                }
-            });
-        });
     
         function UnHighlight(rows) {
             for (var row of rows) {
@@ -212,7 +105,13 @@
 
         function ListenTable() {
             var table = document.getElementById("Table1");
+            if (!table) {
+                console.error("Table with ID 'Table1' not found!");
+                return;
+            }
+            
             var rows = table.querySelectorAll("tr");
+            console.log("Found " + rows.length + " rows in the table");
 
             for(const row of rows) {
                 row.addEventListener("click", function() {
@@ -223,11 +122,23 @@
         }
         
         function Display(row) {
+            console.log("Display function called for row:", row);
+            
             const categoryIdTxt = document.getElementById("CategoryIdTxt");
             const categoryNameTxt = document.getElementById("CategoryNameTxt");
             const descriptionTxt = document.getElementById("DescriptionTxt");
             const statusDdl = document.getElementById("StatusDdl");
+            
+            if (!categoryIdTxt || !categoryNameTxt || !descriptionTxt || !statusDdl) {
+                console.error("One or more required elements not found!");
+                return;
+            }
+            
             const cols = row.querySelectorAll("td");
+            if (cols.length === 0) {
+                console.error("No columns found in the selected row!");
+                return;
+            }
 
             categoryIdTxt.value = row.getAttribute("data-category_id");
             categoryNameTxt.value = cols[0].innerText;
@@ -239,17 +150,22 @@
             const editBtn = document.getElementById("EditBtn");
             const removeBtn = document.getElementById("RemoveBtn");
             const categoryIdTxt = document.getElementById("CategoryIdTxt");
+            
+            if (!editBtn || !removeBtn || !categoryIdTxt) {
+                console.error("One or more button elements not found!");
+                return;
+            }
 
             editBtn.addEventListener("click", function(e) {
                 if (categoryIdTxt.value.length == 0) {
-                    showAlert("Please Select a Category!", "warning");
+                    alert("Please Select a Category!");
                     e.preventDefault();
                 }
             });
             
             removeBtn.addEventListener("click", function(e) {
                 if (categoryIdTxt.value.length == 0) {
-                    showAlert("Please Select a Category!", "warning");
+                    alert("Please Select a Category!");
                     e.preventDefault();
                     return false;
                 }
@@ -260,18 +176,12 @@
                 }
             });
         }
-        
-        function showAlert(message, type) {
-            const alertMessage = document.getElementById("alertMessage");
-            
-            alertMessage.className = "alert-message";
-            alertMessage.classList.add("alert-" + type);
-            alertMessage.innerHTML = message;
-            alertMessage.style.display = "block";
-        }
 
-        ListenTable();
-        ListenToButtons();
+        // Initialize table and button listeners when the DOM is loaded
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("DOM fully loaded, initializing listeners");
+            ListenTable();
+            ListenToButtons();
+        });
     </script>
-</body>
-</html> 
+</asp:Content> 

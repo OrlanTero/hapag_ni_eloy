@@ -12,10 +12,7 @@ Partial Class Pages_Admin_AdminDashboard
                 Response.Redirect("~/Pages/LoginPortal/AdminStaffLoginPortal.aspx")
             End If
 
-            ' Display user name and initials
-            Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
-            UserDisplayNameLiteral.Text = currentUser.display_name
-            UserInitialsLiteral.Text = GetInitials(currentUser.display_name)
+            ' Master page will handle displaying user name and initials
             
             ' Load dashboard data
             LoadDashboardData()
@@ -37,14 +34,7 @@ Partial Class Pages_Admin_AdminDashboard
         End If
     End Function
 
-    Protected Sub LogoutButton_Click(ByVal sender As Object, ByVal e As EventArgs)
-        ' Clear session
-        Session.Clear()
-        Session.Abandon()
-
-        ' Redirect to login page
-        Response.Redirect("~/Pages/LoginPortal/AdminStaffLoginPortal.aspx")
-    End Sub
+    ' LogoutButton_Click handler is now in the master page
 
     Private Sub LoadDashboardData()
         Try
@@ -98,9 +88,18 @@ Partial Class Pages_Admin_AdminDashboard
             LoadRecentActivity()
 
         Catch ex As Exception
-            ' Handle any errors
-            AlertLiteral.Text = "Error loading dashboard data: " & ex.Message
-            alertMessage.Visible = True
+            ' Handle any errors - use the master page's alert message if possible
+            Try
+                Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+                If masterPage IsNot Nothing Then
+                    masterPage.ShowAlert("Error loading dashboard data: " & ex.Message, False)
+                End If
+            Catch masterEx As Exception
+                ' Fallback to client-side alert if master page method fails
+                Dim script As String = "alert('Error loading dashboard data: " & _
+                                      ex.Message.Replace("'", "\\'") & "');"
+                ClientScript.RegisterStartupScript(Me.GetType(), "ErrorAlert", script, True)
+            End Try
         End Try
     End Sub
 

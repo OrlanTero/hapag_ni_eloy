@@ -2,6 +2,7 @@ Imports System.Data
 Imports System.Text
 Imports System.Web.UI.HtmlControls
 Imports System.Web.UI.WebControls
+Imports System.Web.UI
 Imports HapagDB
 
 Partial Class Pages_Admin_AdminDiscounts
@@ -94,14 +95,12 @@ Partial Class Pages_Admin_AdminDiscounts
 
             ' Use DiscountController to create the discount
             If discountController.CreateDiscount(newDiscount) Then
-            ' Show success message and refresh table
-            showAlert("Discount added successfully!", "success")
-            ClearForm()
-            ViewTable()
+                showAlert("Discount added successfully!", "success")
+                ClearForm()
+                ViewTable()
             Else
                 showAlert("Failed to add discount!", "danger")
             End If
-
         Catch ex As Exception
             showAlert("Error adding discount: " & ex.Message, "danger")
             System.Diagnostics.Debug.WriteLine("Error in AddBtn_Click: " & ex.Message)
@@ -112,7 +111,7 @@ Partial Class Pages_Admin_AdminDiscounts
     Protected Sub EditBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles EditBtn.Click
         Try
             ' Validate discount ID
-            If String.IsNullOrEmpty(DiscountIdHidden.Value) Then
+            If String.IsNullOrEmpty(DiscountIdTxt.Text) Then
                 showAlert("Please select a discount to edit!", "warning")
                 Return
             End If
@@ -159,7 +158,7 @@ Partial Class Pages_Admin_AdminDiscounts
 
             ' Create a Discount object for the update
             Dim discount As New Discount()
-            discount.discount_id = Integer.Parse(DiscountIdHidden.Value)
+            discount.discount_id = Integer.Parse(DiscountIdTxt.Text)
             discount.name = NameTxt.Text.Trim()
             discount.discount_type = Integer.Parse(DiscountTypeDdl.SelectedValue)
             discount.value = value
@@ -172,14 +171,12 @@ Partial Class Pages_Admin_AdminDiscounts
 
             ' Use DiscountController to update the discount
             If discountController.UpdateDiscount(discount) Then
-            ' Show success message and refresh table
-            showAlert("Discount updated successfully!", "success")
-            ClearForm()
-            ViewTable()
+                showAlert("Discount updated successfully!", "success")
+                ClearForm()
+                ViewTable()
             Else
                 showAlert("Failed to update discount!", "danger")
             End If
-
         Catch ex As Exception
             showAlert("Error updating discount: " & ex.Message, "danger")
             System.Diagnostics.Debug.WriteLine("Error in EditBtn_Click: " & ex.Message)
@@ -190,21 +187,19 @@ Partial Class Pages_Admin_AdminDiscounts
     Protected Sub RemoveBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles DeleteBtn.Click
         Try
             ' Validate discount ID
-            If String.IsNullOrEmpty(DiscountIdHidden.Value) Then
+            If String.IsNullOrEmpty(DiscountIdTxt.Text) Then
                 showAlert("Please select a discount to delete!", "warning")
                 Return
             End If
 
             ' Use DiscountController to delete the discount
-            If discountController.DeleteDiscount(Integer.Parse(DiscountIdHidden.Value)) Then
-            ' Show success message and refresh table
+            If discountController.DeleteDiscount(Integer.Parse(DiscountIdTxt.Text)) Then
                 showAlert("Discount deleted successfully!", "success")
-            ClearForm()
-            ViewTable()
+                ClearForm()
+                ViewTable()
             Else
                 showAlert("Failed to delete discount!", "danger")
             End If
-
         Catch ex As Exception
             showAlert("Error deleting discount: " & ex.Message, "danger")
             System.Diagnostics.Debug.WriteLine("Error in RemoveBtn_Click: " & ex.Message)
@@ -238,10 +233,62 @@ Partial Class Pages_Admin_AdminDiscounts
             TableContainer.Visible = (discounts.Count > 0)
             NoRecords.Visible = (discounts.Count = 0)
             
+            Table1.Rows.Clear()
+
             If discounts.Count > 0 Then
-                DiscountsRepeater.DataSource = discounts
-                DiscountsRepeater.DataBind()
-                System.Diagnostics.Debug.WriteLine("Bound " & discounts.Count & " discounts to repeater")
+                ' Create header row
+                Dim headerRow As New TableHeaderRow()
+                headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Name"})
+                headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Type"})
+                headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Value"})
+                headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Applicable To"})
+                headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Start Date"})
+                headerRow.Cells.Add(New TableHeaderCell() With {.Text = "End Date"})
+                headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Min Order"})
+                headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Status"})
+                Table1.Rows.Add(headerRow)
+
+                ' Add data rows
+                For Each discount As Discount In discounts
+                    Dim row As New TableRow()
+                    
+                    ' Add cells with data
+                    row.Cells.Add(New TableCell() With {.Text = discount.name})
+                    
+                    ' Discount type
+                    Dim discountTypeText As String = GetDiscountTypeName(discount.discount_type)
+                    row.Cells.Add(New TableCell() With {.Text = discountTypeText})
+                    
+                    ' Format discount value
+                    Dim formattedValue As String = FormatDiscountValue(discount.value, discount.discount_type)
+                    row.Cells.Add(New TableCell() With {.Text = formattedValue})
+                    
+                    ' Applicable to
+                    Dim applicableToText As String = GetApplicableToName(discount.applicable_to)
+                    row.Cells.Add(New TableCell() With {.Text = applicableToText})
+                    
+                    ' Dates
+                    row.Cells.Add(New TableCell() With {.Text = discount.start_date.ToString("MM/dd/yyyy")})
+                    row.Cells.Add(New TableCell() With {.Text = discount.end_date.ToString("MM/dd/yyyy")})
+                    
+                    ' Min order amount
+                    Dim minOrderText As String = If(discount.min_order_amount > 0, "₱" & discount.min_order_amount.ToString("0.00"), "None")
+                    row.Cells.Add(New TableCell() With {.Text = minOrderText})
+                    
+                    ' Status with styling
+                    Dim statusCell As New TableCell()
+                    Dim statusSpan As New HtmlGenericControl("span")
+                    statusSpan.InnerText = GetStatusName(discount.status)
+                    statusSpan.Attributes.Add("class", If(discount.status = 1, "status-active", "status-inactive"))
+                    statusCell.Controls.Add(statusSpan)
+                    row.Cells.Add(statusCell)
+                    
+                    ' Add data attributes for JavaScript
+                    row.Attributes.Add("data-discount_id", discount.discount_id.ToString())
+                    row.Attributes.Add("data-description", discount.description)
+                    
+                    Table1.Rows.Add(row)
+                Next
             End If
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error in ViewTable: " & ex.Message)
@@ -263,7 +310,7 @@ Partial Class Pages_Admin_AdminDiscounts
         Select Case discountType
             Case 1
                 Return "Percentage"
-            Case 0
+            Case 0, 2
                 Return "Fixed Amount"
             Case Else
                 Return "Unknown"
@@ -274,11 +321,11 @@ Partial Class Pages_Admin_AdminDiscounts
     Protected Function GetApplicableToName(ByVal applicableTo As Integer) As String
         Select Case applicableTo
             Case 1
-                Return "Selected Items"
+                Return "All Products"
             Case 2
-                Return "Categories"
-            Case 0
-                Return "All Items"
+                Return "Specific Category"
+            Case 3
+                Return "Specific Product"
             Case Else
                 Return "Unknown"
         End Select
@@ -297,7 +344,7 @@ Partial Class Pages_Admin_AdminDiscounts
     End Function
 
     Private Sub ClearForm()
-        DiscountIdHidden.Value = ""
+        DiscountIdTxt.Text = ""
         NameTxt.Text = ""
         DiscountTypeDdl.SelectedIndex = 0
         ValueTxt.Text = ""
@@ -307,59 +354,47 @@ Partial Class Pages_Admin_AdminDiscounts
         MinOrderAmountTxt.Text = ""
         StatusDdl.SelectedIndex = 0
         DescriptionTxt.Text = ""
-        AddBtn.Visible = True
-        EditBtn.Visible = False
-        DeleteBtn.Visible = False
     End Sub
 
-    Private Sub showAlert(ByVal message As String, ByVal type As String)
-        Dim script As String = "showAlert('" & message & "', '" & type & "');"
-        ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
-    End Sub
-
-    ' Event handler for the Repeater's ItemCommand event
-    Protected Sub DiscountsRepeater_ItemCommand(ByVal source As Object, ByVal e As RepeaterCommandEventArgs)
+    Private Sub showAlert(message As String, type As String)
         Try
-            If e.CommandName = "Edit" Then
-                Dim discountId As Integer = Convert.ToInt32(e.CommandArgument)
-                System.Diagnostics.Debug.WriteLine("Edit command for discount ID: " & discountId)
-                
-                ' Get the discount details from the controller
-                Dim discount = discountController.GetDiscountById(discountId)
-                
-                If discount IsNot Nothing Then
-                    ' Populate the form with discount details
-                    DiscountIdHidden.Value = discount.discount_id.ToString()
-                    NameTxt.Text = discount.name
-                    DiscountTypeDdl.SelectedValue = discount.discount_type.ToString()
-                    
-                    If discount.discount_type = 1 Then ' Percentage
-                        ValueTxt.Text = discount.value.ToString("0.##") & "%"
-                    Else ' Fixed amount
-                        ValueTxt.Text = discount.value.ToString("0.00")
-                End If
-
-                    ApplicableToDdl.SelectedValue = discount.applicable_to.ToString()
-                    StartDateTxt.Text = discount.start_date.ToString("yyyy-MM-dd")
-                    EndDateTxt.Text = discount.end_date.ToString("yyyy-MM-dd")
-                    MinOrderAmountTxt.Text = discount.min_order_amount.ToString("0.00")
-                    StatusDdl.SelectedValue = discount.status.ToString()
-                    DescriptionTxt.Text = discount.description
-                    
-                    ' Show edit and delete buttons, hide add button
-                    AddBtn.Visible = False
-                    EditBtn.Visible = True
-                    DeleteBtn.Visible = True
-                    
-                    ' Scroll to the form
-                    ClientScript.RegisterStartupScript(Me.GetType(), "scrollToForm", "scrollToForm();", True)
-                Else
-                    showAlert("Discount not found!", "warning")
-                End If
-            End If
+            ' Use the master page's alert methods
+            Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+            
+            Select Case type
+                Case "success"
+                    masterPage.ShowAlert(message, True)
+                Case "danger", "error"
+                    masterPage.ShowAlert(message, False)
+                Case "warning"
+                    masterPage.ShowWarning(message)
+                Case "info"
+                    masterPage.ShowInfo(message)
+                Case Else
+                    masterPage.ShowInfo(message)
+            End Select
         Catch ex As Exception
-            System.Diagnostics.Debug.WriteLine("Error in DiscountsRepeater_ItemCommand: " & ex.Message)
-            showAlert("Error: " & ex.Message, "danger")
+            ' Fallback to original method if master page method fails
+            alertMessage.Style("display") = "block"
+            
+            Select Case type
+                Case "success"
+                    alertMessage.Attributes("class") = "alert-message alert-success"
+                Case "danger", "error"
+                    alertMessage.Attributes("class") = "alert-message alert-danger"
+                Case "warning"
+                    alertMessage.Attributes("class") = "alert-message alert-warning"
+                Case "info"
+                    alertMessage.Attributes("class") = "alert-message alert-info"
+                Case Else
+                    alertMessage.Attributes("class") = "alert-message alert-info"
+            End Select
+            
+            AlertLiteral.Text = message
+            
+            ' Auto-hide after 5 seconds using JavaScript
+            Dim script As String = "setTimeout(function() { document.getElementById('" & alertMessage.ClientID & "').style.display = 'none'; }, 5000);"
+            ScriptManager.RegisterStartupScript(Me, Me.GetType(), "hideAlert", script, True)
         End Try
     End Sub
 End Class

@@ -715,8 +715,8 @@
                                                  Eval("sender_number").ToString(), "Not provided") %>
                                         </div>
                                     </div>
-
-                                       
+                                    
+                                
                                 <div class="info-row">
                                     <div class="info-label">Payment Status:</div>
                                     <div class="info-value <%# If(Eval("transaction_status").ToString() = "Verified", "status-success", If(Eval("transaction_status").ToString() = "Pending" Or Eval("transaction_status").ToString() = "", "status-pending", "")) %>">
@@ -890,17 +890,17 @@
                         
                         <div class="verification-message">
                             <p>Please verify the payment details before approving. Once approved, the order status will be updated and the order will be ready for processing.</p>
-                        </div>
-                    </div>
-                </div>
+                            </div>
+                            </div>
+                            </div>
                 <div class="modal-footer" style="margin-top: 20px; text-align: right; padding-top: 15px; border-top: 1px solid #ddd;">
                     <asp:Button ID="ConfirmPaymentButton" runat="server" Text="Confirm Payment" CssClass="btn btn-success" OnClick="ConfirmPaymentButton_Click" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;" />
                     <asp:Button ID="RejectPaymentButton" runat="server" Text="Reject Payment" CssClass="btn btn-danger" OnClick="RejectPaymentButton_Click" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;" />
                     <asp:Button ID="CancelPaymentVerificationButton" runat="server" Text="Cancel" CssClass="btn btn-secondary" OnClick="ClosePaymentModalButton_Click" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;" />
-                </div>
-            </div>
+                        </div>
+                            </div>
         </asp:Panel>
-        </div>
+                            </div>
 
     <script type="text/javascript">
         // Define showVerificationModal in the global scope first
@@ -1241,7 +1241,7 @@
                         <p style="margin-bottom: 5px;"><strong>Order ID:</strong> ${orderId}</p>
                         <p style="margin-bottom: 5px;"><strong>Customer:</strong> ${orderData.customerName}</p>
                         <p style="margin-bottom: 5px;"><strong>Total Amount:</strong> PHP ${orderData.totalAmount}</p>
-                    </div>
+                            </div>
                     
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
                         <h4 style="margin-top: 0; color: #333; font-size: 16px;">Payment Details</h4>
@@ -1250,12 +1250,12 @@
                         <p style="margin-bottom: 5px;"><strong>Sender Name:</strong> ${orderData.senderName}</p>
                         <p style="margin-bottom: 5px;"><strong>Sender Number:</strong> ${orderData.senderNumber}</p>
                         <p style="margin-bottom: 5px;"><strong>Current Status:</strong> ${orderData.transactionStatus}</p>
-                    </div>
-                    
+                        </div>
+                        
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fe; border-radius: 5px; border-left: 4px solid #2196F3;">
                         <h4 style="margin-top: 0; color: #0d47a1; font-size: 16px;">Verification</h4>
-                        <p>Please verify the payment details before approving. Once approved, the order status will be updated and the order will be ready for processing.</p>
-                    </div>
+                            <p>Please verify the payment details before approving. Once approved, the order status will be updated and the order will be ready for processing.</p>
+                        </div>
                 `;
             } else {
                 // Basic info only
@@ -1269,7 +1269,7 @@
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
                         <h4 style="margin-top: 0; color: #856404; font-size: 16px;">Emergency Verification</h4>
                         <p>The normal verification modal could not be displayed with complete details. Please use the buttons below to verify or reject this payment.</p>
-                    </div>
+                </div>
                 `;
             }
             

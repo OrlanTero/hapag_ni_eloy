@@ -57,11 +57,13 @@
             position: absolute;
             left: 100%;
             top: 0;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 4px;
+            background-color: #fff;
+            min-width: 180px;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+            z-index: 10;
+            border-radius: 6px;
+            padding: 8px 0;
+            margin-left: 5px;
         }
         
         .dropdown-container:hover .dropdown-menu {
@@ -70,15 +72,31 @@
         
         .dropdown-menu a {
             color: #333;
-            padding: 12px 16px;
+            padding: 10px 16px;
             text-decoration: none;
-            display: block;
-            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            margin-bottom: 0;
+            border-radius: 0;
         }
         
         .dropdown-menu a:hover {
-            background-color: #f1f1f1;
-            color: #000;
+            background-color: #f5f5f5;
+            color: #619F2B;
+        }
+        
+        .dropdown-menu a i {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .dropdown-menu a:hover i {
+            color: #619F2B;
         }
         
         /* Mobile dropdown */
@@ -223,36 +241,44 @@
             color: #619F2B;
         }
         
-        .nav-links a img {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-        }
-        
-        .nav-links a .white {
-            display: none;
-        }
-        
-        .nav-links a:hover .black, .nav-links a.active .black {
-            display: none;
-        }
-        
-        .nav-links a:hover .white, .nav-links a.active .white {
-            display: inline-block;
-        }
-        
         .nav-links a span {
             font-weight: 500;
-        }
-        
-        /* Fix emoji spacing in navigation */
-        .nav-links a span {
             display: flex;
             align-items: center;
         }
         
-        .nav-links a span::before {
-            margin-right: 8px;
+        /* Style for Font Awesome icons in navigation */
+        .nav-links a span i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover span i, .nav-links a.active span i {
+            color: #619F2B;
+        }
+        
+        /* Style for Font Awesome icons in dropdown */
+        .dropdown-menu a i {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .dropdown-toggle .dropdown-indicator {
+            margin-left: auto;
+            font-size: 12px;
+            opacity: 0.5;
+            transition: transform 0.3s ease;
+        }
+        
+        .dropdown-container.active .dropdown-indicator,
+        .dropdown-container:hover .dropdown-indicator {
+            transform: rotate(90deg);
+            opacity: 1;
         }
     </style>
 </head>
@@ -291,58 +317,42 @@
                 </div>
                 <div class="nav-links">
                     <a href="AdminDashboard.aspx">
-                        <img src="../../Assets/Images/icons/dashboard icon black.png" class="black" />
-                        <img src="../../Assets/Images/icons/dasboard icon white.png" class="white" />
-                        <span>📊 Dashboard</span>
+                        <span><i class="fas fa-chart-bar"></i> Dashboard</span>
                     </a>
 
                     <a href="AdminMenu.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>🍽️ Menu</span>
+                        <span><i class="fas fa-utensils"></i> Menu</span>
                     </a> 
 
                     <a href="AdminMenuCategories.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>📑 Categories</span>
+                        <span><i class="fas fa-list"></i> Categories</span>
                     </a>
 
                     <a href="AdminMenuTypes.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>🏷️ Types</span>
+                        <span><i class="fas fa-tags"></i> Types</span>
                     </a>
 
                     <a href="AdminOrders.aspx">
-                        <img src="../../Assets/Images/icons/order-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/order-white.png" class="white" />
-                        <span>📦 Orders</span>
+                        <span><i class="fas fa-box"></i> Orders</span>
                     </a>
 
                     <a href="AdminAccounts.aspx" id="navAccounts" runat="server">
-                        <img src="../../Assets/Images/icons/user-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/user-white.png" class="white" />
-                        <span>👥 Accounts</span>
+                        <span><i class="fas fa-users"></i> Accounts</span>
                     </a>
 
                     <div class="dropdown-container">
                         <a href="javascript:void(0);" class="dropdown-toggle">
-                            <img src="../../Assets/Images/icons/administrator-black.png" class="black" />
-                            <img src="../../Assets/Images/icons/administrator-white.png" class="white" />
-                            <span>⚙️ Administrator</span>
+                            <span><i class="fas fa-cog"></i> Administrator <i class="fas fa-chevron-right dropdown-indicator"></i></span>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="AdminDeals.aspx">🏷️ Deals</a>
-                            <a href="AdminPromotions.aspx">🎯 Promotions</a>
-                            <a href="AdminDiscounts.aspx">💰 Discounts</a>
+                            <a href="AdminDeals.aspx"><i class="fas fa-tag"></i> Deals</a>
+                            <a href="AdminPromotions.aspx"><i class="fas fa-bullseye"></i> Promotions</a>
+                            <a href="AdminDiscounts.aspx"><i class="fas fa-percent"></i> Discounts</a>
                         </div>
                     </div>
 
                     <a href="Admin Transaction.aspx">
-                        <img src="../../Assets/Images/icons/transaction-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/transaction-white.png" class="white" />
-                        <span>💳 Transactions</span>
+                        <span><i class="fas fa-credit-card"></i> Transactions</span>
                     </a>
                 </div>
             </div>
@@ -357,33 +367,6 @@
 
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            // Fix any potential encoding issues in the navigation text
-            var navLinks = document.querySelectorAll('.nav-links a span');
-            navLinks.forEach(function(link) {
-                // Ensure text is properly displayed
-                if (link.textContent.includes('')) {
-                    // Replace any unreadable characters
-                    var text = link.textContent;
-                    if (link.closest('a').getAttribute('href').includes('Dashboard')) {
-                        link.textContent = '📊 Dashboard';
-                    } else if (link.closest('a').getAttribute('href').includes('Menu') && !link.closest('a').getAttribute('href').includes('Categories') && !link.closest('a').getAttribute('href').includes('Types')) {
-                        link.textContent = '🍽️ Menu';
-                    } else if (link.closest('a').getAttribute('href').includes('Categories')) {
-                        link.textContent = '📑 Categories';
-                    } else if (link.closest('a').getAttribute('href').includes('Types')) {
-                        link.textContent = '🏷️ Types';
-                    } else if (link.closest('a').getAttribute('href').includes('Orders')) {
-                        link.textContent = '📦 Orders';
-                    } else if (link.closest('a').getAttribute('href').includes('Accounts')) {
-                        link.textContent = '👥 Accounts';
-                    } else if (link.closest('a').getAttribute('href').includes('Transaction')) {
-                        link.textContent = '💳 Transactions';
-                    } else if (link.textContent.includes('Administrator')) {
-                        link.textContent = '⚙️ Administrator';
-                    }
-                }
-            });
-            
             // Dropdown toggle
             var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
             dropdownToggles.forEach(function(toggle) {
@@ -395,7 +378,7 @@
             
             // Set active class based on current page
             var currentPage = window.location.pathname.split('/').pop().toLowerCase();
-            var navLinks = document.querySelectorAll('.nav-links a');
+            var navLinks = document.querySelectorAll('.nav-links > a');
             var dropdownLinks = document.querySelectorAll('.dropdown-menu a');
             
             navLinks.forEach(function(link) {
@@ -409,7 +392,7 @@
                 var href = link.getAttribute('href').toLowerCase();
                 if (href === currentPage || currentPage.includes(href.split('.')[0].toLowerCase())) {
                     link.classList.add('active');
-                    link.parentElement.parentElement.classList.add('active');
+                    link.closest('.dropdown-container').classList.add('active');
                 }
             });
         });

@@ -85,11 +85,22 @@ Public Class TransactionController
         Return 0
     End Function
     
-    Public Function UpdateTransactionStatus(ByVal transactionId As Integer, ByVal status As String) As Boolean
-        Dim query As String = "UPDATE transactions SET status = @status WHERE transaction_id = @transaction_id"
+    Public Function UpdateTransactionStatus(ByVal transaction As Transaction) As Boolean
+        Dim query As String = "UPDATE transactions SET status = @status"
         
-        conn.AddParam("@transaction_id", transactionId)
-        conn.AddParam("@status", status)
+        ' Add verification_date field if present
+        If transaction.verification_date IsNot Nothing Then
+            query &= ", verification_date = @verification_date"
+        End If
+        
+        query &= " WHERE transaction_id = @transaction_id"
+        
+        conn.AddParam("@transaction_id", transaction.transaction_id)
+        conn.AddParam("@status", transaction.status)
+        
+        If transaction.verification_date IsNot Nothing Then
+            conn.AddParam("@verification_date", transaction.verification_date)
+        End If
         
         Return conn.Query(query)
     End Function
@@ -149,6 +160,17 @@ Public Class TransactionController
         transaction.sender_name = If(row("sender_name") IsNot DBNull.Value, row("sender_name").ToString(), Nothing)
         transaction.sender_number = If(row("sender_number") IsNot DBNull.Value, row("sender_number").ToString(), Nothing)
         transaction.transaction_date = Convert.ToDateTime(row("transaction_date"))
+        
+        ' Map new properties with null checks
+        transaction.delivery_fee = If(row.Table.Columns.Contains("delivery_fee") AndAlso row("delivery_fee") IsNot DBNull.Value, Convert.ToDecimal(row("delivery_fee")), 0)
+        transaction.discount_id = If(row.Table.Columns.Contains("discount_id") AndAlso row("discount_id") IsNot DBNull.Value, Convert.ToInt32(row("discount_id")), Nothing)
+        transaction.promotion_id = If(row.Table.Columns.Contains("promotion_id") AndAlso row("promotion_id") IsNot DBNull.Value, Convert.ToInt32(row("promotion_id")), Nothing)
+        transaction.deal_id = If(row.Table.Columns.Contains("deal_id") AndAlso row("deal_id") IsNot DBNull.Value, Convert.ToInt32(row("deal_id")), Nothing)
+        transaction.app_name = If(row.Table.Columns.Contains("app_name") AndAlso row("app_name") IsNot DBNull.Value, row("app_name").ToString(), Nothing)
+        transaction.tracking_url = If(row.Table.Columns.Contains("tracking_url") AndAlso row("tracking_url") IsNot DBNull.Value, row("tracking_url").ToString(), Nothing)
+        transaction.estimated_time = If(row.Table.Columns.Contains("estimated_time") AndAlso row("estimated_time") IsNot DBNull.Value, row("estimated_time").ToString(), Nothing)
+        transaction.driver_name = If(row.Table.Columns.Contains("driver_name") AndAlso row("driver_name") IsNot DBNull.Value, row("driver_name").ToString(), Nothing)
+        transaction.verification_date = If(row.Table.Columns.Contains("verification_date") AndAlso row("verification_date") IsNot DBNull.Value, Convert.ToDateTime(row("verification_date")), Nothing)
         
         Return transaction
     End Function

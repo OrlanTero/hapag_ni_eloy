@@ -1,167 +1,92 @@
-﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdminAccounts.aspx.vb" Inherits="Pages_Admin_AdminAccounts" %>
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdminAccounts.aspx.vb" Inherits="Pages_Admin_AdminAccounts" MasterPageFile="~/Pages/Admin/AdminTemplate.master" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <title>Account Management</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="./../../StyleSheets/Layout.css" rel="stylesheet" type="text/css" />
-    <link href="./../../StyleSheets/Admin.css" rel="stylesheet" type="text/css" />
-</head>
-<body>
-    <form id="Form1" runat="server">
-        <div class="page-container">
-            <!-- Admin Sidebar -->
-            <div class="admin-sidebar">
-                <div class="logo">
-                    <img src="../../Assets/Images/logo-removebg-preview.png" alt="Logo" />
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fa fa-bars"></i> Menu
+    </button>
+    
+    <!-- Content Container -->
+    <div class="content-container">
+        <!-- Content Header -->
+        <div class="content-header">
+            <h1>Account Management</h1>
+            <p>Add, edit, or remove user accounts</p>
+        </div>
+        
+        <!-- Alert Message -->
+        <div class="alert-message" id="alertMessage" runat="server" visible="false">
+            <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
+        </div>
+        
+        <!-- Form Container -->
+        <div class="form-container">
+            <asp:TextBox ID="UserIdTxt" runat="server" Width="282px" RequiredFieldValidator1="true" hidden ClientIDMode="Static"></asp:TextBox>
+            
+            <div class="form-row">
+                <div class="form-group-half">
+                    <h3>Username:</h3>
+                    <asp:TextBox ID="UsernameTxt" runat="server" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
                 </div>
-                <div class="nav-links">
-                    <a href="AdminDashboard.aspx">
-                        <img src="../../Assets/Images/icons/dashboard icon black.png" class="black" />
-                        <img src="../../Assets/Images/icons/dasboard icon white.png" class="white" />
-                        <span>Dashboard</span>
-                    </a>
-
-                    <a href="AdminMenu.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Menu</span>
-                    </a>
-                    
-                    <a href="AdminMenuCategories.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Categories</span>
-                    </a>
-
-                    <a href="AdminMenuTypes.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Types</span>
-                    </a>
-
-                    <a href="AdminOrders.aspx">
-                        <img src="../../Assets/Images/icons/order-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/order-white.png" class="white" />
-                        <span>Orders</span>
-                    </a>
-
-                    <a href="AdminAccounts.aspx" class="active">
-                        <img src="../../Assets/Images/icons/account-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/account-white.png" class="white" />
-                        <span>Accounts</span>
-                    </a>
-
-                    <div class="dropdown-container">
-                        <a href="javascript:void(0);" class="dropdown-toggle">
-                            <img src="../../Assets/Images/icons/administrator-black.png" class="black" />
-                            <img src="../../Assets/Images/icons/administrator-white.png" class="white" />
-                            <span>Administrator</span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="AdminDeals.aspx">Deals</a>
-                            <a href="AdminPromotions.aspx">Promotions</a>
-                            <a href="AdminDiscounts.aspx">Discounts</a>
-                        </div>
-                    </div>
-
-                    <a href="Admin Transaction.aspx">
-                        <img src="../../Assets/Images/icons/transaction-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/transaction-white.png" class="white" />
-                        <span>Transactions</span>
-                    </a>
+                <div class="form-group-half">
+                    <h3>Password:</h3>
+                    <asp:TextBox ID="PasswordTxt" runat="server" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
             
-            <!-- Main Content -->
-            <div class="main-content">
-                <!-- Mobile Menu Toggle -->
-                <button class="menu-toggle" id="menuToggle">
-                    <i class="fa fa-bars"></i> Menu
-                </button>
-                
-                <!-- Content Container -->
-                <div class="content-container">
-                    <!-- Content Header -->
-                    <div class="content-header">
-                        <h1>Account Management</h1>
-                        <p>Add, edit, or remove user accounts</p>
-                    </div>
-                    
-                    <!-- Alert Message -->
-                    <div class="alert-message" id="alertMessage" runat="server" visible="false">
-                        <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
-                    </div>
-                    
-                    <!-- Form Container -->
-                    <div class="form-container">
-                        <asp:TextBox ID="UserIdTxt" runat="server" Width="282px" RequiredFieldValidator1="true" hidden></asp:TextBox>
-                        
-                        <div class="form-row">
-                            <div class="form-group-half">
-                                <h3>Username:</h3>
-                                <asp:TextBox ID="UsernameTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                            <div class="form-group-half">
-                                <h3>Password:</h3>
-                                <asp:TextBox ID="PasswordTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group-half">
-                                <h3>Contact:</h3>
-                                <asp:TextBox ID="ContactTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                            <div class="form-group-half">
-                                <h3>Address:</h3>
-                                <asp:TextBox ID="AddressTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group-half">
-                                <h3>Display Name:</h3>
-                                <asp:TextBox ID="DisplayNameTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                            <div class="form-group-half">
-                                <h3>User Type:</h3>
-                                <asp:DropDownList ID="UsertypeDdl" runat="server" CssClass="form-control">
-                                    <asp:ListItem Text="Admin" Value="1"></asp:ListItem>
-                                    <asp:ListItem Text="Staff" Value="2"></asp:ListItem>
-                                </asp:DropDownList>
-                            </div>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <asp:Button ID="AddBtn" runat="server" Text="ADD" CssClass="btn btn-primary" />
-                            <asp:Button ID="EditBtn" runat="server" Text="EDIT" CssClass="btn btn-secondary" />
-                            <asp:Button ID="RemoveBtn" runat="server" Text="REMOVE" CssClass="btn btn-danger" />
-                        </div>
-                    </div>
+            <div class="form-row">
+                <div class="form-group-half">
+                    <h3>Contact:</h3>
+                    <asp:TextBox ID="ContactTxt" runat="server" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
                 </div>
-                
-                <!-- Table Container -->
-                <div class="content-container">
-                    <div class="content-header">
-                        <h1>User Accounts</h1>
-                        <p>Click on a row to select and edit a user account</p>
-                    </div>
-                    <div class="table-responsive">
-                        <asp:Table ID="Table1" runat="server" CssClass="table table-striped table-hover">
-                        </asp:Table>
-                    </div>
-                </div>
-                
-                <!-- Footer -->
-                <div class="footer">
-                    <p>&copy; <%= DateTime.Now.Year %> Food Ordering System. All rights reserved.</p>
+                <div class="form-group-half">
+                    <h3>Address:</h3>
+                    <asp:TextBox ID="AddressTxt" runat="server" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
+            
+            <div class="form-row">
+                <div class="form-group-half">
+                    <h3>Display Name:</h3>
+                    <asp:TextBox ID="DisplayNameTxt" runat="server" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
+                </div>
+                <div class="form-group-half">
+                    <h3>User Type:</h3>
+                    <asp:DropDownList ID="UsertypeDdl" runat="server" CssClass="form-control" ClientIDMode="Static">
+                        <asp:ListItem Text="Admin" Value="1"></asp:ListItem>
+                        <asp:ListItem Text="Staff" Value="2"></asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <asp:Button ID="AddBtn" runat="server" Text="ADD" CssClass="btn btn-primary" ClientIDMode="Static" />
+                <asp:Button ID="EditBtn" runat="server" Text="EDIT" CssClass="btn btn-secondary" ClientIDMode="Static" />
+                <asp:Button ID="RemoveBtn" runat="server" Text="REMOVE" CssClass="btn btn-danger" ClientIDMode="Static" />
+            </div>
         </div>
-    </form>
+    </div>
+    
+    <!-- Table Container -->
+    <div class="content-container">
+        <div class="content-header">
+            <h1>User Accounts</h1>
+            <p>Click on a row to select and edit a user account</p>
+        </div>
+        <div class="table-responsive">
+            <asp:Table ID="Table1" runat="server" CssClass="table table-striped table-hover" ClientIDMode="Static">
+            </asp:Table>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; <%= DateTime.Now.Year %> Food Ordering System. All rights reserved.</p>
+    </div>
 
     <script type="text/javascript">
         // Mobile menu toggle
@@ -191,7 +116,13 @@
 
         function ListenTable() {
             var table = document.getElementById("Table1");
+            if (!table) {
+                console.error("Table with ID 'Table1' not found!");
+                return;
+            }
+            
             var rows = table.querySelectorAll("tr");
+            console.log("Found " + rows.length + " rows in the table");
 
             for(const row of rows) {
                 row.addEventListener("click", function() {
@@ -202,6 +133,8 @@
         }
         
         function Display(row) {
+            console.log("Display function called for row:", row);
+            
             const uidTxt = document.getElementById("UserIdTxt");
             const uTxt = document.getElementById("UsernameTxt");
             const pTxt = document.getElementById("PasswordTxt");
@@ -209,7 +142,17 @@
             const cTxt = document.getElementById("ContactTxt");
             const aTxt = document.getElementById("AddressTxt");
             const utTxt = document.getElementById("UsertypeDdl");
+            
+            if (!uidTxt || !uTxt || !pTxt || !dndTxt || !cTxt || !aTxt || !utTxt) {
+                console.error("One or more required elements not found!");
+                return;
+            }
+            
             const cols = row.querySelectorAll("td");
+            if (cols.length === 0) {
+                console.error("No columns found in the selected row!");
+                return;
+            }
 
             uidTxt.value = row.getAttribute("data-user_id");
             uTxt.value = cols[0].innerText;
@@ -224,6 +167,11 @@
             const editBtn = document.getElementById("EditBtn");
             const removeBtn = document.getElementById("RemoveBtn");
             const uidTxt = document.getElementById("UserIdTxt");
+            
+            if (!editBtn || !removeBtn || !uidTxt) {
+                console.error("One or more button elements not found!");
+                return;
+            }
 
             editBtn.addEventListener("click", function(e) {
                 if (uidTxt.value.length == 0) {
@@ -247,16 +195,40 @@
         }
         
         function showAlert(message, type) {
-            const alertMessage = document.getElementById("alertMessage");
-            
-            alertMessage.className = "alert-message";
-            alertMessage.classList.add("alert-" + type);
-            alertMessage.innerHTML = message;
-            alertMessage.style.display = "block";
+            try {
+                // Try to use the master page's showAlert function
+                if (typeof window.masterShowAlert === 'function') {
+                    window.masterShowAlert(message, type);
+                    return;
+                }
+                
+                // Fallback to local implementation
+                const alertMessage = document.getElementById("alertMessage");
+                
+                if (!alertMessage) {
+                    console.error("Alert message element not found");
+                    return;
+                }
+                
+                alertMessage.className = "alert-message";
+                alertMessage.classList.add("alert-" + type);
+                alertMessage.innerHTML = message;
+                alertMessage.style.display = "block";
+                
+                // Auto-hide after 5 seconds
+                setTimeout(function() {
+                    alertMessage.style.display = "none";
+                }, 5000);
+            } catch (e) {
+                console.error("Error showing alert:", e);
+            }
         }
 
-        ListenTable();
-        ListenToButtons();
+        // Initialize table and button listeners when the DOM is loaded
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("DOM fully loaded, initializing listeners");
+            ListenTable();
+            ListenToButtons();
+        });
     </script>
-</body>
-</html>
+</asp:Content>

@@ -1,9 +1,6 @@
-﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Admin Transaction.aspx.vb" Inherits="Pages_Admin_Admin_Transaction" %>
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Admin Transaction.aspx.vb" Inherits="Pages_Admin_Admin_Transaction" MasterPageFile="~/Pages/Admin/AdminTemplate.master" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <title>Manage Transactions</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="./../../StyleSheets/Layout.css" rel="stylesheet" type="text/css" />
@@ -67,6 +64,41 @@
             padding: 4px 8px;
             border-radius: 4px;
             background-color: #fff3cd;
+        }
+        
+        .status-canceled {
+            color: #dc3545;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #f8d7da;
+        }
+        
+        /* Transaction Details Styles */
+        .transaction-details {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        
+        .detail-label {
+            flex: 1;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .detail-value {
+            flex: 2;
+            color: #212529;
         }
         
         /* Form Styles */
@@ -180,156 +212,143 @@
             }
         }
     </style>
-</head>
-<body>
-    <form id="Form1" runat="server">
-        <div class="page-container">
-            <!-- Admin Sidebar -->
-            <div class="admin-sidebar">
-                <div class="logo">
-                    <img src="../../Assets/Images/logo-removebg-preview.png" alt="Logo" />
-                </div>
-                <div class="nav-links">
-                    <a href="AdminDashboard.aspx">
-                        <img src="../../Assets/Images/icons/dashboard icon black.png" class="black" />
-                        <img src="../../Assets/Images/icons/dasboard icon white.png" class="white" />
-                        <span>Dashboard</span>
-                    </a>
+</asp:Content>
 
-                    <a href="AdminMenu.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Menu</span>
-                    </a> 
-
-                    <a href="AdminMenuCategories.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Categories</span>
-                    </a>
-
-                    <a href="AdminMenuTypes.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Types</span>
-                    </a>
-
-                    <a href="AdminOrders.aspx">
-                        <img src="../../Assets/Images/icons/order-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/order-white.png" class="white" />
-                        <span>Orders</span>
-                    </a>
-
-                    <a href="AdminAccounts.aspx">
-                        <img src="../../Assets/Images/icons/account-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/account-white.png" class="white" />
-                        <span>Accounts</span>
-                    </a>
-
-                    <div class="dropdown-container">
-                        <a href="javascript:void(0);" class="dropdown-toggle">
-                            <img src="../../Assets/Images/icons/administrator-black.png" class="black" />
-                            <img src="../../Assets/Images/icons/administrator-white.png" class="white" />
-                            <span>Administrator</span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="AdminDeals.aspx">Deals</a>
-                            <a href="AdminPromotions.aspx">Promotions</a>
-                            <a href="AdminDiscounts.aspx">Discounts</a>
-                        </div>
-                    </div>
-
-                    <a href="Admin Transaction.aspx" class="active">
-                        <img src="../../Assets/Images/icons/transaction-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/transaction-white.png" class="white" />
-                        <span>Transactions</span>
-                    </a>
-                </div>
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fa fa-bars"></i> Menu
+    </button>
+    
+    <!-- Content Container -->
+    <div class="content-container">
+        <!-- Content Header -->
+        <div class="content-header">
+            <h1>Manage Transactions</h1>
+            <p>View transaction details and update payment status</p>
+        </div>
+        
+        <!-- Alert Message -->
+        <div class="alert-message" id="alertMessage" runat="server" visible="false">
+            <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
+        </div>
+        
+        <!-- Transaction Details -->
+        <div class="transaction-details" id="transactionDetails" runat="server" visible="false">
+            <h2>Transaction Details</h2>
+            
+            <asp:HiddenField ID="TransactionIdHidden" runat="server" ClientIDMode="Static" />
+            
+            <div class="detail-row">
+                <div class="detail-label">Transaction ID:</div>
+                <div class="detail-value"><asp:Literal ID="TransactionIdLiteral" runat="server"></asp:Literal></div>
             </div>
             
-            <!-- Main Content -->
-            <div class="main-content">
-                <!-- Mobile Menu Toggle -->
-                <button class="menu-toggle" id="menuToggle">
-                    <i class="fa fa-bars"></i> Menu
-                </button>
-                
-                <!-- Content Container -->
-                <div class="content-container">
-                    <!-- Content Header -->
-                    <div class="content-header">
-                        <h1>Manage Transactions</h1>
-                        <p>Add, edit, or remove transaction records</p>
-                    </div>
-                    
-                    <!-- Alert Message -->
-                    <div class="alert-message" id="alertMessage" runat="server" visible="false">
-                        <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
-                    </div>
-                    
-                    <!-- Form Container -->
-                    <div class="form-container">
-                        <asp:TextBox ID="UserIdTxt" runat="server" Width="282px" RequiredFieldValidator1="true" hidden></asp:TextBox>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <h3>Payment Method:</h3>
-                                <asp:DropDownList ID="PaymentMethodDdl" runat="server" CssClass="form-control">
-                                    <asp:ListItem Text="GCash" Value="1"></asp:ListItem>
-                                    <asp:ListItem Text="Cash" Value="2"></asp:ListItem>
-                                </asp:DropDownList>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group-half">
-                                <h3>Subtotal:</h3>
-                                <asp:TextBox ID="SubtotalTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                            <div class="form-group-half">
-                                <h3>Total:</h3>
-                                <asp:TextBox ID="TotalTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group-half">
-                                <h3>Discounts:</h3>
-                                <asp:TextBox ID="DiscountTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                            <div class="form-group-half">
-                                <h3>Driver:</h3>
-                                <asp:TextBox ID="DriverTxt" runat="server" CssClass="form-control"></asp:TextBox>
-                            </div>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <asp:Button ID="AddBtn" runat="server" Text="ADD" CssClass="btn btn-primary" />
-                            <asp:Button ID="EditBtn" runat="server" Text="EDIT" CssClass="btn btn-secondary" />
-                            <asp:Button ID="RemoveBtn" runat="server" Text="REMOVE" CssClass="btn btn-danger" />
-                        </div>
+            <div class="detail-row">
+                <div class="detail-label">Reference Number:</div>
+                <div class="detail-value"><asp:Literal ID="ReferenceNumberLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Transaction Date:</div>
+                <div class="detail-value"><asp:Literal ID="TransactionDateLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Payment Method:</div>
+                <div class="detail-value"><asp:Literal ID="PaymentMethodLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Subtotal:</div>
+                <div class="detail-value"><asp:Literal ID="SubtotalLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Discount:</div>
+                <div class="detail-value"><asp:Literal ID="DiscountLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Delivery Fee:</div>
+                <div class="detail-value"><asp:Literal ID="DeliveryFeeLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Total Amount:</div>
+                <div class="detail-value"><asp:Literal ID="TotalAmountLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Customer:</div>
+                <div class="detail-value"><asp:Literal ID="CustomerLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Sender Name:</div>
+                <div class="detail-value"><asp:Literal ID="SenderNameLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Sender Number:</div>
+                <div class="detail-value"><asp:Literal ID="SenderNumberLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Driver Name:</div>
+                <div class="detail-value"><asp:Literal ID="DriverNameLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Tracking URL:</div>
+                <div class="detail-value"><asp:Literal ID="TrackingUrlLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Est. Delivery Time:</div>
+                <div class="detail-value"><asp:Literal ID="EstDeliveryLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Current Status:</div>
+                <div class="detail-value"><asp:Literal ID="StatusLiteral" runat="server"></asp:Literal></div>
+            </div>
+            
+            <!-- Update Payment Status Form -->
+            <div class="form-container">
+                <h3>Update Payment Status</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <asp:DropDownList ID="StatusDdl" runat="server" CssClass="form-control" ClientIDMode="Static">
+                            <asp:ListItem Text="Pending" Value="Pending"></asp:ListItem>
+                            <asp:ListItem Text="Paid" Value="Paid"></asp:ListItem>
+                            <asp:ListItem Text="Canceled" Value="Canceled"></asp:ListItem>
+                        </asp:DropDownList>
                     </div>
                 </div>
-                
-                <!-- Table Container -->
-                <div class="content-container">
-                    <div class="content-header">
-                        <h1>Transactions</h1>
-                        <p>Click on a row to select and edit a transaction</p>
-                    </div>
-                    <div class="table-responsive">
-                        <asp:Table ID="Table1" runat="server" CssClass="table table-striped table-hover">
-                        </asp:Table>
-                    </div>
-                </div>
-                
-                <!-- Footer -->
-                <div class="footer">
-                    <p>&copy; <%= DateTime.Now.Year %> Food Ordering System. All rights reserved.</p>
+                <div class="form-row">
+                    <asp:Button ID="UpdateStatusBtn" runat="server" Text="Update Status" CssClass="btn btn-primary" ClientIDMode="Static" />
                 </div>
             </div>
         </div>
-    </form>
+    </div>
+    
+    <!-- Table Container -->
+    <div class="content-container">
+        <div class="content-header">
+            <h1>All Transactions</h1>
+            <p>Click on a row to view transaction details</p>
+        </div>
+        <div class="table-responsive">
+            <asp:Table ID="Table1" runat="server" CssClass="table table-striped table-hover" ClientIDMode="Static">
+            </asp:Table>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; <%= DateTime.Now.Year %> Food Ordering System. All rights reserved.</p>
+    </div>
 
     <script type="text/javascript">
         // Mobile menu toggle
@@ -346,36 +365,10 @@
             }
         });
         
-        // Dropdown toggle
+        // Initialize event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-            
-            dropdownToggles.forEach(function(toggle) {
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    this.parentElement.classList.toggle('active');
-                });
-            });
-            
-            // Set active class based on current page
-            var currentPage = window.location.pathname.split('/').pop();
-            var navLinks = document.querySelectorAll('.nav-links a');
-            var dropdownLinks = document.querySelectorAll('.dropdown-menu a');
-            
-            navLinks.forEach(function(link) {
-                var href = link.getAttribute('href');
-                if (href === currentPage) {
-                    link.classList.add('active');
-                }
-            });
-            
-            dropdownLinks.forEach(function(link) {
-                var href = link.getAttribute('href');
-                if (href === currentPage) {
-                    link.classList.add('active');
-                    link.parentElement.parentElement.classList.add('active');
-                }
-            });
+            // Initialize table listeners
+            ListenTable();
         });
     
         function UnHighlight(rows) {
@@ -391,70 +384,121 @@
 
         function ListenTable() {
             var table = document.getElementById("Table1");
+            if (!table) {
+                console.error("Table with ID 'Table1' not found!");
+                return;
+            }
+            
             var rows = table.querySelectorAll("tr");
+            console.log("Found " + rows.length + " rows in the table");
 
             for(const row of rows) {
-                row.addEventListener("click", function() {
-                    Highlight(rows, row);
-                    Display(row);
-                });
+                if(row.cells.length > 1) { // Skip header row
+                    row.addEventListener("click", function() {
+                        Highlight(rows, row);
+                        ViewTransactionDetails(row);
+                    });
+                }
             }
         }
         
-        function Display(row) {
-            const userIdTxt = document.getElementById("UserIdTxt");
-            const paymentMethodDdl = document.getElementById("PaymentMethodDdl");
-            const subtotalTxt = document.getElementById("SubtotalTxt");
-            const totalTxt = document.getElementById("TotalTxt");
-            const discountTxt = document.getElementById("DiscountTxt");
-            const driverTxt = document.getElementById("DriverTxt");
-            const cols = row.querySelectorAll("td");
-
-            userIdTxt.value = row.getAttribute("data-user_id");
-            paymentMethodDdl.value = cols[0].innerText === "GCash" ? "1" : "2";
-            subtotalTxt.value = cols[1].innerText;
-            totalTxt.value = cols[2].innerText;
-            discountTxt.value = cols[3].innerText;
-            driverTxt.value = cols[4].innerText;
-        }
-
-        function ListenToButtons() {
-            const editBtn = document.getElementById("EditBtn");
-            const removeBtn = document.getElementById("RemoveBtn");
-            const userIdTxt = document.getElementById("UserIdTxt");
-
-            editBtn.addEventListener("click", function(e) {
-                if (userIdTxt.value.length == 0) {
-                    showAlert("Please Select a Transaction!", "warning");
-                    e.preventDefault();
-                }
-            });
-            
-            removeBtn.addEventListener("click", function(e) {
-                if (userIdTxt.value.length == 0) {
-                    showAlert("Please Select a Transaction!", "warning");
-                    e.preventDefault();
-                    return false;
+        function ViewTransactionDetails(row) {
+            try {
+                // This function will trigger a postback to load transaction details
+                var transactionId = row.getAttribute("data-transaction_id");
+                if (!transactionId) {
+                    console.error("No transaction ID found on the row");
+                    return;
                 }
                 
-                if(!confirm("Do you really want to delete this transaction?")) {
-                    e.preventDefault();
-                    return false;
+                var hiddenField = document.getElementById("TransactionIdHidden");
+                if (!hiddenField) {
+                    console.error("Element 'TransactionIdHidden' not found. Creating a temporary one.");
+                    // Create a temporary hidden input if it doesn't exist
+                    hiddenField = document.createElement("input");
+                    hiddenField.id = "TransactionIdHidden";
+                    hiddenField.name = "TransactionIdHidden";
+                    hiddenField.type = "hidden";
+                    document.forms[0].appendChild(hiddenField);
                 }
-            });
+                hiddenField.value = transactionId;
+                
+                // Update status dropdown to match current status
+                var statusText = "";
+                for(var i = 0; i < row.cells.length; i++) {
+                    if(row.cells[i].classList.contains("status-paid") || 
+                       row.cells[i].classList.contains("status-pending") ||
+                       row.cells[i].classList.contains("status-canceled")) {
+                        statusText = row.cells[i].innerText.trim();
+                        break;
+                    }
+                }
+                
+                var statusDdl = document.getElementById("StatusDdl");
+                if(statusDdl) {
+                    for(var i = 0; i < statusDdl.options.length; i++) {
+                        if(statusDdl.options[i].text === statusText) {
+                            statusDdl.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                
+                // Trigger server-side code to show transaction details
+                if (typeof __doPostBack === 'function') {
+                    __doPostBack('ViewTransactionDetails', transactionId);
+                } else {
+                    console.error("__doPostBack function not found. Submitting form manually.");
+                    // Create a form and submit it manually as a fallback
+                    var form = document.forms[0];
+                    var eventTargetInput = document.createElement("input");
+                    eventTargetInput.type = "hidden";
+                    eventTargetInput.name = "__EVENTTARGET";
+                    eventTargetInput.value = "ViewTransactionDetails";
+                    form.appendChild(eventTargetInput);
+                    
+                    var eventArgumentInput = document.createElement("input");
+                    eventArgumentInput.type = "hidden";
+                    eventArgumentInput.name = "__EVENTARGUMENT";
+                    eventArgumentInput.value = transactionId;
+                    form.appendChild(eventArgumentInput);
+                    
+                    form.submit();
+                }
+            } catch (ex) {
+                console.error("Error in ViewTransactionDetails:", ex);
+                alert("An error occurred while viewing transaction details. Please try again.");
+            }
         }
         
         function showAlert(message, type) {
-            const alertMessage = document.getElementById("alertMessage");
-            
-            alertMessage.className = "alert-message";
-            alertMessage.classList.add("alert-" + type);
-            alertMessage.innerHTML = message;
-            alertMessage.style.display = "block";
+            try {
+                // Try to use the master page's showAlert function
+                if (typeof window.masterShowAlert === 'function') {
+                    window.masterShowAlert(message, type);
+                    return;
+                }
+                
+                // Fallback to local implementation
+                const alertMessage = document.getElementById("alertMessage");
+                
+                if (!alertMessage) {
+                    console.error("Alert message element not found");
+                    return;
+                }
+                
+                alertMessage.className = "alert-message";
+                alertMessage.classList.add("alert-" + type);
+                alertMessage.innerHTML = message;
+                alertMessage.style.display = "block";
+                
+                // Auto-hide after 5 seconds
+                setTimeout(function() {
+                    alertMessage.style.display = "none";
+                }, 5000);
+            } catch (e) {
+                console.error("Error showing alert:", e);
+            }
         }
-
-        ListenTable();
-        ListenToButtons();
     </script>
-</body>
-</html>
+</asp:Content>

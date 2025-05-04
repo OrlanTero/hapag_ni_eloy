@@ -44,7 +44,7 @@ Partial Class Pages_Admin_AdminTemplate
     End Sub
 
     ' Helper method to show alert messages
-    Protected Sub ShowAlert(ByVal message As String, Optional ByVal isSuccess As Boolean = True)
+    Public Sub ShowAlert(ByVal message As String, Optional ByVal isSuccess As Boolean = True)
         alertMessage.Visible = True
         
         If isSuccess Then
@@ -57,14 +57,14 @@ Partial Class Pages_Admin_AdminTemplate
     End Sub
     
     ' Helper method to show warning messages
-    Protected Sub ShowWarning(ByVal message As String)
+    Public Sub ShowWarning(ByVal message As String)
         alertMessage.Visible = True
         alertMessage.Attributes("class") = "alert-message alert-warning"
         AlertLiteral.Text = message
     End Sub
     
     ' Helper method to show info messages
-    Protected Sub ShowInfo(ByVal message As String)
+    Public Sub ShowInfo(ByVal message As String)
         alertMessage.Visible = True
         alertMessage.Attributes("class") = "alert-message alert-info"
         AlertLiteral.Text = message

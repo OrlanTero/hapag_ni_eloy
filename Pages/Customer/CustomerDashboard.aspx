@@ -211,6 +211,166 @@
             line-height: 1.6;
         }
         
+        /* Current Promotions Section Styles */
+        .promotions-section {
+            padding: 80px 0 60px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            position: relative;
+            margin-top: 120px;
+        }
+        
+        .promotions-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .promo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .promo-card {
+            border: 1px solid #eee;
+            border-radius: 15px;
+            overflow: hidden;
+            background-color: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .promo-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        }
+        
+        .promo-image {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .promo-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .promo-card:hover .promo-image img {
+            transform: scale(1.1);
+        }
+        
+        .promo-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #FFC107;
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        
+        .promo-details {
+            padding: 20px;
+        }
+        
+        .promo-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .promo-description {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+            height: 65px;
+            overflow: hidden;
+        }
+        
+        .promo-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FF5722;
+            margin-bottom: 15px;
+        }
+        
+        .promo-dates {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .view-more-btn {
+            display: block;
+            margin: 50px auto 0;
+            width: 220px;
+            padding: 14px 30px;
+            border-radius: 30px;
+            background-color: #FFC107;
+            color: #333;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+        
+        .view-more-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background-color: #FF9800;
+            transition: width 0.3s ease;
+            z-index: -1;
+            border-radius: 30px;
+        }
+        
+        .view-more-btn:hover {
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4);
+        }
+        
+        .view-more-btn:hover::before {
+            width: 100%;
+        }
+        
+        .no-promos {
+            text-align: center;
+            padding: 40px 0;
+            color: #666;
+        }
+        
+        .no-promos i {
+            font-size: 50px;
+            color: #ddd;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .promo-card:nth-child(1) { animation-delay: 0.1s; }
+        .promo-card:nth-child(2) { animation-delay: 0.2s; }
+        .promo-card:nth-child(3) { animation-delay: 0.3s; }
+        .promo-card:nth-child(4) { animation-delay: 0.4s; }
+        
         /* Special Offers Section Styles */
         .special-offers-section {
             padding: 120px 0 90px;
@@ -666,6 +826,47 @@
             <p>We pride ourselves on providing excellent customer service and high-quality food.</p>
                             </div>
                         </div>
+    
+    <!-- Current Promotions Section -->
+    <div class="promotions-section">
+        <div class="promotions-container">
+            <h2 class="section-title">Current Promotions</h2>
+            <p class="subtitle">Check out our latest promotions and special offers to enjoy great discounts on your orders.</p>
+            
+            <asp:PlaceHolder ID="PromotionsContainer" runat="server">
+                <div class="promo-grid">
+                    <asp:Repeater ID="PromotionsRepeater" runat="server">
+                        <ItemTemplate>
+                            <div class="promo-card">
+                                <div class="promo-image">
+                                    <img src='<%# GetImageUrl(Eval("image")) %>' alt='<%# Eval("name") %>' />
+                                    <div class="promo-badge">PROMO</div>
+                                </div>
+                                <div class="promo-details">
+                                    <div class="promo-title"><%# Eval("name") %></div>
+                                    <div class="promo-description"><%# Eval("description") %></div>
+                                    <div class="promo-value">
+                                        <%# GetValueDisplay(Eval("value"), Eval("value_type")) %>
+                                    </div>
+                                    <div class="promo-dates">
+                                        Valid until <%# FormatDate(Eval("valid_until")) %>
+                                    </div>
+                                </div>
+                            </div>
+                        </ItemTemplate>
+                    </asp:Repeater>
+                </div>
+                <a href="CustomerSpecialOffers.aspx" class="view-more-btn">View All Promotions <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></a>
+            </asp:PlaceHolder>
+            
+            <asp:PlaceHolder ID="NoPromotionsContainer" runat="server" Visible="false">
+                <div class="no-promos">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>No active promotions found at the moment. Please check back later!</p>
+                </div>
+            </asp:PlaceHolder>
+        </div>
+    </div>
     
     <div class="special-offers-section">
         <div class="special-offers-container">

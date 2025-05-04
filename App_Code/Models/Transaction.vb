@@ -16,6 +16,15 @@ Public Class Transaction
     Public Property sender_name As String
     Public Property sender_number As String
     Public Property transaction_date As DateTime
+    Public Property delivery_fee As Decimal
+    Public Property discount_id As Integer?
+    Public Property promotion_id As Integer?
+    Public Property deal_id As Integer?
+    Public Property app_name As String
+    Public Property tracking_url As String
+    Public Property estimated_time As String
+    Public Property driver_name As String
+    Public Property verification_date As DateTime?
     
     ' Navigation properties
     Public Property User As User

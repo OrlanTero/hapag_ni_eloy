@@ -320,18 +320,34 @@ Partial Class Pages_Admin_AdminMenu
     End Function
 
     Private Sub ShowAlert(ByVal message As String)
-        alertMessage.Visible = True
-        
-        If message.Contains("Successfully") Then
-            alertMessage.Attributes("class") = "alert-message alert-success"
-        ElseIf message.Contains("Error") Or message.Contains("Failed") Then
-            alertMessage.Attributes("class") = "alert-message alert-danger"
-        ElseIf message.Contains("Note") Then
-            alertMessage.Attributes("class") = "alert-message alert-warning"
-        Else
-            alertMessage.Attributes("class") = "alert-message alert-info"
-        End If
-        
-        AlertLiteral.Text = message
+        Try
+            ' Use the master page's alert methods
+            Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+            
+            If message.Contains("Successfully") Then
+                masterPage.ShowAlert(message, True)
+            ElseIf message.Contains("Error") Or message.Contains("Failed") Then
+                masterPage.ShowAlert(message, False)
+            ElseIf message.Contains("Note") Or message.Contains("Please") Then
+                masterPage.ShowWarning(message)
+            Else
+                masterPage.ShowInfo(message)
+            End If
+        Catch ex As Exception
+            ' Fallback to original method if master page method fails
+            alertMessage.Visible = True
+            
+            If message.Contains("Successfully") Then
+                alertMessage.Attributes("class") = "alert-message alert-success"
+            ElseIf message.Contains("Error") Or message.Contains("Failed") Then
+                alertMessage.Attributes("class") = "alert-message alert-danger"
+            ElseIf message.Contains("Note") Then
+                alertMessage.Attributes("class") = "alert-message alert-warning"
+            Else
+                alertMessage.Attributes("class") = "alert-message alert-info"
+            End If
+            
+            AlertLiteral.Text = message
+        End Try
     End Sub
 End Class

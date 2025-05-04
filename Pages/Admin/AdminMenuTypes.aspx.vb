@@ -131,7 +131,23 @@ Partial Class Pages_Admin_AdminMenuTypes
     End Sub
 
     Private Sub ShowAlert(ByVal message As String)
-        Dim script As String = "alert('" & message & "');"
-        ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+        Try
+            ' Use the master page's alert methods
+            Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+            
+            If message.Contains("Successfully") Then
+                masterPage.ShowAlert(message, True)
+            ElseIf message.Contains("Error") Or message.Contains("Failed") Then
+                masterPage.ShowAlert(message, False)
+            ElseIf message.Contains("Note") Or message.Contains("Please") Or message.Contains("Cannot") Then
+                masterPage.ShowWarning(message)
+            Else
+                masterPage.ShowInfo(message)
+            End If
+        Catch ex As Exception
+            ' Fallback to using a JavaScript alert
+            Dim script As String = "alert('" & message & "');"
+            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+        End Try
     End Sub
 End Class 

@@ -1,13 +1,7 @@
-﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdminDashboard.aspx.vb" Inherits="Pages_Admin_AdminDashboard" %>
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdminDashboard.aspx.vb" Inherits="Pages_Admin_AdminDashboard" MasterPageFile="~/Pages/Admin/AdminTemplate.master" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <title>Admin Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="./../../StyleSheets/Layout.css" rel="stylesheet" type="text/css" />
-    <link href="./../../StyleSheets/Admin.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style type="text/css">
         .dashboard-container {
@@ -275,175 +269,10 @@
                 width: 100%;
             }
         }
-        
-        .user-profile {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-            background-color: rgba(0, 0, 0, 0.2);
-            position: relative;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            gap: 12px;
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background-color: #619F2B;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            color: white;
-            text-transform: uppercase;
-            font-weight: 500;
-            flex-shrink: 0;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .user-details {
-            flex: 1;
-            min-width: 0; /* For text truncation to work */
-        }
-        
-        .user-name {
-            color: #FFFFFF;
-            font-weight: 500;
-            font-size: 15px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            margin-bottom: 2px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-        }
-        
-        .user-role {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-        }
-        
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 12px;
-            background-color: rgba(209, 41, 41, 0.1);
-            border: 1px solid rgba(209, 41, 41, 0.2);
-            border-radius: 6px;
-            color: #FFFFFF;
-            font-size: 13px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-top: 10px;
-        }
-        
-        .logout-btn:hover {
-            background-color: rgba(209, 41, 41, 0.2);
-            border-color: rgba(209, 41, 41, 0.3);
-        }
-        
-        .logout-btn i {
-            margin-right: 8px;
-            font-size: 14px;
-        }
     </style>
-</head>
-<body>
-    <form id="Form1" runat="server">
-        <div class="page-container">
-            <!-- Admin Sidebar -->
-            <div class="admin-sidebar">
-                <!-- User Profile Section - Moved to top -->
-                <div class="user-profile">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <asp:Literal ID="UserInitialsLiteral" runat="server"></asp:Literal>
-                        </div>
-                        <div class="user-details">
-                            <div class="user-name">
-                                <asp:Literal ID="UserDisplayNameLiteral" runat="server"></asp:Literal>
-                            </div>
-                            <div class="user-role">Administrator</div>
-                        </div>
-                    </div>
-                    <asp:LinkButton ID="LogoutButton" runat="server" CssClass="logout-btn" OnClick="LogoutButton_Click">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </asp:LinkButton>
-                </div>
+</asp:Content>
 
-                <div class="logo">
-                    <img src="../../Assets/Images/logo-removebg-preview.png" alt="Logo" />
-                </div>
-
-                <div class="nav-links">
-                    <a href="AdminDashboard.aspx" class="active">
-                        <img src="../../Assets/Images/icons/dashboard icon black.png" class="black" />
-                        <img src="../../Assets/Images/icons/dasboard icon white.png" class="white" />
-                        <span>Dashboard</span>
-                    </a>
-
-                    <a href="AdminMenu.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Menu</span>
-                    </a> 
-
-                    <a href="AdminMenuCategories.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Categories</span>
-                    </a>
-
-                    <a href="AdminMenuTypes.aspx">
-                        <img src="../../Assets/Images/icons/menu-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/menu-white.png" class="white" />
-                        <span>Types</span>
-                    </a>
-
-                    <a href="AdminOrders.aspx">
-                        <img src="../../Assets/Images/icons/order-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/order-white.png" class="white" />
-                        <span>Orders</span>
-                    </a>
-
-                    <a href="AdminAccounts.aspx">
-                        <img src="../../Assets/Images/icons/account-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/account-white.png" class="white" />
-                        <span>Accounts</span>
-                    </a>
-
-                    <div class="dropdown-container">
-                        <a href="javascript:void(0);" class="dropdown-toggle">
-                            <img src="../../Assets/Images/icons/administrator-black.png" class="black" />
-                            <img src="../../Assets/Images/icons/administrator-white.png" class="white" />
-                            <span>Administrator</span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="AdminDeals.aspx">Deals</a>
-                            <a href="AdminPromotions.aspx">Promotions</a>
-                            <a href="AdminDiscounts.aspx">Discounts</a>
-                        </div>
-                    </div>
-
-                    <a href="Admin Transaction.aspx">
-                        <img src="../../Assets/Images/icons/transaction-black.png" class="black" />
-                        <img src="../../Assets/Images/icons/transaction-white.png" class="white" />
-                        <span>Transactions</span>
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Main Content -->
-            <div class="main-content">
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
                 <!-- Mobile Menu Toggle -->
                 <button class="menu-toggle" id="menuToggle">
                     <i class="fa fa-bars"></i> Menu
@@ -455,11 +284,6 @@
                     <div class="content-header">
                         <h1>Dashboard</h1>
                         <p>Welcome to the Food Ordering System Admin Dashboard</p>
-                    </div>
-                    
-                    <!-- Alert Message -->
-                    <div class="alert-message" id="alertMessage" runat="server" visible="false">
-                        <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
                     </div>
                     
                     <!-- Dashboard Content -->
@@ -599,9 +423,6 @@
                 <div class="footer">
                     <p>&copy; <%= DateTime.Now.Year %> Food Ordering System. All rights reserved.</p>
                 </div>
-            </div>
-        </div>
-    </form>
 
     <script type="text/javascript">
         // Mobile menu toggle
@@ -618,38 +439,19 @@
             }
         });
         
-        // Dropdown toggle
+        // Charts data
+        var salesChartData = {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            data: [5000, 7500, 6200, 8900, 9100, 12500]
+        };
+        
+        var categoryChartData = {
+            labels: ['Main Dish', 'Appetizers', 'Desserts', 'Beverages', 'Specials'],
+            data: [45, 15, 20, 10, 10]
+        };
+        
+        // Initialize Charts
         document.addEventListener('DOMContentLoaded', function() {
-            var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-            
-            dropdownToggles.forEach(function(toggle) {
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    this.parentElement.classList.toggle('active');
-                });
-            });
-            
-            // Set active class based on current page
-            var currentPage = window.location.pathname.split('/').pop();
-            var navLinks = document.querySelectorAll('.nav-links a');
-            var dropdownLinks = document.querySelectorAll('.dropdown-menu a');
-            
-            navLinks.forEach(function(link) {
-                var href = link.getAttribute('href');
-                if (href === currentPage) {
-                    link.classList.add('active');
-                }
-            });
-            
-            dropdownLinks.forEach(function(link) {
-                var href = link.getAttribute('href');
-                if (href === currentPage) {
-                    link.classList.add('active');
-                    link.parentElement.parentElement.classList.add('active');
-                }
-            });
-            
-            // Initialize Charts
             // Sales Chart
             var salesCtx = document.getElementById('salesChart').getContext('2d');
             var salesChart = new Chart(salesCtx, {
@@ -711,5 +513,4 @@
             });
         });
     </script>
-</body>
-</html>
+</asp:Content>

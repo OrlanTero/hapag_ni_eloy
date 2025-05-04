@@ -33,8 +33,18 @@ Partial Class Pages_Admin_AdminPromotions
                 Return
             End If
 
+            ' Parse min_purchase
+            Dim minPurchase As Double = 0
+            If Not String.IsNullOrEmpty(MinPurchaseTxt.Text) Then
+                If Not Double.TryParse(MinPurchaseTxt.Text, minPurchase) Then
+                    showAlert("Please enter a valid minimum purchase amount!", "warning")
+                    Return
+                End If
+            End If
+
             ' Create a new Promotion object
             Dim newPromotion As New Promotion()
+            newPromotion.code = CodeTxt.Text.Trim()
             newPromotion.name = NameTxt.Text.Trim()
             newPromotion.value = value
             newPromotion.value_type = Convert.ToInt32(DiscountTypeDdl.SelectedValue)
@@ -42,6 +52,8 @@ Partial Class Pages_Admin_AdminPromotions
             newPromotion.valid_until = endDate
             newPromotion.description = DescriptionTxt.Text.Trim()
             newPromotion.image = ""
+            newPromotion.min_purchase = minPurchase
+            newPromotion.is_active = (StatusDdl.SelectedValue = "1")
 
             ' Use PromotionController to create the promotion
             If promotionController.CreatePromotion(newPromotion) Then
@@ -90,9 +102,19 @@ Partial Class Pages_Admin_AdminPromotions
                 Return
             End If
 
+            ' Parse min_purchase
+            Dim minPurchase As Double = 0
+            If Not String.IsNullOrEmpty(MinPurchaseTxt.Text) Then
+                If Not Double.TryParse(MinPurchaseTxt.Text, minPurchase) Then
+                    showAlert("Please enter a valid minimum purchase amount!", "warning")
+                    Return
+                End If
+            End If
+
             ' Create a Promotion object for the update
             Dim promotion As New Promotion()
             promotion.promotion_id = Convert.ToInt32(PromotionIdTxt.Text)
+            promotion.code = CodeTxt.Text.Trim()
             promotion.name = NameTxt.Text.Trim()
             promotion.value = value
             promotion.value_type = Convert.ToInt32(DiscountTypeDdl.SelectedValue)
@@ -100,6 +122,8 @@ Partial Class Pages_Admin_AdminPromotions
             promotion.valid_until = endDate
             promotion.description = DescriptionTxt.Text.Trim()
             promotion.image = ""
+            promotion.min_purchase = minPurchase
+            promotion.is_active = (StatusDdl.SelectedValue = "1")
 
             ' Use PromotionController to update the promotion
             If promotionController.UpdatePromotion(promotion) Then
@@ -154,36 +178,57 @@ Partial Class Pages_Admin_AdminPromotions
 
         Dim headerRow As New TableHeaderRow()
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Name"})
+        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Code"})
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Value"})
-        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Value Type"})
+        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Type"})
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Start Date"})
-        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Valid Until"})
-        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Date Created"})
-        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Description"})
-        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Image"})
+        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "End Date"})
+        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Min Purchase"})
+        headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Status"})
         Table1.Rows.Add(headerRow)
 
         For Each promotion As Promotion In promotions
             Dim tableRow As New TableRow()
 
             tableRow.Cells.Add(New TableCell() With {.Text = promotion.name})
-            tableRow.Cells.Add(New TableCell() With {.Text = promotion.value.ToString()})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(promotion.code, "")})
+            tableRow.Cells.Add(New TableCell() With {.Text = promotion.value})
             
             ' Convert value_type to readable text
             Dim valueTypeText As String = "Fixed"
-            If promotion.value_type = 1 Then
+            If promotion.value_type = "1" Then
                 valueTypeText = "Percentage"
             End If
             tableRow.Cells.Add(New TableCell() With {.Text = valueTypeText})
             
-            ' Handle dates properly - they are strings in the model, not DateTime objects
-            tableRow.Cells.Add(New TableCell() With {.Text = promotion.start_date})
-            tableRow.Cells.Add(New TableCell() With {.Text = promotion.valid_until})
-            tableRow.Cells.Add(New TableCell() With {.Text = promotion.date_created})
-            tableRow.Cells.Add(New TableCell() With {.Text = If(promotion.description, "")})
-            tableRow.Cells.Add(New TableCell() With {.Text = If(promotion.image, "")})
+            ' Format dates for better readability
+            Dim startDate As DateTime
+            Dim endDate As DateTime
+            Dim startDateText As String = promotion.start_date
+            Dim endDateText As String = promotion.valid_until
+            
+            If DateTime.TryParse(promotion.start_date, startDate) Then
+                startDateText = startDate.ToString("MM/dd/yyyy")
+            End If
+            
+            If DateTime.TryParse(promotion.valid_until, endDate) Then
+                endDateText = endDate.ToString("MM/dd/yyyy")
+            End If
+            
+            tableRow.Cells.Add(New TableCell() With {.Text = startDateText})
+            tableRow.Cells.Add(New TableCell() With {.Text = endDateText})
+            tableRow.Cells.Add(New TableCell() With {.Text = promotion.min_purchase})
+            
+            ' Status based on is_active
+            Dim statusText As String = "Inactive"
+            If promotion.is_active Then
+                statusText = "Active"
+            End If
+            tableRow.Cells.Add(New TableCell() With {.Text = statusText})
 
+            ' Add description as a data attribute for JavaScript to use
             tableRow.Attributes.Add("data-promotion_id", promotion.promotion_id.ToString())
+            tableRow.Attributes.Add("data-description", If(promotion.description, ""))
             Table1.Rows.Add(tableRow)
         Next
     End Sub
@@ -196,11 +241,46 @@ Partial Class Pages_Admin_AdminPromotions
         DiscountAmountTxt.Text = ""
         StartDateTxt.Text = ""
         EndDateTxt.Text = ""
+        MinPurchaseTxt.Text = ""
+        StatusDdl.SelectedIndex = 0
         DescriptionTxt.Text = ""
     End Sub
 
     Private Sub showAlert(message As String, type As String)
-        Dim script As String = "showAlert('" & message & "', '" & type & "');"
-        ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+        Try
+            ' Use the master page's alert methods
+            Dim masterPage As Pages_Admin_AdminTemplate = DirectCast(Me.Master, Pages_Admin_AdminTemplate)
+            
+            Select Case type
+                Case "success"
+                    masterPage.ShowAlert(message, True)
+                Case "error", "danger"
+                    masterPage.ShowAlert(message, False)
+                Case "warning"
+                    masterPage.ShowWarning(message)
+                Case "info"
+                    masterPage.ShowInfo(message)
+                Case Else
+                    masterPage.ShowInfo(message)
+            End Select
+        Catch ex As Exception
+            ' Fallback to original method if master page method fails
+            alertMessage.Visible = True
+            
+            Select Case type
+                Case "success"
+                    alertMessage.Attributes("class") = "alert-message alert-success"
+                Case "error", "danger"
+                    alertMessage.Attributes("class") = "alert-message alert-danger"
+                Case "warning"
+                    alertMessage.Attributes("class") = "alert-message alert-warning"
+                Case "info"
+                    alertMessage.Attributes("class") = "alert-message alert-info"
+                Case Else
+                    alertMessage.Attributes("class") = "alert-message alert-info"
+            End Select
+            
+            AlertLiteral.Text = message
+        End Try
     End Sub
 End Class
