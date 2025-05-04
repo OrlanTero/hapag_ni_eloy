@@ -15,4 +15,16 @@ Public Class CustomerAddress
     
     ' Navigation properties
     Public Property User As User
+    
+    ' Helper property to handle Boolean conversion
+    Public ReadOnly Property IsDefaultBoolean As Boolean
+        Get
+            Return is_default > 0
+        End Get
+    End Property
+    
+    ' Helper method to set is_default properly
+    Public Sub SetDefault(value As Boolean)
+        is_default = If(value, 1, 0)
+    End Sub
 End Class 

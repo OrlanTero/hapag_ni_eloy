@@ -125,6 +125,14 @@ Public Class TransactionController
         Return conn.Query(query)
     End Function
     
+    Public Function DeleteTransaction(ByVal transactionId As Integer) As Boolean
+        Dim query As String = "DELETE FROM transactions WHERE transaction_id = @transaction_id"
+        
+        conn.AddParam("@transaction_id", transactionId)
+        
+        Return conn.Query(query)
+    End Function
+    
     Private Function MapDataRowToTransaction(ByVal row As DataRow) As Transaction
         Dim transaction As New Transaction()
         

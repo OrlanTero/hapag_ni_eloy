@@ -941,10 +941,10 @@ Partial Class Pages_Customer_CustomerCart
             Connect = New Connection()
             Dim createTransactionQuery As String = "INSERT INTO transactions (user_id, payment_method, subtotal, " & _
                                                 "discount, delivery_fee, total_amount, status, transaction_date, " & _
-                                                "discount_id, promotion_id, deal_id) " & _
+                                                "discount_id, promotion_id, deal_id, reference_number, sender_name, sender_number) " & _
                                                 "VALUES (@user_id, @payment_method, @subtotal, @discount, " & _
                                                 "@delivery_fee, @total_amount, 'Pending', GETDATE(), " & _
-                                                "@discount_id, @promotion_id, @deal_id); " & _
+                                                "@discount_id, @promotion_id, @deal_id, @reference_number, @sender_name, @sender_number); " & _
                                                 "SELECT SCOPE_IDENTITY();"
             
             Connect.AddParam("@user_id", CInt(currentUser.user_id))
@@ -953,110 +953,213 @@ Partial Class Pages_Customer_CustomerCart
             Connect.AddParam("@discount", discountAmount + promotionAmount + dealAmount) ' Total discount amount
             Connect.AddParam("@delivery_fee", deliveryFee)
             Connect.AddParam("@total_amount", totalAmount)
-            Connect.AddParam("@discount_id", If(discountId = 0, DBNull.Value, discountId))
-            Connect.AddParam("@promotion_id", If(promotionId = 0, DBNull.Value, promotionId))
-            Connect.AddParam("@deal_id", If(dealId = 0, DBNull.Value, dealId))
-            
-            Dim success As Boolean = Connect.Query(createTransactionQuery)
-            
-            If Not success OrElse Connect.DataCount = 0 Then
-                System.Diagnostics.Debug.WriteLine("Error: Failed to create transaction")
-                Return "Error: Failed to create transaction"
+            Connect.AddParamNullable("@discount_id", If(discountId > 0, discountId, DBNull.Value), Nothing)
+            Connect.AddParamNullable("@promotion_id", If(promotionId > 0, promotionId, DBNull.Value), Nothing)
+            Connect.AddParamNullable("@deal_id", If(dealId > 0, dealId, DBNull.Value), Nothing)
+
+            ' Add GCash payment details if available
+            If paymentMethod = "gcash" AndAlso paymentData.ContainsKey("referenceNumber") Then
+                Connect.AddParamWithNull("@reference_number", paymentData("referenceNumber").ToString())
+                Connect.AddParamWithNull("@sender_name", paymentData("senderName").ToString())
+                Connect.AddParamWithNull("@sender_number", paymentData("senderNumber").ToString())
+            Else
+                Connect.AddParamWithNull("@reference_number", Nothing)
+                Connect.AddParamWithNull("@sender_name", Nothing)
+                Connect.AddParamWithNull("@sender_number", Nothing)
             End If
 
-            Dim transactionId As Integer = Convert.ToInt32(Connect.Data.Tables(0).Rows(0)(0))
+            ' Execute the transaction creation query
+            Dim success As Boolean = Connect.Query(createTransactionQuery)
+
+            ' Debug information to diagnose the issue
+            System.Diagnostics.Debug.WriteLine("Transaction creation query executed with success flag: " & success)
+            System.Diagnostics.Debug.WriteLine("DataCount: " & Connect.DataCount)
+
+            ' SCOPE_IDENTITY() might not be properly captured through the Query method when it's part of an INSERT
+            ' Modified logic: If the INSERT affects rows, we consider it a success even if DataCount is 0
+            Dim transactionId As Integer = 0
+            Try
+                ' Even if the Data property wasn't populated correctly, the transaction itself might have succeeded
+                ' Try to get the transaction ID if data exists
+                If Connect.Data IsNot Nothing AndAlso Connect.Data.Tables.Count > 0 AndAlso Connect.Data.Tables(0).Rows.Count > 0 Then
+                    transactionId = Convert.ToInt32(Connect.Data.Tables(0).Rows(0)(0))
+                    System.Diagnostics.Debug.WriteLine("Transaction ID from SCOPE_IDENTITY(): " & transactionId)
+                End If
+                
+                ' If we couldn't get the ID directly, query for the most recent transaction
+                If transactionId = 0 Then
+                    System.Diagnostics.Debug.WriteLine("No transaction ID from SCOPE_IDENTITY(), trying to fetch most recent transaction")
+                    Connect = New Connection()
+                    Dim getLastTransactionQuery As String = "SELECT TOP 1 transaction_id FROM transactions " & _
+                                                           "WHERE user_id = @user_id " & _
+                                                           "ORDER BY transaction_date DESC"
+                    Connect.AddParam("@user_id", CInt(currentUser.user_id))
+                    
+                    Dim querySuccess As Boolean = Connect.Query(getLastTransactionQuery)
+                    If querySuccess AndAlso Connect.DataCount > 0 Then
+                        transactionId = Convert.ToInt32(Connect.Data.Tables(0).Rows(0)(0))
+                        System.Diagnostics.Debug.WriteLine("Retrieved most recent transaction ID: " & transactionId)
+                    Else
+                        System.Diagnostics.Debug.WriteLine("Failed to retrieve most recent transaction")
+                        Return "Error: Failed to create transaction - Unable to retrieve transaction ID"
+                    End If
+                End If
+            Catch ex As Exception
+                System.Diagnostics.Debug.WriteLine("Error getting transaction ID: " & ex.Message)
+                Return "Error: Failed to retrieve transaction ID: " & ex.Message
+            End Try
 
             ' Create order record
             Connect = New Connection()
-            Dim createOrderQuery As String = "INSERT INTO orders (user_id, order_date, status, subtotal, discount, " & _
-                                           "promotion_amount, deal_amount, delivery_fee, total_amount, transaction_id, " & _
-                                           "delivery_type, discount_id, promotion_id, deal_id"
-            
+            Dim createOrderQuery As String = "INSERT INTO orders (user_id, order_date, transaction_id, " & _
+                                           "subtotal, total_amount, status, delivery_notes"
+
             If Not String.IsNullOrEmpty(scheduledTime) Then
-                createOrderQuery &= ", scheduled_time"
+                createOrderQuery &= ", delivery_service" ' Use delivery_service for the scheduled time
             End If
-            
-            createOrderQuery &= ") VALUES (@user_id, GETDATE(), 'pending', @subtotal, @discount, " & _
-                              "@promotion_amount, @deal_amount, @delivery_fee, @total_amount, @transaction_id, " & _
-                              "@delivery_type, @discount_id, @promotion_id, @deal_id"
-            
+
+            createOrderQuery &= ") VALUES (@user_id, GETDATE(), @transaction_id, " & _
+                              "@subtotal, @total_amount, 'pending', @delivery_notes"
+
             If Not String.IsNullOrEmpty(scheduledTime) Then
                 createOrderQuery &= ", @scheduled_time"
             End If
-            
+
             createOrderQuery &= ")"
-            
+
+            ' Debug the SQL query 
+            System.Diagnostics.Debug.WriteLine("Creating order with query: " & createOrderQuery)
+
+            ' Add parameters with appropriate data types
             Connect.AddParam("@user_id", CInt(currentUser.user_id))
-            Connect.AddParam("@subtotal", subtotalAmount)
-            Connect.AddParam("@discount", discountAmount)
-            Connect.AddParam("@promotion_amount", promotionAmount)
-            Connect.AddParam("@deal_amount", dealAmount)
-            Connect.AddParam("@delivery_fee", deliveryFee)
-            Connect.AddParam("@total_amount", totalAmount)
+            Connect.AddParam("@subtotal", subtotalAmount.ToString()) ' Convert to string as the field is VARCHAR
+            Connect.AddParam("@total_amount", totalAmount) ' This is decimal(10,2) in the database
             Connect.AddParam("@transaction_id", transactionId)
-            Connect.AddParam("@delivery_type", deliveryType)
-            Connect.AddParam("@discount_id", If(discountId = 0, DBNull.Value, discountId))
-            Connect.AddParam("@promotion_id", If(promotionId = 0, DBNull.Value, promotionId))
-            Connect.AddParam("@deal_id", If(dealId = 0, DBNull.Value, dealId))
-            
+            Connect.AddParam("@delivery_notes", "Delivery Type: " & deliveryType & ". " & _
+                                       "Discount: " & discountAmount.ToString() & ". " & _
+                                       "Promotion: " & promotionAmount.ToString() & ". " & _
+                                       "Deal: " & dealAmount.ToString())
+
             If Not String.IsNullOrEmpty(scheduledTime) Then
-                Connect.AddParam("@scheduled_time", scheduledTime)
+                Connect.AddParam("@scheduled_time", "Scheduled for: " & scheduledTime)
             End If
-            
+
+            ' Execute the query with detailed logging
+            System.Diagnostics.Debug.WriteLine("Executing order creation query with " & Connect.Parameters.Count & " parameters")
             Dim orderCreated As Boolean = Connect.Query(createOrderQuery)
+            System.Diagnostics.Debug.WriteLine("Order creation query success: " & orderCreated)
+
             If Not orderCreated Then
-                System.Diagnostics.Debug.WriteLine("Error: Failed to create order")
-                Return "Error: Failed to create order"
+                System.Diagnostics.Debug.WriteLine("Error: Failed to create order. Query failed.")
+                ' Try to log more information about the failure if possible
+                Return "Error: Failed to create order. Database operation failed."
             End If
             
             ' Get the order ID
             Connect = New Connection()
-            Dim getOrderIdQuery As String = "SELECT MAX(order_id) FROM orders WHERE user_id = @user_id"
+            Dim getOrderIdQuery As String = "SELECT order_id FROM orders WHERE user_id = @user_id AND transaction_id = @transaction_id ORDER BY order_date DESC"
             Connect.AddParam("@user_id", CInt(currentUser.user_id))
-            Connect.Query(getOrderIdQuery)
-            
+            Connect.AddParam("@transaction_id", transactionId)
+
+            ' Debug the query
+            System.Diagnostics.Debug.WriteLine("Executing order ID query: " & getOrderIdQuery)
+            System.Diagnostics.Debug.WriteLine("User ID: " & CInt(currentUser.user_id) & ", Transaction ID: " & transactionId)
+
+            Dim orderQuerySuccess As Boolean = Connect.Query(getOrderIdQuery)
+
+            System.Diagnostics.Debug.WriteLine("Order ID query success: " & orderQuerySuccess & ", DataCount: " & Connect.DataCount)
+
             Dim orderId As Integer = 0
-            If Connect.DataCount > 0 AndAlso Connect.Data.Tables(0).Rows.Count > 0 Then
+            If orderQuerySuccess AndAlso Connect.DataCount > 0 AndAlso Connect.Data.Tables(0).Rows.Count > 0 AndAlso Connect.Data.Tables(0).Rows(0)(0) IsNot DBNull.Value Then
                 orderId = Convert.ToInt32(Connect.Data.Tables(0).Rows(0)(0))
                 System.Diagnostics.Debug.WriteLine("Order created with ID: " & orderId)
             Else
-                System.Diagnostics.Debug.WriteLine("Error: Failed to retrieve order ID")
-                Return "Error: Failed to retrieve order ID"
+                ' Try to retrieve the most recent order ID for this user as a fallback
+                Connect = New Connection()
+                Dim fallbackQuery As String = "SELECT TOP 1 order_id FROM orders WHERE user_id = @user_id ORDER BY order_date DESC"
+                Connect.AddParam("@user_id", CInt(currentUser.user_id))
+                Dim fallbackSuccess As Boolean = Connect.Query(fallbackQuery)
+                
+                If fallbackSuccess AndAlso Connect.DataCount > 0 AndAlso Connect.Data.Tables(0).Rows.Count > 0 Then
+                    orderId = Convert.ToInt32(Connect.Data.Tables(0).Rows(0)(0))
+                    System.Diagnostics.Debug.WriteLine("Retrieved order ID using fallback query: " & orderId)
+                Else
+                    System.Diagnostics.Debug.WriteLine("Error: Failed to retrieve order ID using both direct and fallback queries")
+                    Return "Error: Failed to retrieve order ID. Your transaction has been recorded, but please contact support."
+                End If
             End If
 
             ' Move items from cart to order_items
             Connect = New Connection()
             Dim moveItemsQuery As String = "INSERT INTO order_items (order_id, item_id, quantity, price, transaction_id) " & _
-                                         "SELECT @order_id, c.item_id, c.quantity, m.price, @transaction_id " & _
-                                         "FROM cart c JOIN menu m ON c.item_id = m.item_id " & _
-                                         "WHERE c.user_id = @user_id"
+                                          "SELECT @order_id, c.item_id, c.quantity, CONVERT(DECIMAL(10,2), m.price), @transaction_id " & _
+                                          "FROM cart c JOIN menu m ON c.item_id = m.item_id " & _
+                                          "WHERE c.user_id = @user_id"
 
             Connect.AddParam("@order_id", orderId)
             Connect.AddParam("@transaction_id", transactionId)
             Connect.AddParam("@user_id", CInt(currentUser.user_id))
+
+            ' Debug the query
+            System.Diagnostics.Debug.WriteLine("Executing move items query: " & moveItemsQuery)
+            System.Diagnostics.Debug.WriteLine("Order ID: " & orderId & ", Transaction ID: " & transactionId & ", User ID: " & CInt(currentUser.user_id))
+
             success = Connect.Query(moveItemsQuery)
 
+            System.Diagnostics.Debug.WriteLine("Move items query success: " & success)
+
             If Not success Then
-                System.Diagnostics.Debug.WriteLine("Error: Failed to process order items")
-                Return "Error: Failed to process order items"
+                System.Diagnostics.Debug.WriteLine("Error: Failed to process order items. The order was created but the items weren't added.")
+                
+                ' Check if there are items in the cart
+                Connect = New Connection()
+                Dim checkCartQuery As String = "SELECT COUNT(*) FROM cart WHERE user_id = @user_id"
+                Connect.AddParam("@user_id", CInt(currentUser.user_id))
+                Connect.Query(checkCartQuery)
+                
+                Dim itemCount As Integer = 0
+                If Connect.DataCount > 0 Then
+                    itemCount = Convert.ToInt32(Connect.Data.Tables(0).Rows(0)(0))
+                End If
+                
+                System.Diagnostics.Debug.WriteLine("Cart item count: " & itemCount)
+                
+                Return "Error: Failed to process order items. Your order has been recorded (ID: " & orderId & "), but please contact support for details."
             End If
 
             ' Clear the cart
-            Connect = New Connection()
-            Dim clearCartQuery As String = "DELETE FROM cart WHERE user_id = @user_id"
-            Connect.AddParam("@user_id", CInt(currentUser.user_id))
-            Connect.Query(clearCartQuery)
-            
-            ' Clear any applied discount, promotion, and deal
-            HttpContext.Current.Session("SelectedDiscountId") = Nothing
-            HttpContext.Current.Session("SelectedPromotionId") = Nothing
-            HttpContext.Current.Session("SelectedDealId") = Nothing
-            HttpContext.Current.Session("SelectedDiscount") = Nothing
-            HttpContext.Current.Session("SelectedPromotion") = Nothing
-            HttpContext.Current.Session("SelectedDeal") = Nothing
+            Try
+                Connect = New Connection()
+                Dim clearCartQuery As String = "DELETE FROM cart WHERE user_id = @user_id"
+                Connect.AddParam("@user_id", CInt(currentUser.user_id))
+                Dim clearCartSuccess = Connect.Query(clearCartQuery)
+                
+                If Not clearCartSuccess Then
+                    System.Diagnostics.Debug.WriteLine("Warning: Failed to clear cart, but order was created successfully")
+                    ' Continue despite cart clearing failure - order was already created
+                End If
+                
+                ' Clear any applied discount, promotion, and deal
+                Try
+                    HttpContext.Current.Session("SelectedDiscountId") = Nothing
+                    HttpContext.Current.Session("SelectedPromotionId") = Nothing
+                    HttpContext.Current.Session("SelectedDealId") = Nothing
+                    HttpContext.Current.Session("SelectedDiscount") = Nothing
+                    HttpContext.Current.Session("SelectedPromotion") = Nothing
+                    HttpContext.Current.Session("SelectedDeal") = Nothing
+                Catch ex As Exception
+                    ' Log but continue - session clearing failure shouldn't prevent order confirmation
+                    System.Diagnostics.Debug.WriteLine("Warning: Error clearing session values - " & ex.Message)
+                End Try
 
-            System.Diagnostics.Debug.WriteLine("Payment processed successfully for order: " & orderId)
-            Return "Success: Payment processed successfully! Order ID: " & orderId & " Redirecting to orders page..."
+                ' Order has been successfully created and processed
+                System.Diagnostics.Debug.WriteLine("Payment processed successfully for order: " & orderId)
+                Return "Success: Payment processed successfully! Order ID: " & orderId & " Redirecting to orders page..."
+            Catch ex As Exception
+                System.Diagnostics.Debug.WriteLine("Warning: Error clearing cart - " & ex.Message)
+                ' Continue despite cart clearing failure - order was already created
+                Return "Success: Payment processed successfully! Order ID: " & orderId & " Redirecting to orders page..."
+            End Try
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error in ProcessPayment: " & ex.Message)
             Return "Error: " & ex.Message
@@ -1066,13 +1169,13 @@ Partial Class Pages_Customer_CustomerCart
     Private Sub LoadCartItems()
         Try
             Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
-            
+
             ' Get cart items with menu details
             Dim query As String = "SELECT c.cart_id, c.quantity, m.* " & _
                                 "FROM cart c " & _
                                 "INNER JOIN menu m ON c.item_id = m.item_id " & _
                                 "WHERE c.user_id = @user_id"
-            
+
             Connect.AddParam("@user_id", currentUser.user_id)
             Connect.Query(query)
 
@@ -1093,12 +1196,12 @@ Partial Class Pages_Customer_CustomerCart
     Protected Function GetCartTotal() As Decimal
         Try
             Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
-            
+
             Dim query As String = "SELECT SUM(m.price * c.quantity) as total " & _
                                 "FROM cart c " & _
                                 "INNER JOIN menu m ON c.item_id = m.item_id " & _
                                 "WHERE c.user_id = @user_id"
-            
+
             Connect.AddParam("@user_id", currentUser.user_id)
             Connect.Query(query)
 
@@ -1115,11 +1218,11 @@ Partial Class Pages_Customer_CustomerCart
     Protected Function GetTotalItems() As Integer
         Try
             Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
-            
+
             Dim query As String = "SELECT SUM(quantity) as total_items " & _
                                 "FROM cart " & _
                                 "WHERE user_id = @user_id"
-            
+
             Connect.AddParam("@user_id", currentUser.user_id)
             Connect.Query(query)
 
@@ -1172,12 +1275,12 @@ Partial Class Pages_Customer_CustomerCart
     Protected Sub ClearCartButton_Click(ByVal sender As Object, ByVal e As EventArgs)
         Try
             Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
-            
+
             ' Clear all items from cart
             Dim deleteQuery As String = "DELETE FROM cart WHERE user_id = @user_id"
             Connect.AddParam("@user_id", currentUser.user_id)
             Connect.Query(deleteQuery)
-            
+
             ' Clear any applied discounts, promotions, and deals
             Session("SelectedDiscountId") = Nothing
             Session("SelectedPromotionId") = Nothing
@@ -1197,10 +1300,10 @@ Partial Class Pages_Customer_CustomerCart
     Protected Sub CancelAddressButton_Click(sender As Object, e As EventArgs)
         ' Hide the new address form
         NewAddressPanel.Visible = False
-        
+
         ' Apply CSS to ensure it's hidden
         NewAddressPanel.Attributes("style") = "display: none;"
-        
+
         ' Update the UI
         LoadCustomerAddresses() ' Reload the addresses
         UpdateOrderSummary()
@@ -1237,127 +1340,146 @@ Partial Class Pages_Customer_CustomerCart
     Protected Sub CheckoutButton_Click(sender As Object, e As EventArgs)
         ' Show delivery options panel
         DeliveryOptionsPanel.Visible = True
-        
+
         ' Make sure new address panel is hidden
         HideNewAddressForm()
-        
+
         ' Load customer's saved addresses
         LoadCustomerAddresses()
-        
+
         ' Update order summary with delivery fee
         UpdateOrderSummary()
     End Sub
 
     Private Sub LoadCustomerAddresses()
         Try
+            ' Get the current user
             Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
             Dim userId As Integer = currentUser.user_id
-            
+
             ' Only hide new address panel if it's not meant to be shown
             If Not NewAddressPanel.Visible Then
                 NewAddressPanel.Attributes("style") = "display: none;"
             Else
-                ' If panel should be visible, make sure any hiding style is removed
                 NewAddressPanel.Attributes.Remove("style")
             End If
-            
-            If userId > 0 Then
-                ' Query to get all customer addresses
-                Dim query As String = "SELECT address_id, address_name, recipient_name, contact_number, " & _
-                                     "address_line, city, postal_code, is_default " & _
-                                     "FROM customer_addresses " & _
-                                     "WHERE user_id = @UserId " & _
-                                     "ORDER BY is_default DESC, date_added DESC"
-                
-                Connect.ClearParams()
-                Connect.AddParam("@UserId", userId)
-                Connect.Query(query)
-                
-                If Connect.DataCount > 0 AndAlso Connect.Data.Tables(0).Rows.Count > 0 Then
-                    ' Clear any existing items
-                    AddressRadioList.Items.Clear()
-                    
-                    ' Add addresses to the radio button list
-                    For Each row As DataRow In Connect.Data.Tables(0).Rows
-                        Dim addressId As Integer = Convert.ToInt32(row("address_id"))
-                        Dim addressName As String = If(IsDBNull(row("address_name")), "", row("address_name").ToString())
-                        Dim recipientName As String = row("recipient_name").ToString()
-                        Dim contactNumber As String = row("contact_number").ToString()
-                        Dim addressLine As String = row("address_line").ToString()
-                        Dim city As String = row("city").ToString()
-                        Dim postalCode As String = If(IsDBNull(row("postal_code")), "", row("postal_code").ToString())
-                        Dim isDefault As Boolean = Convert.ToBoolean(row("is_default"))
-                        
-                        ' Format the address text
-                        Dim addressText As String = String.Format("{0}<br />{1}<br />{2}, {3} {4}", 
-                                                                recipientName, 
-                                                                addressLine, 
-                                                                city, 
-                                                                postalCode,
-                                                                contactNumber)
-                        
-                        ' Add a label for default or address name
-                        If isDefault Then
-                            addressText = "<strong>Default Address</strong><br />" & addressText
-                        ElseIf Not String.IsNullOrEmpty(addressName) Then
-                            addressText = "<strong>" & addressName & "</strong><br />" & addressText
-                        End If
-                        
-                        ' Add to radio button list
-                        Dim item As New ListItem(addressText, addressId.ToString())
-                        item.Selected = isDefault
-                        AddressRadioList.Items.Add(item)
-                    Next
-                    
-                    ' Show addresses and hide no address message
-                    AddressRadioList.Visible = True
-                    NoAddressPanel.Visible = False
-                    
-                    ' Set the selected address to the delivery address hidden field
-                    If AddressRadioList.SelectedItem IsNot Nothing Then
-                        Dim selectedAddressId As Integer = Convert.ToInt32(AddressRadioList.SelectedValue)
-                        DeliveryAddressHidden.Value = selectedAddressId.ToString()
+
+            ' Use CustomerAddressController to get all customer addresses
+            Dim addressController As New CustomerAddressController()
+            Dim addresses = addressController.GetAddressesByUserId(userId)
+
+            ' Clear existing items
+            AddressRadioList.Items.Clear()
+
+            If addresses.Count > 0 Then
+                ' Add addresses to the radio button list
+                For Each address As CustomerAddress In addresses
+                    Dim addressId As Integer = address.address_id
+                    Dim addressName As String = If(String.IsNullOrEmpty(address.address_name), "", address.address_name)
+                    Dim recipientName As String = If(String.IsNullOrEmpty(address.recipient_name), "", address.recipient_name)
+                    Dim contactNumber As String = If(String.IsNullOrEmpty(address.contact_number), "", address.contact_number)
+                    Dim addressLine As String = If(String.IsNullOrEmpty(address.address_line), "", address.address_line)
+                    Dim city As String = If(String.IsNullOrEmpty(address.city), "", address.city)
+                    Dim postalCode As String = If(String.IsNullOrEmpty(address.postal_code), "", address.postal_code)
+                    Dim isDefault As Boolean = address.is_default > 0
+
+                    ' Format the address text
+                    Dim addressText As String = String.Format("{0}<br />{1}<br />{2}, {3} {4}",
+                                              recipientName,
+                                              addressLine,
+                                              city,
+                                              postalCode,
+                                              contactNumber)
+
+                    ' Add a label for default or address name
+                    If isDefault Then
+                        addressText = "<strong>Default Address</strong><br />" & addressText
+                    ElseIf Not String.IsNullOrEmpty(addressName) Then
+                        addressText = "<strong>" & addressName & "</strong><br />" & addressText
                     End If
-                Else
-                    ' No addresses found
-                    AddressRadioList.Visible = False
-                    NoAddressPanel.Visible = True
+
+                    ' Create the list item
+                    Dim item As New ListItem(addressText, addressId.ToString())
+                    item.Selected = isDefault ' Select the default address
+                    AddressRadioList.Items.Add(item)
+
+                    ' Debug log
+                    System.Diagnostics.Debug.WriteLine(String.Format("Added address to list: ID={0}, Default={1}, Name={2}",
+                                                                  addressId, isDefault, addressName))
+                Next
+
+                ' Show addresses and hide no address message
+                AddressRadioList.Visible = True
+                NoAddressPanel.Visible = False
+
+                ' Set the selected address to the delivery address hidden field
+                If AddressRadioList.SelectedItem IsNot Nothing Then
+                    Dim selectedAddressId As Integer = Convert.ToInt32(AddressRadioList.SelectedValue)
+                    DeliveryAddressHidden.Value = selectedAddressId.ToString()
+                    System.Diagnostics.Debug.WriteLine("Selected address ID: " & selectedAddressId)
                 End If
+            Else
+                ' No addresses found
+                AddressRadioList.Visible = False
+                NoAddressPanel.Visible = True
+                System.Diagnostics.Debug.WriteLine("No addresses found for user ID: " & userId)
             End If
         Catch ex As Exception
-            ' Log error and show message to user
+            System.Diagnostics.Debug.WriteLine("Error in LoadCustomerAddresses: " & ex.Message & Environment.NewLine & ex.StackTrace)
             ShowAlert("Error loading addresses: " & ex.Message, False)
         End Try
     End Sub
-    
+
     Protected Sub AddressRadioList_SelectedIndexChanged(sender As Object, e As EventArgs)
-        ' Update the selected address ID
-        If AddressRadioList.SelectedItem IsNot Nothing Then
-            Dim selectedAddressId As Integer = Convert.ToInt32(AddressRadioList.SelectedValue)
-            DeliveryAddressHidden.Value = selectedAddressId.ToString()
-        End If
+        Try
+            ' Update the selected address ID
+            If AddressRadioList.SelectedItem IsNot Nothing Then
+                Dim selectedAddressId As Integer = Convert.ToInt32(AddressRadioList.SelectedValue)
+                DeliveryAddressHidden.Value = selectedAddressId.ToString()
+
+                ' Using CustomerAddressController to get more details about the selected address if needed
+                Dim addressController As New CustomerAddressController()
+                Dim selectedAddress = addressController.GetAddressById(selectedAddressId)
+
+                If selectedAddress IsNot Nothing Then
+                    System.Diagnostics.Debug.WriteLine("Selected address: " & selectedAddress.address_id & ", " & selectedAddress.city)
+
+                    ' You could do something with the address details here if needed
+                    ' For example, update shipping costs based on the city
+
+                    ' For now, we'll just log the selection
+                    System.Diagnostics.Debug.WriteLine("Selected address ID: " & selectedAddressId)
+                End If
+
+                ' Update the order summary
+                UpdateOrderSummary()
+            End If
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error in AddressRadioList_SelectedIndexChanged: " & ex.Message)
+            ' Don't show alert to user for this event to avoid disrupting UX
+        End Try
     End Sub
-    
+
     Protected Sub ShowNewAddressButton_Click(sender As Object, e As EventArgs)
         ' Show delivery options panel and address form
         DeliveryOptionsPanel.Visible = True
         NewAddressPanel.Visible = True
-        
+
         ' Force the form to be visible by removing any inline style
         NewAddressPanel.Attributes.Remove("style")
-        
+
         ' Reload addresses to ensure the form is correctly displayed
         LoadCustomerAddresses()
-        
+
         ' Update the UI
         UpdateOrderSummary()
     End Sub
-    
+
     Protected Sub SaveAddressButton_Click(sender As Object, e As EventArgs)
         Try
             Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
             Dim userId As Integer = currentUser.user_id
-            
+
             ' Get address details from form
             Dim addressName As String = AddressNameTextBox.Text.Trim()
             Dim recipientName As String = RecipientNameTextBox.Text.Trim()
@@ -1366,55 +1488,69 @@ Partial Class Pages_Customer_CustomerCart
             Dim city As String = CityTextBox.Text.Trim()
             Dim postalCode As String = PostalCodeTextBox.Text.Trim()
             Dim isDefault As Boolean = DefaultAddressCheckBox.Checked
-            
+
             ' Validate required fields
-            If String.IsNullOrEmpty(recipientName) OrElse 
-               String.IsNullOrEmpty(contactNumber) OrElse 
-               String.IsNullOrEmpty(addressLine) OrElse 
+            If String.IsNullOrEmpty(recipientName) OrElse
+               String.IsNullOrEmpty(contactNumber) OrElse
+               String.IsNullOrEmpty(addressLine) OrElse
                String.IsNullOrEmpty(city) Then
                 ShowAlert("Please fill in all required fields", False)
                 Return
             End If
-            
-            ' If setting as default, update existing addresses to not be default
-            If isDefault Then
-                Dim updateDefaultQuery As String = "UPDATE customer_addresses SET is_default = 0 WHERE user_id = @UserId"
-                Connect.ClearParams()
-                Connect.AddParam("@UserId", userId)
-                Connect.Query(updateDefaultQuery)
-            End If
-            
-            ' Insert new address
-            Dim insertQuery As String = "INSERT INTO customer_addresses (" & _
-                                       "user_id, address_name, recipient_name, contact_number, " & _
-                                       "address_line, city, postal_code, is_default) " & _
-                                       "VALUES (@UserId, @AddressName, @RecipientName, @ContactNumber, " & _
-                                       "@AddressLine, @City, @PostalCode, @IsDefault)"
-            
-            Connect.ClearParams()
-            Connect.AddParam("@UserId", userId)
-            Connect.AddParam("@AddressName", If(String.IsNullOrEmpty(addressName), DBNull.Value, addressName))
-            Connect.AddParam("@RecipientName", recipientName)
-            Connect.AddParam("@ContactNumber", contactNumber)
-            Connect.AddParam("@AddressLine", addressLine)
-            Connect.AddParam("@City", city)
-            Connect.AddParam("@PostalCode", If(String.IsNullOrEmpty(postalCode), DBNull.Value, postalCode))
-            Connect.AddParam("@IsDefault", If(isDefault, 1, 0)) ' Convert boolean to integer
-            
-            Dim success As Boolean = Connect.Query(insertQuery)
-            
+
+            ' Create a new CustomerAddress object
+            Dim newAddress As New CustomerAddress()
+            newAddress.user_id = userId
+            newAddress.address_name = If(String.IsNullOrEmpty(addressName), Nothing, addressName)
+            newAddress.recipient_name = recipientName
+            newAddress.contact_number = contactNumber
+            newAddress.address_line = addressLine
+            newAddress.city = city
+            newAddress.postal_code = If(String.IsNullOrEmpty(postalCode), Nothing, postalCode)
+            newAddress.is_default = If(isDefault, 1, 0)
+
+            ' Log the address details before saving
+            System.Diagnostics.Debug.WriteLine("Saving address: " & _
+                                             "user_id=" & newAddress.user_id & ", " & _
+                                             "name=" & newAddress.address_name & ", " & _
+                                             "recipient=" & newAddress.recipient_name & ", " & _
+                                             "is_default=" & newAddress.is_default)
+
+            ' Use the CustomerAddressController to save the address
+            Dim addressController As New CustomerAddressController()
+            Dim success As Boolean = addressController.CreateAddress(newAddress)
+
             If success Then
-                ' Get the new address ID
-                Dim getIdQuery As String = "SELECT MAX(address_id) FROM customer_addresses WHERE user_id = @UserId"
-                Connect.ClearParams()
-                Connect.AddParam("@UserId", userId)
-                Connect.Query(getIdQuery)
-                
-                Dim newAddressId As Integer = Convert.ToInt32(Connect.Data.Tables(0).Rows(0)(0))
-                
+                ' Get all addresses for the user to find the new one
+                Dim addresses = addressController.GetAddressesByUserId(userId)
+                Dim newAddressId As Integer = 0
+
+                ' Get the ID of the newly created address (should be the first one if it was set as default)
+                If addresses.Count > 0 Then
+                    If isDefault Then
+                        ' If set as default, it should be the first one
+                        newAddressId = addresses(0).address_id
+                    Else
+                        ' Otherwise, it's likely the most recently added one - we'll take the first one from the list
+                        ' as the controller orders by default first, then date added descending
+                        ' Look for the first non-default address
+                        For Each addr In addresses
+                            If addr.is_default = 0 Then
+                                newAddressId = addr.address_id
+                                Exit For
+                            End If
+                        Next
+
+                        ' If we couldn't find a non-default address, use the first one
+                        If newAddressId = 0 And addresses.Count > 0 Then
+                            newAddressId = addresses(0).address_id
+                        End If
+                    End If
+                End If
+
                 ' Set as selected address
                 DeliveryAddressHidden.Value = newAddressId.ToString()
-                
+
                 ' Clear the form
                 AddressNameTextBox.Text = ""
                 RecipientNameTextBox.Text = ""
@@ -1423,18 +1559,19 @@ Partial Class Pages_Customer_CustomerCart
                 CityTextBox.Text = ""
                 PostalCodeTextBox.Text = ""
                 DefaultAddressCheckBox.Checked = False
-                
+
                 ' Hide the form
                 HideNewAddressForm()
-                
+
                 ' Reload addresses
                 LoadCustomerAddresses()
-                
+
                 ShowAlert("Address saved successfully", True)
             Else
                 ShowAlert("Error saving address", False)
             End If
         Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error in SaveAddressButton_Click: " & ex.Message & Environment.NewLine & ex.StackTrace)
             ShowAlert("Error saving address: " & ex.Message, False)
         End Try
     End Sub
@@ -1448,7 +1585,7 @@ Partial Class Pages_Customer_CustomerCart
             ElseIf AddressRadioList.SelectedItem IsNot Nothing Then
                 selectedAddressId = Convert.ToInt32(AddressRadioList.SelectedValue)
             End If
-            
+
             If selectedAddressId <= 0 Then
                 ShowAlert("Please select a delivery address", False)
                 Return
@@ -1473,13 +1610,18 @@ Partial Class Pages_Customer_CustomerCart
 
             ' Get payment method
             Dim paymentMethod As String = Request.Form("paymentMethod")
-            
+
             ' For GCash payments, validate reference number and sender details
             If paymentMethod = "gcash" Then
-                Dim referenceNumber As String = Request.Form("referenceNumber")
-                Dim senderName As String = Request.Form("senderName")
-                Dim senderNumber As String = Request.Form("senderNumber")
-                
+                ' Get values from the server controls
+                Dim referenceNumber As String = ReferenceNumberTextBox.Text.Trim()
+                Dim senderName As String = SenderNameTextBox.Text.Trim()
+                Dim senderNumber As String = SenderNumberTextBox.Text.Trim()
+
+                System.Diagnostics.Debug.WriteLine("GCash validation - Reference Number: " & referenceNumber &
+                                                ", Sender Name: " & senderName &
+                                                ", Sender Number: " & senderNumber)
+
                 If String.IsNullOrEmpty(referenceNumber) OrElse
                    String.IsNullOrEmpty(senderName) OrElse
                    String.IsNullOrEmpty(senderNumber) Then
@@ -1494,35 +1636,35 @@ Partial Class Pages_Customer_CustomerCart
             paymentData.Add("deliveryType", deliveryType)
             paymentData.Add("deliveryFee", deliveryFee)
             paymentData.Add("deliveryAddressId", selectedAddressId)
-            
+
             If Not String.IsNullOrEmpty(scheduledTime) Then
                 paymentData.Add("scheduledTime", scheduledTime)
             End If
-            
+
             ' Add GCash details if applicable
             If paymentMethod = "gcash" Then
-                paymentData.Add("referenceNumber", Request.Form("referenceNumber"))
-                paymentData.Add("senderName", Request.Form("senderName"))
-                paymentData.Add("senderNumber", Request.Form("senderNumber"))
+                paymentData.Add("referenceNumber", ReferenceNumberTextBox.Text.Trim())
+                paymentData.Add("senderName", SenderNameTextBox.Text.Trim())
+                paymentData.Add("senderNumber", SenderNumberTextBox.Text.Trim())
             End If
-            
+
             ' Convert to JSON and process payment
-                    Dim serializer As New JavaScriptSerializer()
+            Dim serializer As New JavaScriptSerializer()
             Dim paymentDataJson As String = serializer.Serialize(paymentData)
-            
+
             Dim result As String = ProcessPayment(paymentDataJson)
-            
+
             If result.StartsWith("Success") Then
                 ' Clear cart on successful payment
                 ShowAlert("Order placed successfully! Redirecting to your orders...", True)
-                
+
                 ' Redirect to orders page after a short delay (handled by client-side script)
-                ClientScript.RegisterStartupScript(Me.GetType(), "RedirectScript", 
+                ClientScript.RegisterStartupScript(Me.GetType(), "RedirectScript",
                     "setTimeout(function() { window.location.href = 'CustomerOrders.aspx'; }, 3000);", True)
             Else
                 ShowAlert(result, False)
             End If
-                Catch ex As Exception
+        Catch ex As Exception
             ShowAlert("Error placing order: " & ex.Message, False)
         End Try
     End Sub

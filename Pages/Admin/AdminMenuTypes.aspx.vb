@@ -3,7 +3,7 @@ Imports HapagDB
 
 Partial Class Pages_Admin_AdminMenuTypes
     Inherits System.Web.UI.Page
-    Dim Connect As New Connection()
+    Private menuController As New MenuController()
 
     Protected Sub AddBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles AddBtn.Click
         Dim typeName = TypeNameTxt.Text
@@ -15,15 +15,15 @@ Partial Class Pages_Admin_AdminMenuTypes
             Return
         End If
 
-        Dim query = "INSERT INTO menu_types (type_name, description, is_active) VALUES (@type_name, @description, @is_active)"
+        ' Create a new MenuType object
+        Dim newType As New MenuType()
+        newType.type_name = typeName
+        newType.description = description
+        ' Convert "1" to True and "0" to False
+        newType.is_active = (isActive = "1")
 
-        Connect.AddParam("@type_name", typeName)
-        Connect.AddParam("@description", description)
-        Connect.AddParam("@is_active", isActive)
-
-        Dim insert = Connect.Query(query)
-
-        If insert Then
+        ' Use MenuController to create the type
+        If menuController.CreateMenuType(newType) Then
             ShowAlert("Type Added Successfully!")
         Else
             ShowAlert("Failed to Add Type!")
@@ -49,16 +49,16 @@ Partial Class Pages_Admin_AdminMenuTypes
             Return
         End If
 
-        Dim query = "UPDATE menu_types SET type_name = @type_name, description = @description, is_active = @is_active WHERE type_id = @type_id"
+        ' Create a MenuType object for the update
+        Dim menuType As New MenuType()
+        menuType.type_id = Convert.ToInt32(typeId)
+        menuType.type_name = typeName
+        menuType.description = description
+        ' Convert "1" to True and "0" to False
+        menuType.is_active = (isActive = "1")
 
-        Connect.AddParam("@type_name", typeName)
-        Connect.AddParam("@description", description)
-        Connect.AddParam("@is_active", isActive)
-        Connect.AddParam("@type_id", typeId)
-
-        Dim updateResult = Connect.Query(query)
-
-        If updateResult Then
+        ' Use MenuController to update the type
+        If menuController.UpdateMenuType(menuType) Then
             ShowAlert("Type Updated Successfully!")
         Else
             ShowAlert("Failed to Update Type!")
@@ -77,21 +77,13 @@ Partial Class Pages_Admin_AdminMenuTypes
         End If
 
         ' Check if type is in use
-        Dim checkQuery = "SELECT COUNT(*) FROM menu WHERE type_id = @type_id"
-        Connect.AddParam("@type_id", typeId)
-        Connect.Query(checkQuery)
-
-        If Connect.Data.Tables(0).Rows(0)(0) > 0 Then
+        If menuController.IsTypeInUse(Convert.ToInt32(typeId)) Then
             ShowAlert("Cannot delete type because it is being used by menu items!")
             Return
         End If
 
-        Dim query = "DELETE FROM menu_types WHERE type_id = @type_id"
-        Connect.AddParam("@type_id", typeId)
-
-        Dim deleteResult = Connect.Query(query)
-
-        If deleteResult Then
+        ' Use MenuController to delete the type
+        If menuController.DeleteMenuType(Convert.ToInt32(typeId)) Then
             ShowAlert("Type Deleted Successfully!")
         Else
             ShowAlert("Failed to Delete Type!")
@@ -108,9 +100,9 @@ Partial Class Pages_Admin_AdminMenuTypes
     End Sub
 
     Public Sub ViewTable()
-        Dim query = "SELECT * FROM menu_types ORDER BY type_name"
-        Connect.Query(query)
-
+        ' Get all menu types from the controller
+        Dim types = menuController.GetAllTypes()
+        
         Table1.Rows.Clear()
 
         Dim headerRow As New TableHeaderRow()
@@ -119,16 +111,14 @@ Partial Class Pages_Admin_AdminMenuTypes
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Status"})
         Table1.Rows.Add(headerRow)
 
-        For Each row As DataRow In Connect.Data.Tables(0).Rows
+        For Each menuType As MenuType In types
             Dim tableRow As New TableRow()
 
-            tableRow.Cells.Add(New TableCell() With {.Text = row("type_name").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("description").ToString()})
-            
-            Dim isActive As Boolean = Convert.ToBoolean(row("is_active"))
-            tableRow.Cells.Add(New TableCell() With {.Text = If(isActive, "Active", "Inactive")})
+            tableRow.Cells.Add(New TableCell() With {.Text = menuType.type_name})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(menuType.description, "")})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(menuType.is_active, "Active", "Inactive")})
 
-            tableRow.Attributes.Add("data-type_id", row("type_id").ToString())
+            tableRow.Attributes.Add("data-type_id", menuType.type_id.ToString())
             Table1.Rows.Add(tableRow)
         Next
     End Sub

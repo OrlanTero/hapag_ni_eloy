@@ -6,7 +6,7 @@ Imports HapagDB
 
 Partial Class Pages_Admin_AdminDiscounts
     Inherits System.Web.UI.Page
-    Dim Connect As New Connection()
+    Private discountController As New DiscountController()
 
     Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
         ' Debug initialization of controls
@@ -80,29 +80,27 @@ Partial Class Pages_Admin_AdminDiscounts
                 Return
             End If
 
-            ' Prepare SQL query
-            Dim query As String = "INSERT INTO discounts (name, discount_type, value, applicable_to, start_date, end_date, min_order_amount, status, description, created_at) " & _
-                             "VALUES (@name, @discount_type, @value, @applicable_to, @start_date, @end_date, @min_order_amount, @status, @description, GETDATE())"
+            ' Create a new Discount object
+            Dim newDiscount As New Discount()
+            newDiscount.name = NameTxt.Text.Trim()
+            newDiscount.discount_type = Integer.Parse(DiscountTypeDdl.SelectedValue)
+            newDiscount.value = value
+            newDiscount.applicable_to = Integer.Parse(ApplicableToDdl.SelectedValue)
+            newDiscount.start_date = startDate
+            newDiscount.end_date = endDate
+            newDiscount.min_order_amount = minOrderAmount
+            newDiscount.status = Integer.Parse(StatusDdl.SelectedValue)
+            newDiscount.description = DescriptionTxt.Text.Trim()
 
-            ' Add parameters
-            Connect.ClearParams()
-            Connect.AddParam("@name", NameTxt.Text.Trim())
-            Connect.AddParam("@discount_type", Integer.Parse(DiscountTypeDdl.SelectedValue))
-            Connect.AddParam("@value", value)
-            Connect.AddParam("@applicable_to", Integer.Parse(ApplicableToDdl.SelectedValue))
-            Connect.AddParam("@start_date", startDate)
-            Connect.AddParam("@end_date", endDate)
-            Connect.AddParam("@min_order_amount", minOrderAmount)
-            Connect.AddParam("@status", Integer.Parse(StatusDdl.SelectedValue))
-            Connect.AddParam("@description", DescriptionTxt.Text.Trim())
-
-            ' Execute query
-            Connect.Query(query)
-
+            ' Use DiscountController to create the discount
+            If discountController.CreateDiscount(newDiscount) Then
             ' Show success message and refresh table
             showAlert("Discount added successfully!", "success")
             ClearForm()
             ViewTable()
+            Else
+                showAlert("Failed to add discount!", "danger")
+            End If
 
         Catch ex As Exception
             showAlert("Error adding discount: " & ex.Message, "danger")
@@ -159,40 +157,28 @@ Partial Class Pages_Admin_AdminDiscounts
                 Return
             End If
 
-            ' Prepare SQL query
-            Dim query As String = "UPDATE discounts SET " & _
-                                 "name = @name, " & _
-                                 "discount_type = @discount_type, " & _
-                                 "value = @value, " & _
-                                 "applicable_to = @applicable_to, " & _
-                                 "start_date = @start_date, " & _
-                                 "end_date = @end_date, " & _
-                                 "min_order_amount = @min_order_amount, " & _
-                                 "status = @status, " & _
-                                 "description = @description, " & _
-                                 "updated_at = GETDATE() " & _
-                                 "WHERE discount_id = @discount_id"
+            ' Create a Discount object for the update
+            Dim discount As New Discount()
+            discount.discount_id = Integer.Parse(DiscountIdHidden.Value)
+            discount.name = NameTxt.Text.Trim()
+            discount.discount_type = Integer.Parse(DiscountTypeDdl.SelectedValue)
+            discount.value = value
+            discount.applicable_to = Integer.Parse(ApplicableToDdl.SelectedValue)
+            discount.start_date = startDate
+            discount.end_date = endDate
+            discount.min_order_amount = minOrderAmount
+            discount.status = Integer.Parse(StatusDdl.SelectedValue)
+            discount.description = DescriptionTxt.Text.Trim()
 
-            ' Add parameters
-            Connect.ClearParams()
-            Connect.AddParam("@discount_id", Integer.Parse(DiscountIdHidden.Value))
-            Connect.AddParam("@name", NameTxt.Text.Trim())
-            Connect.AddParam("@discount_type", Integer.Parse(DiscountTypeDdl.SelectedValue))
-            Connect.AddParam("@value", value)
-            Connect.AddParam("@applicable_to", Integer.Parse(ApplicableToDdl.SelectedValue))
-            Connect.AddParam("@start_date", startDate)
-            Connect.AddParam("@end_date", endDate)
-            Connect.AddParam("@min_order_amount", minOrderAmount)
-            Connect.AddParam("@status", Integer.Parse(StatusDdl.SelectedValue))
-            Connect.AddParam("@description", DescriptionTxt.Text.Trim())
-
-            ' Execute query
-            Connect.Query(query)
-
+            ' Use DiscountController to update the discount
+            If discountController.UpdateDiscount(discount) Then
             ' Show success message and refresh table
             showAlert("Discount updated successfully!", "success")
             ClearForm()
             ViewTable()
+            Else
+                showAlert("Failed to update discount!", "danger")
+            End If
 
         Catch ex As Exception
             showAlert("Error updating discount: " & ex.Message, "danger")
@@ -201,31 +187,26 @@ Partial Class Pages_Admin_AdminDiscounts
         End Try
     End Sub
 
-    Protected Sub RemoveBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles RemoveBtn.Click
+    Protected Sub RemoveBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles DeleteBtn.Click
         Try
             ' Validate discount ID
             If String.IsNullOrEmpty(DiscountIdHidden.Value) Then
-                showAlert("Please select a discount to remove!", "warning")
+                showAlert("Please select a discount to delete!", "warning")
                 Return
             End If
 
-            ' Prepare SQL query
-            Dim query As String = "DELETE FROM discounts WHERE discount_id = @discount_id"
-
-            ' Add parameters
-            Connect.ClearParams()
-            Connect.AddParam("@discount_id", Integer.Parse(DiscountIdHidden.Value))
-
-            ' Execute query
-            Connect.Query(query)
-
+            ' Use DiscountController to delete the discount
+            If discountController.DeleteDiscount(Integer.Parse(DiscountIdHidden.Value)) Then
             ' Show success message and refresh table
-            showAlert("Discount removed successfully!", "success")
+                showAlert("Discount deleted successfully!", "success")
             ClearForm()
             ViewTable()
+            Else
+                showAlert("Failed to delete discount!", "danger")
+            End If
 
         Catch ex As Exception
-            showAlert("Error removing discount: " & ex.Message, "danger")
+            showAlert("Error deleting discount: " & ex.Message, "danger")
             System.Diagnostics.Debug.WriteLine("Error in RemoveBtn_Click: " & ex.Message)
             System.Diagnostics.Debug.WriteLine(ex.StackTrace)
         End Try
@@ -235,119 +216,85 @@ Partial Class Pages_Admin_AdminDiscounts
         ClearForm()
     End Sub
 
-    Protected Sub ViewTable()
+    ' Validates that the database table has all required columns
+    Private Sub ValidateTableStructure()
         Try
-            System.Diagnostics.Debug.WriteLine("ViewTable method called")
-            
-            ' Add debug message about the table control
-            System.Diagnostics.Debug.WriteLine("Table1 is null: " & (Table1 Is Nothing).ToString())
-            System.Diagnostics.Debug.WriteLine("TableContainer is null: " & (TableContainer Is Nothing).ToString())
-            System.Diagnostics.Debug.WriteLine("DiscountIdHidden is null: " & (DiscountIdHidden Is Nothing).ToString())
-            
-            ' Prepare SQL query to get all discounts
-            Dim query As String = "SELECT discount_id, name, " & _
-                                 "CASE discount_type WHEN 1 THEN 'Percentage' ELSE 'Fixed Amount' END AS discount_type, " & _
-                                 "CASE discount_type " & _
-                                 "    WHEN 1 THEN CAST(value AS NVARCHAR) + '%' " & _
-                                 "    ELSE 'PHP ' + CAST(value AS NVARCHAR) " & _
-                                 "END AS value, " & _
-                                 "CASE applicable_to " & _
-                                 "    WHEN 1 THEN 'All Products' " & _
-                                 "    WHEN 2 THEN 'Specific Category' " & _
-                                 "    ELSE 'Specific Product' " & _
-                                 "END AS applicable_to, " & _
-                                 "CONVERT(VARCHAR, start_date, 101) AS start_date, " & _
-                                 "CONVERT(VARCHAR, end_date, 101) AS end_date, " & _
-                                 "CASE WHEN min_order_amount IS NULL OR min_order_amount = 0 THEN 'None' " & _
-                                 "    ELSE 'PHP ' + CAST(min_order_amount AS NVARCHAR) " & _
-                                 "END AS min_order_amount, " & _
-                                 "CASE status WHEN 1 THEN 'Active' ELSE 'Inactive' END AS status, " & _
-                                 "description " & _
-                                 "FROM discounts " & _
-                                 "ORDER BY discount_id DESC"
-            
-            System.Diagnostics.Debug.WriteLine("Query: " & query)
+            ' We'll rely on the DiscountController for database operations
+            ' The controller should handle table structure validation if needed
+            System.Diagnostics.Debug.WriteLine("Table structure validation handled by controller")
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error validating table structure: " & ex.Message)
+        End Try
+    End Sub
 
-            ' Clear any existing parameters before executing the query
-            Connect.ClearParams()
+    Public Sub ViewTable()
+        Try
+            ' Get all discounts from the controller
+            Dim discounts = discountController.GetAllDiscounts()
             
-            ' Execute query
-            Dim success As Boolean = Connect.Query(query)
-            System.Diagnostics.Debug.WriteLine("Query executed, success: " & success & ", record count: " & Connect.DataCount)
+            System.Diagnostics.Debug.WriteLine("Retrieved " & discounts.Count & " discounts from controller")
             
-            ' Always clear the table to start fresh
-            Table1.Rows.Clear()
+            ' Show or hide the NoRecords panel based on whether we have data
+            TableContainer.Visible = (discounts.Count > 0)
+            NoRecords.Visible = (discounts.Count = 0)
             
-            ' Add header row
-            Dim headerRow As New TableHeaderRow()
-            headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Name"})
-            headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Type"})
-            headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Value"})
-            headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Applicable To"})
-            headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Start Date"})
-            headerRow.Cells.Add(New TableHeaderCell() With {.Text = "End Date"})
-            headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Min Order"})
-            headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Status"})
-            Table1.Rows.Add(headerRow)
-            
-            ' Check if data exists
-            If Connect.DataCount > 0 Then
-                For Each dataRow As DataRow In Connect.Data.Tables(0).Rows
-                    System.Diagnostics.Debug.WriteLine("Row found - ID: " & dataRow("discount_id").ToString() & ", Name: " & dataRow("name").ToString())
-                    
-                    ' Create a new row
-                    Dim tableRow As New TableRow()
-                    
-                    ' Create cells and populate with data
-                    tableRow.Cells.Add(New TableCell() With {.Text = dataRow("name").ToString()})
-                    tableRow.Cells.Add(New TableCell() With {.Text = dataRow("discount_type").ToString()})
-                    tableRow.Cells.Add(New TableCell() With {.Text = dataRow("value").ToString()})
-                    tableRow.Cells.Add(New TableCell() With {.Text = dataRow("applicable_to").ToString()})
-                    tableRow.Cells.Add(New TableCell() With {.Text = dataRow("start_date").ToString()})
-                    tableRow.Cells.Add(New TableCell() With {.Text = dataRow("end_date").ToString()})
-                    tableRow.Cells.Add(New TableCell() With {.Text = dataRow("min_order_amount").ToString()})
-                    
-                    ' Add status with appropriate style
-                    Dim statusCell As New TableCell()
-                    Dim statusText As String = dataRow("status").ToString()
-                    If statusText = "Active" Then
-                        statusCell.Text = "<span class='status-active'>" & statusText & "</span>"
-                    Else
-                        statusCell.Text = "<span class='status-inactive'>" & statusText & "</span>"
-                    End If
-                    tableRow.Cells.Add(statusCell)
-                    
-                    ' Set data attributes
-                    tableRow.Attributes.Add("data-discount_id", dataRow("discount_id").ToString())
-                    tableRow.Attributes.Add("data-description", dataRow("description").ToString())
-                    
-                    ' Add the completed row to the table
-                    Table1.Rows.Add(tableRow)
-                Next
-                
-                System.Diagnostics.Debug.WriteLine("Table populated with " & Connect.Data.Tables(0).Rows.Count & " rows")
-                
-                ' Show table and hide no records message
-                TableContainer.Visible = True
-                NoRecords.Visible = False
-                
-                System.Diagnostics.Debug.WriteLine("Table container set to visible")
-            Else
-                ' We still need to keep the header row
-                System.Diagnostics.Debug.WriteLine("No data rows found, keeping header row only")
-                
-                ' Show "No Records" message
-                NoRecords.Visible = True
-                
-                System.Diagnostics.Debug.WriteLine("No records panel set to visible")
+            If discounts.Count > 0 Then
+                DiscountsRepeater.DataSource = discounts
+                DiscountsRepeater.DataBind()
+                System.Diagnostics.Debug.WriteLine("Bound " & discounts.Count & " discounts to repeater")
             End If
-
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error in ViewTable: " & ex.Message)
-            System.Diagnostics.Debug.WriteLine(ex.StackTrace)
             showAlert("Error loading discounts: " & ex.Message, "danger")
         End Try
     End Sub
+
+    ' Helper method to format discount value for display
+    Protected Function FormatDiscountValue(ByVal value As Decimal, ByVal discountType As Integer) As String
+        If discountType = 1 Then ' Percentage discount
+            Return value.ToString("0.##") & "%"
+        Else ' Fixed amount discount
+            Return "₱" & value.ToString("0.00")
+        End If
+    End Function
+    
+    ' Helper method to get the text description of discount type
+    Protected Function GetDiscountTypeName(ByVal discountType As Integer) As String
+        Select Case discountType
+            Case 1
+                Return "Percentage"
+            Case 0
+                Return "Fixed Amount"
+            Case Else
+                Return "Unknown"
+        End Select
+    End Function
+    
+    ' Helper method to get the text description of applicable to
+    Protected Function GetApplicableToName(ByVal applicableTo As Integer) As String
+        Select Case applicableTo
+            Case 1
+                Return "Selected Items"
+            Case 2
+                Return "Categories"
+            Case 0
+                Return "All Items"
+            Case Else
+                Return "Unknown"
+        End Select
+    End Function
+    
+    ' Helper method to get the text description of status
+    Protected Function GetStatusName(ByVal status As Integer) As String
+        Select Case status
+            Case 1
+                Return "Active"
+            Case 0
+                Return "Inactive"
+            Case Else
+                Return "Unknown"
+        End Select
+    End Function
 
     Private Sub ClearForm()
         DiscountIdHidden.Value = ""
@@ -360,154 +307,59 @@ Partial Class Pages_Admin_AdminDiscounts
         MinOrderAmountTxt.Text = ""
         StatusDdl.SelectedIndex = 0
         DescriptionTxt.Text = ""
+        AddBtn.Visible = True
+        EditBtn.Visible = False
+        DeleteBtn.Visible = False
     End Sub
 
     Private Sub showAlert(ByVal message As String, ByVal type As String)
         Dim script As String = "showAlert('" & message & "', '" & type & "');"
-        ClientScript.RegisterStartupScript(Me.GetType(), "showAlert", script, True)
+        ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
     End Sub
 
-    Private Sub ValidateTableStructure()
+    ' Event handler for the Repeater's ItemCommand event
+    Protected Sub DiscountsRepeater_ItemCommand(ByVal source As Object, ByVal e As RepeaterCommandEventArgs)
         Try
-            System.Diagnostics.Debug.WriteLine("Validating discounts table structure...")
-
-            ' Check if the table exists
-            Dim tableQuery = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'discounts'"
-            Connect.Query(tableQuery)
-
-            If Connect.DataCount > 0 Then
-                Dim tableExists As Boolean = (Convert.ToInt32(Connect.Data.Tables(0).Rows(0)(0)) > 0)       
-                System.Diagnostics.Debug.WriteLine("Discounts table exists: " & tableExists)
-
-                If Not tableExists Then
-                    ' Create the table if it doesn't exist
-                    System.Diagnostics.Debug.WriteLine("Creating discounts table...")
-                    Dim createTableQuery = "CREATE TABLE discounts (" & _
-                        "discount_id INT IDENTITY(1,1) PRIMARY KEY, " & _
-                        "name NVARCHAR(100) NOT NULL, " & _
-                        "discount_type INT NOT NULL, " & _
-                        "value DECIMAL(10,2) NOT NULL, " & _
-                        "applicable_to INT NOT NULL, " & _
-                        "start_date DATETIME NOT NULL, " & _
-                        "end_date DATETIME NOT NULL, " & _
-                        "min_order_amount DECIMAL(10,2) NULL, " & _
-                        "status INT NOT NULL, " & _
-                        "description NVARCHAR(MAX) NULL, " & _
-                        "created_at DATETIME NOT NULL, " & _
-                        "updated_at DATETIME NULL)"
-
-                    Connect.Query(createTableQuery)
-                    System.Diagnostics.Debug.WriteLine("Discounts table created")
-                    
-                    ' Add a test discount
-                    InsertTestDiscount()
-                    Return
-                End If
-
-                ' Check if the table has any rows
-                Dim rowCountQuery = "SELECT COUNT(*) FROM discounts"
-                Connect.Query(rowCountQuery)
+            If e.CommandName = "Edit" Then
+                Dim discountId As Integer = Convert.ToInt32(e.CommandArgument)
+                System.Diagnostics.Debug.WriteLine("Edit command for discount ID: " & discountId)
                 
-                If Connect.DataCount > 0 Then
-                    Dim rowCount As Integer = Convert.ToInt32(Connect.Data.Tables(0).Rows(0)(0))
-                    System.Diagnostics.Debug.WriteLine("Discounts table has " & rowCount & " rows")
+                ' Get the discount details from the controller
+                Dim discount = discountController.GetDiscountById(discountId)
+                
+                If discount IsNot Nothing Then
+                    ' Populate the form with discount details
+                    DiscountIdHidden.Value = discount.discount_id.ToString()
+                    NameTxt.Text = discount.name
+                    DiscountTypeDdl.SelectedValue = discount.discount_type.ToString()
                     
-                    ' If the table is empty, add a test discount
-                    If rowCount = 0 Then
-                        System.Diagnostics.Debug.WriteLine("No discounts found, adding a test discount")
-                        InsertTestDiscount()
-                    End If
+                    If discount.discount_type = 1 Then ' Percentage
+                        ValueTxt.Text = discount.value.ToString("0.##") & "%"
+                    Else ' Fixed amount
+                        ValueTxt.Text = discount.value.ToString("0.00")
                 End If
 
-                ' Check if all required columns exist
-                Dim columnsQuery = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'discounts'"
-                Connect.Query(columnsQuery)
-
-                If Connect.DataCount > 0 Then
-                    Dim columns As New List(Of String)
-                    For Each row As DataRow In Connect.Data.Tables(0).Rows
-                        columns.Add(row("COLUMN_NAME").ToString().ToLower())
-                    Next
-
-                    System.Diagnostics.Debug.WriteLine("Existing columns: " & String.Join(", ", columns.ToArray()))
-
-                    ' Check for required columns
-                    Dim requiredColumns As String() = {"discount_id", "name", "discount_type", "value", "applicable_to",
-                                                      "start_date", "end_date", "min_order_amount", "status", "description", "created_at"}
-
-                    Dim missingColumns As New List(Of String)
-                    For Each col As String In requiredColumns
-                        If Not columns.Contains(col.ToLower()) Then
-                            missingColumns.Add(col)
-                        End If
-                    Next
-
-                    If missingColumns.Count > 0 Then
-                        System.Diagnostics.Debug.WriteLine("Missing columns: " & String.Join(", ", missingColumns.ToArray()))
-
-                        ' Add missing columns
-                        For Each col As String In missingColumns
-                            Dim alterQuery As String = "ALTER TABLE discounts ADD "
-
-                            Select Case col.ToLower()
-                                Case "discount_id"
-                                    alterQuery &= "discount_id INT IDENTITY(1,1) PRIMARY KEY"
-                                Case "name"
-                                    alterQuery &= "name NVARCHAR(100) NOT NULL"
-                                Case "discount_type"
-                                    alterQuery &= "discount_type INT NOT NULL DEFAULT 1"
-                                Case "value"
-                                    alterQuery &= "value DECIMAL(10,2) NOT NULL DEFAULT 0"
-                                Case "applicable_to"
-                                    alterQuery &= "applicable_to INT NOT NULL DEFAULT 1"
-                                Case "start_date"
-                                    alterQuery &= "start_date DATETIME NOT NULL DEFAULT GETDATE()"
-                                Case "end_date"
-                                    alterQuery &= "end_date DATETIME NOT NULL DEFAULT DATEADD(MONTH, 1, GETDATE())"
-                                Case "min_order_amount"
-                                    alterQuery &= "min_order_amount DECIMAL(10,2) NULL"
-                                Case "status"
-                                    alterQuery &= "status INT NOT NULL DEFAULT 1"
-                                Case "description"
-                                    alterQuery &= "description NVARCHAR(MAX) NULL"
-                                Case "created_at"
-                                    alterQuery &= "created_at DATETIME NOT NULL DEFAULT GETDATE()"
-                                Case "updated_at"
-                                    alterQuery &= "updated_at DATETIME NULL"
-                            End Select
-
-                            System.Diagnostics.Debug.WriteLine("Executing: " & alterQuery)
-                            Connect.Query(alterQuery)
-                        Next
-
-                        System.Diagnostics.Debug.WriteLine("Table structure updated")
-                    Else
-                        System.Diagnostics.Debug.WriteLine("All required columns exist")
-                    End If
+                    ApplicableToDdl.SelectedValue = discount.applicable_to.ToString()
+                    StartDateTxt.Text = discount.start_date.ToString("yyyy-MM-dd")
+                    EndDateTxt.Text = discount.end_date.ToString("yyyy-MM-dd")
+                    MinOrderAmountTxt.Text = discount.min_order_amount.ToString("0.00")
+                    StatusDdl.SelectedValue = discount.status.ToString()
+                    DescriptionTxt.Text = discount.description
+                    
+                    ' Show edit and delete buttons, hide add button
+                    AddBtn.Visible = False
+                    EditBtn.Visible = True
+                    DeleteBtn.Visible = True
+                    
+                    ' Scroll to the form
+                    ClientScript.RegisterStartupScript(Me.GetType(), "scrollToForm", "scrollToForm();", True)
+                Else
+                    showAlert("Discount not found!", "warning")
                 End If
             End If
         Catch ex As Exception
-            System.Diagnostics.Debug.WriteLine("Error validating table structure: " & ex.Message)
-            System.Diagnostics.Debug.WriteLine(ex.StackTrace)
-        End Try
-    End Sub
-
-    Private Sub InsertTestDiscount()
-        Try
-            System.Diagnostics.Debug.WriteLine("Inserting test discount")
-            
-            ' Create a test discount
-            Dim query As String = "INSERT INTO discounts (name, discount_type, value, applicable_to, " & _
-                               "start_date, end_date, min_order_amount, status, description, created_at) " & _
-                               "VALUES ('Welcome Discount', 1, 10, 1, GETDATE(), " & _
-                               "DATEADD(month, 1, GETDATE()), 100, 1, 'Test discount for new customers', GETDATE())"
-            
-            Connect.Query(query)
-            System.Diagnostics.Debug.WriteLine("Test discount inserted")
-            
-        Catch ex As Exception
-            System.Diagnostics.Debug.WriteLine("Error inserting test discount: " & ex.Message)
-            System.Diagnostics.Debug.WriteLine(ex.StackTrace)
+            System.Diagnostics.Debug.WriteLine("Error in DiscountsRepeater_ItemCommand: " & ex.Message)
+            showAlert("Error: " & ex.Message, "danger")
         End Try
     End Sub
 End Class

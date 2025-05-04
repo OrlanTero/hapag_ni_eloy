@@ -3,7 +3,7 @@ Imports HapagDB
 
 Partial Class Pages_Admin_AdminPromotions
     Inherits System.Web.UI.Page
-    Dim Connect As New Connection()
+    Private promotionController As New PromotionController()
 
     Protected Sub AddBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles AddBtn.Click
         Try
@@ -33,20 +33,18 @@ Partial Class Pages_Admin_AdminPromotions
                 Return
             End If
 
-            Dim query = "INSERT INTO promotions (name, value, value_type, start_date, valid_until, description, image, date_created) VALUES " & _
-                       "(@name, @value, @value_type, @start_date, @valid_until, @description, @image, GETDATE())"
+            ' Create a new Promotion object
+            Dim newPromotion As New Promotion()
+            newPromotion.name = NameTxt.Text.Trim()
+            newPromotion.value = value
+            newPromotion.value_type = Convert.ToInt32(DiscountTypeDdl.SelectedValue)
+            newPromotion.start_date = startDate
+            newPromotion.valid_until = endDate
+            newPromotion.description = DescriptionTxt.Text.Trim()
+            newPromotion.image = ""
 
-            Connect.AddParam("@name", NameTxt.Text.Trim())
-            Connect.AddParam("@value", value)
-            Connect.AddParam("@value_type", DiscountTypeDdl.SelectedValue)
-            Connect.AddParam("@start_date", startDate)
-            Connect.AddParam("@valid_until", endDate)
-            Connect.AddParam("@description", DescriptionTxt.Text.Trim())
-            Connect.AddParam("@image", "")
-
-            Dim insert = Connect.Query(query)
-
-            If insert Then
+            ' Use PromotionController to create the promotion
+            If promotionController.CreatePromotion(newPromotion) Then
                 showAlert("Promotion successfully added!", "success")
                 ClearForm()
             Else
@@ -92,28 +90,19 @@ Partial Class Pages_Admin_AdminPromotions
                 Return
             End If
 
-            Dim query = "UPDATE promotions SET " & _
-                       "name = @name, " & _
-                       "value = @value, " & _
-                       "value_type = @value_type, " & _
-                       "start_date = @start_date, " & _
-                       "valid_until = @valid_until, " & _
-                       "description = @description, " & _
-                       "image = @image " & _
-                       "WHERE promotion_id = @promotion_id"
+            ' Create a Promotion object for the update
+            Dim promotion As New Promotion()
+            promotion.promotion_id = Convert.ToInt32(PromotionIdTxt.Text)
+            promotion.name = NameTxt.Text.Trim()
+            promotion.value = value
+            promotion.value_type = Convert.ToInt32(DiscountTypeDdl.SelectedValue)
+            promotion.start_date = startDate
+            promotion.valid_until = endDate
+            promotion.description = DescriptionTxt.Text.Trim()
+            promotion.image = ""
 
-            Connect.AddParam("@promotion_id", PromotionIdTxt.Text)
-            Connect.AddParam("@name", NameTxt.Text.Trim())
-            Connect.AddParam("@value", value)
-            Connect.AddParam("@value_type", DiscountTypeDdl.SelectedValue)
-            Connect.AddParam("@start_date", startDate)
-            Connect.AddParam("@valid_until", endDate)
-            Connect.AddParam("@description", DescriptionTxt.Text.Trim())
-            Connect.AddParam("@image", "")
-
-            Dim updateResult = Connect.Query(query)
-
-            If updateResult Then
+            ' Use PromotionController to update the promotion
+            If promotionController.UpdatePromotion(promotion) Then
                 showAlert("Promotion successfully updated!", "success")
                 ClearForm()
             Else
@@ -133,12 +122,8 @@ Partial Class Pages_Admin_AdminPromotions
                 Return
             End If
 
-            Dim query = "DELETE FROM promotions WHERE promotion_id = @promotion_id"
-            Connect.AddParam("@promotion_id", PromotionIdTxt.Text)
-
-            Dim deleteResult = Connect.Query(query)
-
-            If deleteResult Then
+            ' Use PromotionController to delete the promotion
+            If promotionController.DeletePromotion(Convert.ToInt32(PromotionIdTxt.Text)) Then
                 showAlert("Promotion successfully removed!", "success")
                 ClearForm()
             Else
@@ -162,8 +147,8 @@ Partial Class Pages_Admin_AdminPromotions
     End Sub
 
     Public Sub ViewTable()
-        Dim query = "SELECT * FROM promotions ORDER BY date_created DESC"
-        Connect.Query(query)
+        ' Get all promotions from the controller
+        Dim promotions = promotionController.GetAllPromotions()
 
         Table1.Rows.Clear()
 
@@ -178,19 +163,27 @@ Partial Class Pages_Admin_AdminPromotions
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Image"})
         Table1.Rows.Add(headerRow)
 
-        For Each row As DataRow In Connect.Data.Tables(0).Rows
+        For Each promotion As Promotion In promotions
             Dim tableRow As New TableRow()
 
-            tableRow.Cells.Add(New TableCell() With {.Text = row("name").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("value").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("value_type").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("start_date").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("valid_until").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("date_created").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("description").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("image").ToString()})
+            tableRow.Cells.Add(New TableCell() With {.Text = promotion.name})
+            tableRow.Cells.Add(New TableCell() With {.Text = promotion.value.ToString()})
+            
+            ' Convert value_type to readable text
+            Dim valueTypeText As String = "Fixed"
+            If promotion.value_type = 1 Then
+                valueTypeText = "Percentage"
+            End If
+            tableRow.Cells.Add(New TableCell() With {.Text = valueTypeText})
+            
+            ' Handle dates properly - they are strings in the model, not DateTime objects
+            tableRow.Cells.Add(New TableCell() With {.Text = promotion.start_date})
+            tableRow.Cells.Add(New TableCell() With {.Text = promotion.valid_until})
+            tableRow.Cells.Add(New TableCell() With {.Text = promotion.date_created})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(promotion.description, "")})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(promotion.image, "")})
 
-            tableRow.Attributes.Add("data-promotion_id", row("promotion_id").ToString())
+            tableRow.Attributes.Add("data-promotion_id", promotion.promotion_id.ToString())
             Table1.Rows.Add(tableRow)
         Next
     End Sub

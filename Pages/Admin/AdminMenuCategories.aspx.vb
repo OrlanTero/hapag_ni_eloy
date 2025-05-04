@@ -3,7 +3,7 @@ Imports HapagDB
 
 Partial Class Pages_Admin_AdminMenuCategories
     Inherits System.Web.UI.Page
-    Dim Connect As New Connection()
+    Private menuController As New MenuController()
 
     Protected Sub AddBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles AddBtn.Click
         Dim categoryName = CategoryNameTxt.Text
@@ -15,15 +15,20 @@ Partial Class Pages_Admin_AdminMenuCategories
             Return
         End If
 
-        Dim query = "INSERT INTO menu_categories (category_name, description, is_active) VALUES (@category_name, @description, @is_active)"
+        ' Create a new MenuCategory object
+        Dim newCategory As New MenuCategory()
+        newCategory.category_name = categoryName
+        newCategory.description = description
+        
+        ' Convert dropdown value to boolean properly
+        If isActive = "1" Then
+            newCategory.is_active = True
+        Else
+            newCategory.is_active = False
+        End If
 
-        Connect.AddParam("@category_name", categoryName)
-        Connect.AddParam("@description", description)
-        Connect.AddParam("@is_active", isActive)
-
-        Dim insert = Connect.Query(query)
-
-        If insert Then
+        ' Use MenuController to create the category
+        If menuController.CreateMenuCategory(newCategory) Then
             ShowAlert("Category Added Successfully!")
         Else
             ShowAlert("Failed to Add Category!")
@@ -49,16 +54,21 @@ Partial Class Pages_Admin_AdminMenuCategories
             Return
         End If
 
-        Dim query = "UPDATE menu_categories SET category_name = @category_name, description = @description, is_active = @is_active WHERE category_id = @category_id"
+        ' Create a MenuCategory object for the update
+        Dim category As New MenuCategory()
+        category.category_id = Convert.ToInt32(categoryId)
+        category.category_name = categoryName
+        category.description = description
+        
+        ' Convert dropdown value to boolean properly
+        If isActive = "1" Then
+            category.is_active = True
+        Else
+            category.is_active = False
+        End If
 
-        Connect.AddParam("@category_name", categoryName)
-        Connect.AddParam("@description", description)
-        Connect.AddParam("@is_active", isActive)
-        Connect.AddParam("@category_id", categoryId)
-
-        Dim updateResult = Connect.Query(query)
-
-        If updateResult Then
+        ' Use MenuController to update the category
+        If menuController.UpdateMenuCategory(category) Then
             ShowAlert("Category Updated Successfully!")
         Else
             ShowAlert("Failed to Update Category!")
@@ -76,22 +86,14 @@ Partial Class Pages_Admin_AdminMenuCategories
             Return
         End If
 
-        ' Check if category is in use
-        Dim checkQuery = "SELECT COUNT(*) FROM menu WHERE category_id = @category_id"
-        Connect.AddParam("@category_id", categoryId)
-        Connect.Query(checkQuery)
-
-        If Connect.Data.Tables(0).Rows(0)(0) > 0 Then
+        ' Check if the category is being used by menu items
+        If menuController.IsCategoryInUse(Convert.ToInt32(categoryId)) Then
             ShowAlert("Cannot delete category because it is being used by menu items!")
             Return
         End If
 
-        Dim query = "DELETE FROM menu_categories WHERE category_id = @category_id"
-        Connect.AddParam("@category_id", categoryId)
-
-        Dim deleteResult = Connect.Query(query)
-
-        If deleteResult Then
+        ' Use MenuController to delete the category
+        If menuController.DeleteMenuCategory(Convert.ToInt32(categoryId)) Then
             ShowAlert("Category Deleted Successfully!")
         Else
             ShowAlert("Failed to Delete Category!")
@@ -108,8 +110,8 @@ Partial Class Pages_Admin_AdminMenuCategories
     End Sub
 
     Public Sub ViewTable()
-        Dim query = "SELECT * FROM menu_categories ORDER BY category_name"
-        Connect.Query(query)
+        ' Get all menu categories from the controller
+        Dim categories = menuController.GetAllCategories()
 
         Table1.Rows.Clear()
 
@@ -119,16 +121,14 @@ Partial Class Pages_Admin_AdminMenuCategories
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Status"})
         Table1.Rows.Add(headerRow)
 
-        For Each row As DataRow In Connect.Data.Tables(0).Rows
+        For Each category As MenuCategory In categories
             Dim tableRow As New TableRow()
 
-            tableRow.Cells.Add(New TableCell() With {.Text = row("category_name").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("description").ToString()})
-            
-            Dim isActive As Boolean = Convert.ToBoolean(row("is_active"))
-            tableRow.Cells.Add(New TableCell() With {.Text = If(isActive, "Active", "Inactive")})
+            tableRow.Cells.Add(New TableCell() With {.Text = category.category_name})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(category.description, "")})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(category.is_active, "Active", "Inactive")})
 
-            tableRow.Attributes.Add("data-category_id", row("category_id").ToString())
+            tableRow.Attributes.Add("data-category_id", category.category_id.ToString())
             Table1.Rows.Add(tableRow)
         Next
     End Sub

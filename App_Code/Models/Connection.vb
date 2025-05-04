@@ -45,22 +45,22 @@ Namespace HapagDB
                 Parameters.Add(New SqlParameter(key, value))
             End If
         End Sub
-        
+
         Public Sub AddParam(ByVal key As String, ByVal value As Integer)
             System.Diagnostics.Debug.WriteLine("Adding param: " & key & " = " & value & " (Integer)")
             Parameters.Add(New SqlParameter(key, value))
         End Sub
-        
+
         Public Sub AddParam(ByVal key As String, ByVal value As Decimal)
             System.Diagnostics.Debug.WriteLine("Adding param: " & key & " = " & value & " (Decimal)")
             Parameters.Add(New SqlParameter(key, value))
         End Sub
-        
+
         Public Sub AddParam(ByVal key As String, ByVal value As Boolean)
             System.Diagnostics.Debug.WriteLine("Adding param: " & key & " = " & value & " (Boolean)")
             Parameters.Add(New SqlParameter(key, value))
         End Sub
-        
+
         Public Sub AddParamWithNull(ByVal key As String, ByVal value As Object)
             If value Is Nothing Then
                 System.Diagnostics.Debug.WriteLine("Adding param: " & key & " = NULL (Object is Nothing)")
@@ -75,6 +75,36 @@ Namespace HapagDB
                 System.Diagnostics.Debug.WriteLine("Adding param: " & key & " = '" & value.ToString() & "' (Object)")
                 Parameters.Add(New SqlParameter(key, value))
             End If
+        End Sub
+
+        Public Sub AddParamNullable(ByVal key As String, ByVal value As Object, ByVal defaultValue As Object)
+            Try
+                If value Is Nothing OrElse (TypeOf value Is DBNull) Then
+                    System.Diagnostics.Debug.WriteLine("Adding nullable param: " & key & " = NULL (using default)")
+                    If defaultValue Is Nothing Then
+                        Dim param As New SqlParameter(key, SqlDbType.NVarChar)
+                        param.Value = DBNull.Value
+                        Parameters.Add(param)
+                    Else
+                        System.Diagnostics.Debug.WriteLine("  Using default value: " & defaultValue.ToString())
+                        Parameters.Add(New SqlParameter(key, defaultValue))
+                    End If
+                Else
+                    System.Diagnostics.Debug.WriteLine("Adding nullable param: " & key & " = " & value.ToString())
+                    Parameters.Add(New SqlParameter(key, value))
+                End If
+            Catch ex As Exception
+                System.Diagnostics.Debug.WriteLine("Error in AddParamNullable - Using DBNull instead. Error: " & ex.Message)
+                Dim param As New SqlParameter(key, SqlDbType.NVarChar)
+                param.Value = DBNull.Value
+                Parameters.Add(param)
+            End Try
+        End Sub
+
+        Public Sub Clear()
+            Parameters.Clear()
+            Data = New DataSet()
+            DataCount = 0
         End Sub
 
         Public Function Query(ByVal command_query As String) As Boolean
@@ -92,14 +122,30 @@ Namespace HapagDB
                     Parameters.Clear()
                 End If
 
-                If command_query.StartsWith("INSERT", StringComparison.OrdinalIgnoreCase) OrElse
-                   command_query.StartsWith("UPDATE", StringComparison.OrdinalIgnoreCase) OrElse
-                   command_query.StartsWith("DELETE", StringComparison.OrdinalIgnoreCase) OrElse
-                   command_query.StartsWith("ALTER", StringComparison.OrdinalIgnoreCase) Then
+                ' Special case for INSERT ... SELECT SCOPE_IDENTITY() or similar patterns
+                If command_query.Contains("SCOPE_IDENTITY()") OrElse command_query.Contains("@@IDENTITY") Then
+                    System.Diagnostics.Debug.WriteLine("Detected INSERT with IDENTITY retrieval")
+                    Try
+                        Data = New DataSet()
+                        Dim adapter As New SqlDataAdapter(command)
+                        DataCount = adapter.Fill(Data)
+                        System.Diagnostics.Debug.WriteLine("INSERT with IDENTITY query executed. Result rows: " & DataCount)
+                        Close()
+                        Return True ' If we get this far, the operation succeeded
+                    Catch ex As Exception
+                        System.Diagnostics.Debug.WriteLine("Error executing INSERT with IDENTITY: " & ex.Message)
+                        Close()
+                        Return False
+                    End Try
+                    ' Standard handling for regular queries
+                ElseIf command_query.StartsWith("INSERT", StringComparison.OrdinalIgnoreCase) OrElse
+                       command_query.StartsWith("UPDATE", StringComparison.OrdinalIgnoreCase) OrElse
+                       command_query.StartsWith("DELETE", StringComparison.OrdinalIgnoreCase) OrElse
+                       command_query.StartsWith("ALTER", StringComparison.OrdinalIgnoreCase) Then
 
                     Dim rowsAffected As Integer = command.ExecuteNonQuery()
                     System.Diagnostics.Debug.WriteLine("Non-query executed. Rows affected: " & rowsAffected)
-                    
+
                     Close()
 
                     Return rowsAffected > 0
@@ -109,7 +155,7 @@ Namespace HapagDB
                     Data = New DataSet()
                     DataCount = adapter.Fill(Data)
                     System.Diagnostics.Debug.WriteLine("Select query executed. Rows returned: " & DataCount)
-                    
+
                     Close()
 
                     Return DataCount > 0
@@ -155,4 +201,4 @@ Namespace HapagDB
             End Try
         End Function
     End Class
-End Namespace 
+End Namespace

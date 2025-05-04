@@ -315,7 +315,7 @@
                         <div class="form-actions">
                             <asp:Button ID="AddBtn" runat="server" Text="ADD" CssClass="btn btn-primary" UseSubmitBehavior="true" OnClientClick="console.log('AddBtn client click'); return true;" />
                             <asp:Button ID="EditBtn" runat="server" Text="EDIT" CssClass="btn btn-secondary" />
-                            <asp:Button ID="RemoveBtn" runat="server" Text="REMOVE" CssClass="btn btn-danger" />
+                            <asp:Button ID="DeleteBtn" runat="server" Text="DELETE" CssClass="btn btn-danger" />
                             <asp:Button ID="ClearBtn" runat="server" Text="CLEAR" CssClass="btn btn-info" />
                         </div>
                     </div>
@@ -331,6 +331,50 @@
                     <div class="table-responsive" id="TableContainer" runat="server">
                         <asp:Table ID="Table1" runat="server" CssClass="table table-striped table-hover">
                         </asp:Table>
+                        <asp:Repeater ID="DiscountsRepeater" runat="server" OnItemCommand="DiscountsRepeater_ItemCommand">
+                            <HeaderTemplate>
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Value</th>
+                                            <th>Applicable To</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Min Order</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                            </HeaderTemplate>
+                            <ItemTemplate>
+                                <tr>
+                                    <td><%# Eval("name") %></td>
+                                    <td><%# GetDiscountTypeName(Convert.ToInt32(Eval("discount_type"))) %></td>
+                                    <td><%# FormatDiscountValue(Convert.ToDecimal(Eval("value")), Convert.ToInt32(Eval("discount_type"))) %></td>
+                                    <td><%# GetApplicableToName(Convert.ToInt32(Eval("applicable_to"))) %></td>
+                                    <td><%# Convert.ToDateTime(Eval("start_date")).ToString("MM/dd/yyyy") %></td>
+                                    <td><%# Convert.ToDateTime(Eval("end_date")).ToString("MM/dd/yyyy") %></td>
+                                    <td><%# If(Convert.ToDecimal(Eval("min_order_amount")) > 0, "₱" & Convert.ToDecimal(Eval("min_order_amount")).ToString("0.00"), "None") %></td>
+                                    <td>
+                                        <span class='<%# If(Convert.ToInt32(Eval("status")) = 1, "status-active", "status-inactive") %>'>
+                                            <%# GetStatusName(Convert.ToInt32(Eval("status"))) %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <asp:LinkButton ID="EditButton" runat="server" CommandName="Edit" CommandArgument='<%# Eval("discount_id") %>' CssClass="btn btn-sm btn-primary">
+                                            Edit
+                                        </asp:LinkButton>
+                                    </td>
+                                </tr>
+                            </ItemTemplate>
+                            <FooterTemplate>
+                                    </tbody>
+                                </table>
+                            </FooterTemplate>
+                        </asp:Repeater>
                     </div>
                     <asp:Panel ID="NoRecords" runat="server" CssClass="no-records" Visible="false">
                         <p>No discounts found. Add a discount to see it here.</p>
@@ -524,7 +568,7 @@
         function ListenToButtons() {
             const addBtn = document.getElementById("AddBtn");
             const editBtn = document.getElementById("EditBtn");
-            const removeBtn = document.getElementById("RemoveBtn");
+            const deleteBtn = document.getElementById("DeleteBtn");
             const discountIdTxt = document.getElementById("<%= DiscountIdHidden.ClientID %>");
             const nameTxt = document.getElementById("NameTxt");
             const valueTxt = document.getElementById("ValueTxt");
@@ -553,7 +597,7 @@
                 }
             });
             
-            removeBtn.addEventListener("click", function(e) {
+            deleteBtn.addEventListener("click", function(e) {
                 if (discountIdTxt.value.length == 0) {
                     showAlert("Please Select a Discount!", "warning");
                     e.preventDefault();

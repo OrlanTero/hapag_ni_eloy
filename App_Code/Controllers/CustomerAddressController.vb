@@ -45,53 +45,66 @@ Public Class CustomerAddressController
     End Function
     
     Public Function CreateAddress(ByVal address As CustomerAddress) As Boolean
-        ' If this is the first address or marked as default, clear other default addresses
-        If address.is_default Then
-            ClearDefaultAddresses(address.user_id)
-        End If
-        
-        Dim query As String = "INSERT INTO customer_addresses (user_id, address_name, recipient_name, contact_number, address_line, city, postal_code, is_default, date_added) " & _
-                             "VALUES (@user_id, @address_name, @recipient_name, @contact_number, @address_line, @city, @postal_code, @is_default, @date_added)"
-        
-        conn.AddParam("@user_id", address.user_id)
-        conn.AddParamWithNull("@address_name", address.address_name)
-        conn.AddParamWithNull("@recipient_name", address.recipient_name)
-        conn.AddParamWithNull("@contact_number", address.contact_number)
-        conn.AddParamWithNull("@address_line", address.address_line)
-        conn.AddParamWithNull("@city", address.city)
-        conn.AddParamWithNull("@postal_code", address.postal_code)
-        conn.AddParam("@is_default", If(address.is_default, 1, 0))
-        conn.AddParam("@date_added", DateTime.Now)
-        
-        Return conn.Query(query)
+        Try
+
+            conn.Clear()
+
+            ' If this is the first address or marked as default, clear other default addresses
+            If address.is_default > 0 Then
+                ClearDefaultAddresses(address.user_id)
+            End If
+
+            Dim query As String = "INSERT INTO customer_addresses (user_id, address_name, recipient_name, contact_number, address_line, city, postal_code, is_default, date_added) " & _
+                                 "VALUES (@user_id, @address_name, @recipient_name, @contact_number, @address_line, @city, @postal_code, @is_default, @date_added)"
+
+            conn.AddParam("@user_id", address.user_id)
+            conn.AddParamWithNull("@address_name", address.address_name)
+            conn.AddParamWithNull("@recipient_name", address.recipient_name)
+            conn.AddParamWithNull("@contact_number", address.contact_number)
+            conn.AddParamWithNull("@address_line", address.address_line)
+            conn.AddParamWithNull("@city", address.city)
+            conn.AddParamWithNull("@postal_code", address.postal_code)
+            conn.AddParam("@is_default", CInt(address.is_default))
+            conn.AddParam("@date_added", DateTime.Now)
+
+            Return conn.Query(query)
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error in CreateAddress: " & ex.Message)
+            Return False
+        End Try
     End Function
     
     Public Function UpdateAddress(ByVal address As CustomerAddress) As Boolean
-        ' If updating to default, clear other defaults
-        If address.is_default Then
-            ClearDefaultAddresses(address.user_id)
-        End If
-        
-        Dim query As String = "UPDATE customer_addresses " & _
-                             "SET address_name = @address_name, " & _
-                             "    recipient_name = @recipient_name, " & _
-                             "    contact_number = @contact_number, " & _
-                             "    address_line = @address_line, " & _
-                             "    city = @city, " & _
-                             "    postal_code = @postal_code, " & _
-                             "    is_default = @is_default " & _
-                             "WHERE address_id = @address_id"
-        
-        conn.AddParam("@address_id", address.address_id)
-        conn.AddParamWithNull("@address_name", address.address_name)
-        conn.AddParamWithNull("@recipient_name", address.recipient_name)
-        conn.AddParamWithNull("@contact_number", address.contact_number)
-        conn.AddParamWithNull("@address_line", address.address_line)
-        conn.AddParamWithNull("@city", address.city)
-        conn.AddParamWithNull("@postal_code", address.postal_code)
-        conn.AddParam("@is_default", If(address.is_default, 1, 0))
-        
-        Return conn.Query(query)
+        Try
+            ' If updating to default, clear other defaults
+            If address.is_default > 0 Then
+                ClearDefaultAddresses(address.user_id)
+            End If
+            
+            Dim query As String = "UPDATE customer_addresses " & _
+                                 "SET address_name = @address_name, " & _
+                                 "    recipient_name = @recipient_name, " & _
+                                 "    contact_number = @contact_number, " & _
+                                 "    address_line = @address_line, " & _
+                                 "    city = @city, " & _
+                                 "    postal_code = @postal_code, " & _
+                                 "    is_default = @is_default " & _
+                                 "WHERE address_id = @address_id"
+            
+            conn.AddParam("@address_id", address.address_id)
+            conn.AddParamWithNull("@address_name", address.address_name)
+            conn.AddParamWithNull("@recipient_name", address.recipient_name)
+            conn.AddParamWithNull("@contact_number", address.contact_number)
+            conn.AddParamWithNull("@address_line", address.address_line)
+            conn.AddParamWithNull("@city", address.city)
+            conn.AddParamWithNull("@postal_code", address.postal_code)
+            conn.AddParam("@is_default", CInt(address.is_default))
+            
+            Return conn.Query(query)
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error in UpdateAddress: " & ex.Message)
+            Return False
+        End Try
     End Function
     
     Public Function DeleteAddress(ByVal addressId As Integer) As Boolean
@@ -103,7 +116,7 @@ Public Class CustomerAddressController
             Dim address As CustomerAddress = MapDataRowToAddress(conn.Data.Tables(0).Rows(0))
             
             ' If deleting a default address, set another one as default if available
-            If address.is_default Then
+            If address.is_default > 0 Then
                 Dim userId As Integer = address.user_id
                 
                 ' Delete first
@@ -155,7 +168,7 @@ Public Class CustomerAddressController
         address.address_line = If(row("address_line") IsNot DBNull.Value, row("address_line").ToString(), Nothing)
         address.city = If(row("city") IsNot DBNull.Value, row("city").ToString(), Nothing)
         address.postal_code = If(row("postal_code") IsNot DBNull.Value, row("postal_code").ToString(), Nothing)
-        address.is_default = If(row("is_default") IsNot DBNull.Value, Convert.ToBoolean(row("is_default")), False)
+        address.is_default = If(row("is_default") IsNot DBNull.Value, Convert.ToInt64(row("is_default")), 0)
         
         If row("date_added") IsNot DBNull.Value Then
             address.date_added = Convert.ToDateTime(row("date_added"))

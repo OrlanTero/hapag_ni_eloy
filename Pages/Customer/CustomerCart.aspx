@@ -314,16 +314,16 @@
                                 <img src="../../Assets/Images/gcash.jpg" alt="GCash" class="img-fluid" style="max-width: 300px;" />
                             </div>
                             <div class="form-group">
-                                <label for="referenceNumber">Reference Number:</label>
-                                <input type="text" id="referenceNumber" class="form-control" placeholder="Enter GCash reference number" />
+                                <label for="referenceNumberInput">Reference Number:</label>
+                                <asp:TextBox ID="ReferenceNumberTextBox" runat="server" CssClass="form-control" placeholder="Enter GCash reference number"></asp:TextBox>
                             </div>
                             <div class="form-group">
-                                <label for="senderName">Sender Name:</label>
-                                <input type="text" id="senderName" class="form-control" />
+                                <label for="senderNameInput">Sender Name:</label>
+                                <asp:TextBox ID="SenderNameTextBox" runat="server" CssClass="form-control" placeholder="Enter sender's name"></asp:TextBox>
                             </div>
                             <div class="form-group">
-                                <label for="senderNumber">Sender Number:</label>
-                                <input type="text" id="senderNumber" class="form-control" />
+                                <label for="senderNumberInput">Sender Number:</label>
+                                <asp:TextBox ID="SenderNumberTextBox" runat="server" CssClass="form-control" placeholder="Enter sender's number"></asp:TextBox>
                             </div>
                         </div>
 
@@ -376,16 +376,16 @@
                         <img src="../../Assets/Images/gcash.jpg" alt="GCash" class="img-fluid" style="max-width: 300px;" />
                     </div>
                     <div class="form-group">
-                        <label for="referenceNumber">Reference Number:</label>
-                        <input type="text" id="referenceNumber" class="form-control" placeholder="Enter GCash reference number" />
+                        <label for="referenceNumberModal">Reference Number:</label>
+                        <input type="text" id="referenceNumberModal" class="form-control" placeholder="Enter GCash reference number" />
                     </div>
                     <div class="form-group">
-                        <label for="senderName">Sender Name:</label>
-                        <input type="text" id="senderName" class="form-control" placeholder="Enter sender's name" />
+                        <label for="senderNameModal">Sender Name:</label>
+                        <input type="text" id="senderNameModal" class="form-control" placeholder="Enter sender's name" />
                     </div>
                     <div class="form-group">
-                        <label for="senderNumber">Sender Number:</label>
-                        <input type="text" id="senderNumber" class="form-control" placeholder="Enter sender's number" />
+                        <label for="senderNumberModal">Sender Number:</label>
+                        <input type="text" id="senderNumberModal" class="form-control" placeholder="Enter sender's number" />
                     </div>
                 </div>
 
@@ -1324,6 +1324,17 @@
             var gcashFields = document.getElementById('gcashFields');
             var isGcash = document.getElementById('gcashOption').checked;
             gcashFields.style.display = isGcash ? 'block' : 'none';
+            
+            // Clear the fields if not using GCash
+            if (!isGcash) {
+                var referenceNumberInput = document.getElementById('<%= ReferenceNumberTextBox.ClientID %>');
+                var senderNameInput = document.getElementById('<%= SenderNameTextBox.ClientID %>');
+                var senderNumberInput = document.getElementById('<%= SenderNumberTextBox.ClientID %>');
+                
+                if (referenceNumberInput) referenceNumberInput.value = '';
+                if (senderNameInput) senderNameInput.value = '';
+                if (senderNumberInput) senderNumberInput.value = '';
+            }
         }
 
         function updateDeliveryFee(fee) {
@@ -1396,9 +1407,26 @@
             
             // Add GCash details if selected
             if (paymentMethod.value === 'gcash') {
-                var referenceNumber = document.getElementById('referenceNumber').value;
-                var senderName = document.getElementById('senderName').value;
-                var senderNumber = document.getElementById('senderNumber').value;
+                // Try to get values from the main form controls first (server controls)
+                var referenceNumberInput = document.getElementById('<%= ReferenceNumberTextBox.ClientID %>');
+                var senderNameInput = document.getElementById('<%= SenderNameTextBox.ClientID %>');
+                var senderNumberInput = document.getElementById('<%= SenderNumberTextBox.ClientID %>');
+                
+                var referenceNumber = referenceNumberInput ? referenceNumberInput.value : '';
+                var senderName = senderNameInput ? senderNameInput.value : '';
+                var senderNumber = senderNumberInput ? senderNumberInput.value : '';
+                
+                // If the main form fields are empty, try to get values from the modal
+                if (!referenceNumber && !senderName && !senderNumber) {
+                    referenceNumber = document.getElementById('referenceNumberModal').value;
+                    senderName = document.getElementById('senderNameModal').value;
+                    senderNumber = document.getElementById('senderNumberModal').value;
+                    
+                    // If using modal values, copy them to the server controls for form submission
+                    if (referenceNumberInput) referenceNumberInput.value = referenceNumber;
+                    if (senderNameInput) senderNameInput.value = senderName;
+                    if (senderNumberInput) senderNumberInput.value = senderNumber;
+                }
                 
                 if (!referenceNumber || !senderName || !senderNumber) {
                     document.querySelector('.loading-overlay').style.display = 'none';
@@ -1551,6 +1579,17 @@
             var gcashPayment = document.getElementById('gcashPayment');
             var details = document.getElementById('gcashDetails');
             details.style.display = gcashPayment.checked ? 'block' : 'none';
+            
+            // Clear the fields if not using GCash
+            if (!gcashPayment.checked) {
+                var referenceNumberInput = document.getElementById('<%= ReferenceNumberTextBox.ClientID %>');
+                var senderNameInput = document.getElementById('<%= SenderNameTextBox.ClientID %>');
+                var senderNumberInput = document.getElementById('<%= SenderNumberTextBox.ClientID %>');
+                
+                if (referenceNumberInput) referenceNumberInput.value = '';
+                if (senderNameInput) senderNameInput.value = '';
+                if (senderNumberInput) senderNumberInput.value = '';
+            }
         }
 
         // Add event listeners when the page loads

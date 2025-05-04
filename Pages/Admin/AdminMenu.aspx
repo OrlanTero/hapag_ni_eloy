@@ -184,9 +184,7 @@
                     </div>
                     
                     <!-- Alert Message -->
-                    <div class="alert-message alert-warning" id="sqlNote">
-                        <p><strong>Note:</strong> If you encounter an error about the "no_of_serving" column, please run the <code>run_fix_menu_table.bat</code> script to update your database schema.</p>
-        </div>
+                 
                     
                     <div class="alert-message" id="alertMessage" runat="server" visible="false">
                         <asp:Literal ID="AlertLiteral" runat="server"></asp:Literal>
@@ -194,7 +192,13 @@
                     
                     <!-- Form Container -->
                     <div class="form-container">
+                        <div class="form-row">
+                            <div class="form-group-half">
+                            <h3>ID:</h3>
                         <asp:TextBox ID="ItemIdTxt" runat="server" CssClass="form-control" Width="282px" RequiredFieldValidator1="true" hidden></asp:TextBox>
+
+                            </div>
+                        </div>
                         
                         <div class="form-row">
                             <div class="form-group-half">

@@ -3,7 +3,7 @@ Imports HapagDB
 
 Partial Class Pages_Admin_AdminAccounts
     Inherits System.Web.UI.Page
-    Dim Connect As New Connection()
+    Private userController As New UserController()
 
     Protected Sub AddBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles AddBtn.Click
         Dim username = UsernameTxt.Text
@@ -13,51 +13,39 @@ Partial Class Pages_Admin_AdminAccounts
         Dim address = AddressTxt.Text
         Dim user_type = UsertypeDdl.SelectedValue
 
-        Dim query = "INSERT INTO users (username, password, display_name, contact, address, user_type) VALUES (@username, @password, @display_name, @contact, @address, @user_type)"
+        ' Create a new User object
+        Dim newUser As New User()
+        newUser.username = username
+        newUser.password = password
+        newUser.display_name = display_name
+        newUser.contact = contact
+        newUser.address = address
+        newUser.user_type = Convert.ToInt32(user_type)
 
-        Connect.AddParam("@username", username)
-        Connect.AddParam("@password", password)
-        Connect.AddParam("@display_name", display_name)
-        Connect.AddParam("@contact", contact)
-        Connect.AddParam("@address", address)
-        Connect.AddParam("@user_type", user_type)
-
-        Dim insert = Connect.Query(query)
-
-        If insert Then
-            Dim script As String = "alert('Successfully Added!');"
-
-            ClientScript.RegisterStartupScript(Me.GetType, "alertMessage", script, True)
+        ' Use UserController to create the user
+        If userController.CreateUser(newUser) Then
+            ShowAlert("Successfully Added!")
         Else
-            Dim script As String = "alert('Failed to Add!');"
-
-            ClientScript.RegisterStartupScript(Me.GetType, "alertMessage", script, True)
+            ShowAlert("Failed to Add!")
         End If
 
         ViewTable()
-
-        UserIdTxt.Text = ""
-        UsernameTxt.Text = ""
-        PasswordTxt.Text = ""
-        DisplayNameTxt.Text = ""
-        ContactTxt.Text = ""
-        AddressTxt.Text = ""
-
+        ClearFormFields()
     End Sub
+
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        ViewTable()
+        If Not IsPostBack Then
+            ViewTable()
+        End If
     End Sub
 
     Public Sub ViewTable()
-
-        Dim query = "SELECT * FROM users"
-
-        Connect.Query(query)
+        ' Get all users from the controller
+        Dim users = userController.GetAllUsers()
 
         Table1.Rows.Clear()
 
         Dim headerRow As New TableHeaderRow
-
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Username"})
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Password"})
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Display Name"})
@@ -66,23 +54,26 @@ Partial Class Pages_Admin_AdminAccounts
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "User Type"})
         Table1.Rows.Add(headerRow)
 
-        For Each row As DataRow In Connect.Data.Tables(0).Rows
+        For Each user As User In users
             Dim tableRow As New TableRow()
 
-            tableRow.Cells.Add(New TableCell() With {.Text = row("username").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("password").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("display_name").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("contact").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("address").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("user_type").ToString()})
+            tableRow.Cells.Add(New TableCell() With {.Text = user.username})
+            tableRow.Cells.Add(New TableCell() With {.Text = user.password})
+            tableRow.Cells.Add(New TableCell() With {.Text = user.display_name})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(user.contact, "")})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(user.address, "")})
+            
+            ' Convert user_type to readable text
+            Dim userTypeText As String = "Customer"
+            If user.user_type = 1 Then
+                userTypeText = "Admin"
+            End If
+            tableRow.Cells.Add(New TableCell() With {.Text = userTypeText})
 
-            tableRow.Attributes.Add("data-user_id", row("user_id").ToString())
+            tableRow.Attributes.Add("data-user_id", user.user_id.ToString())
             Table1.Rows.Add(tableRow)
         Next
-
-
     End Sub
-
 
     Protected Sub EditBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles EditBtn.Click
         Dim user_id = UserIdTxt.Text
@@ -93,67 +84,57 @@ Partial Class Pages_Admin_AdminAccounts
         Dim address = AddressTxt.Text
         Dim user_type = UsertypeDdl.SelectedValue
 
-        Dim query = "UPDATE users SET username = @username,password = @password, display_name = @display_name, contact = @contact, address = @address, user_type = @user_type WHERE user_id = @user_id"
+        ' Create a User object for the update
+        Dim user As New User()
+        user.user_id = Convert.ToInt32(user_id)
+        user.username = username
+        user.password = password
+        user.display_name = display_name
+        user.contact = contact
+        user.address = address
+        user.user_type = Convert.ToInt32(user_type)
 
-        CONNECT.AddParam("@username", username)
-        Connect.AddParam("@password", password)
-        Connect.AddParam("@display_name", display_name)
-        CONNECT.AddParam("@contact", contact)
-        CONNECT.AddParam("@address", address)
-        Connect.AddParam("@user_type", user_type)
-        Connect.AddParam("@user_id", user_id)
-
-        Dim updateResult = CONNECT.Query(query)
-
-        If updateResult Then
-            Dim script As String = "alert('Successfully Updated!');"
-            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+        ' Use UserController to update the user
+        If userController.UpdateUser(user) Then
+            ShowAlert("Successfully Updated!")
         Else
-            Dim script As String = "alert('Failed to Update!');"
-            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+            ShowAlert("Failed to Update!")
         End If
 
         ViewTable()
-
-        UserIdTxt.Text = ""
-        UsernameTxt.Text = ""
-        PasswordTxt.Text = ""
-        DisplayNameTxt.Text = ""
-        ContactTxt.Text = ""
-        AddressTxt.Text = ""
-
+        ClearFormFields()
     End Sub
 
     Protected Sub RemoveBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles RemoveBtn.Click
         Dim user_id = UserIdTxt.Text
 
-        Dim query = "DELETE FROM users WHERE user_id = @user_id"
-
-        Connect.AddParam("@user_id", user_id)
-
-        Dim deleteResult = Connect.Query(query)
-
-        If deleteResult Then
-            Dim script As String = "alert('Successfully Deleted!');"
-            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+        ' Use UserController to delete the user
+        If userController.DeleteUser(Convert.ToInt32(user_id)) Then
+            ShowAlert("Successfully Deleted!")
         Else
-            Dim script As String = "alert('Failed to Delete!');"
-            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+            ShowAlert("Failed to Delete!")
         End If
 
         ViewTable()
+        ClearFormFields()
+    End Sub
 
+    Public Function HasSelectedRow() As Boolean
+        Return UserIdTxt.Text.Length > 0
+    End Function
+
+    Private Sub ClearFormFields()
         UserIdTxt.Text = ""
         UsernameTxt.Text = ""
         PasswordTxt.Text = ""
         DisplayNameTxt.Text = ""
         ContactTxt.Text = ""
         AddressTxt.Text = ""
-
     End Sub
 
-    Public Function HasSelectedRow() As Boolean
-        Return UserIdTxt.Text.Length > 0
-    End Function
+    Private Sub ShowAlert(ByVal message As String)
+        Dim script As String = "alert('" & message & "');"
+        ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+    End Sub
 End Class
 

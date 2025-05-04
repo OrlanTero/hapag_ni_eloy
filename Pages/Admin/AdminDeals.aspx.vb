@@ -3,10 +3,9 @@ Imports HapagDB
 
 Partial Class Pages_Admin_AdminDeals
     Inherits System.Web.UI.Page
-    Dim Connect As New Connection()
+    Private dealController As New DealController()
 
     Protected Sub AddBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles AddBtn.Click
-
         Dim name = NameTxt.Text
         Dim value = ValueTxt.Text
         Dim value_type = ValueTypeDdl.SelectedValue
@@ -15,24 +14,21 @@ Partial Class Pages_Admin_AdminDeals
         Dim description = DescriptionTxt.Text
         Dim image = ""
 
-        Dim query = "INSERT INTO deals (name, value, value_type, start_date, valid_until, description, image) VALUES (@name, @value, @value_type, @start_date, @valid_until , @description, @image)"
+        ' Create a new Deal object
+        Dim newDeal As New Deal()
+        newDeal.name = name
+        newDeal.value = Convert.ToDecimal(value)
+        newDeal.value_type = Convert.ToInt32(value_type)
+        newDeal.start_date = Convert.ToDateTime(start_date)
+        newDeal.valid_until = Convert.ToDateTime(valid_until)
+        newDeal.description = description
+        newDeal.image = image
 
-        Connect.AddParam("@name", name)
-        Connect.AddParam("@value", value)
-        Connect.AddParam("@value_type", value_type)
-        Connect.AddParam("@start_date", start_date)
-        Connect.AddParam("@valid_until", valid_until)
-        Connect.AddParam("@description", description)
-        Connect.AddParam("@image", image)
-
-        Dim insert = Connect.Query(query)
-
-        If insert Then
-            Dim script As String = "alert('Successfully Added!');"
-            ClientScript.RegisterStartupScript(Me.GetType, "alertMessage", script, True)
+        ' Use DealController to create the deal
+        If dealController.CreateDeal(newDeal) Then
+            ShowAlert("Successfully Added!")
         Else
-            Dim script As String = "alert('Failed to Add!');"
-            ClientScript.RegisterStartupScript(Me.GetType, "alertMessage", script, True)
+            ShowAlert("Failed to Add!")
         End If
 
         ViewTable()
@@ -40,7 +36,6 @@ Partial Class Pages_Admin_AdminDeals
     End Sub
 
     Protected Sub EditBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles EditBtn.Click
-
         Dim name = NameTxt.Text
         Dim value = ValueTxt.Text
         Dim value_type = ValueTypeDdl.SelectedValue
@@ -48,27 +43,24 @@ Partial Class Pages_Admin_AdminDeals
         Dim valid_until = ValidUntilTxt.Text
         Dim description = DescriptionTxt.Text
         Dim image = ""
-        Dim deals_id = DealIdTxt
+        Dim deals_id = DealIdTxt.Text
 
-        Dim query = "UPDATE deals SET name = @name, value = @value, value_type = @value_type,  start_date = @start_date, valid_until = @valid_until, description = @description, image = @image  WHERE deals_id = @deals_id"
+        ' Create a Deal object for the update
+        Dim deal As New Deal()
+        deal.deals_id = Convert.ToInt32(deals_id)
+        deal.name = name
+        deal.value = Convert.ToDecimal(value)
+        deal.value_type = Convert.ToInt32(value_type)
+        deal.start_date = Convert.ToDateTime(start_date)
+        deal.valid_until = Convert.ToDateTime(valid_until)
+        deal.description = description
+        deal.image = image
 
-        Connect.AddParam("@name", name)
-        Connect.AddParam("@value", value)
-        Connect.AddParam("@value_type", value_type)
-        Connect.AddParam("@start_date", start_date)
-        Connect.AddParam("@valid_until", valid_until)
-        Connect.AddParam("@description", description)
-        Connect.AddParam("@image", image)
-        Connect.AddParam("@deals_id", deals_id.Text)
-
-        Dim updateResult = CONNECT.Query(query)
-
-        If updateResult Then
-            Dim script As String = "alert('Successfully Updated!');"
-            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+        ' Use DealController to update the deal
+        If dealController.UpdateDeal(deal) Then
+            ShowAlert("Successfully Updated!")
         Else
-            Dim script As String = "alert('Failed to Update!');"
-            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+            ShowAlert("Failed to Update!")
         End If
 
         ViewTable()
@@ -78,18 +70,11 @@ Partial Class Pages_Admin_AdminDeals
     Protected Sub RemoveBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles RemoveBtn.Click
         Dim deals_id = DealIdTxt.Text()
 
-        Dim query = "DELETE FROM deals WHERE deals_id = @deals_id"
-
-        Connect.AddParam("@deals_id", deals_id)
-
-        Dim deleteResult = Connect.Query(query)
-
-        If deleteResult Then
-            Dim script As String = "alert('Successfully Deleted!');"
-            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+        ' Use DealController to delete the deal
+        If dealController.DeleteDeal(Convert.ToInt32(deals_id)) Then
+            ShowAlert("Successfully Deleted!")
         Else
-            Dim script As String = "alert('Failed to Delete!');"
-            ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
+            ShowAlert("Failed to Delete!")
         End If
 
         ViewTable()
@@ -108,8 +93,8 @@ Partial Class Pages_Admin_AdminDeals
     End Sub
 
     Public Sub ViewTable()
-        Dim query = "SELECT * FROM deals"
-        Connect.Query(query)
+        ' Get all deals from the controller
+        Dim deals = dealController.GetAllDeals()
 
         Table1.Rows.Clear()
 
@@ -124,19 +109,26 @@ Partial Class Pages_Admin_AdminDeals
         headerRow.Cells.Add(New TableHeaderCell() With {.Text = "Image"})
         Table1.Rows.Add(headerRow)
 
-        For Each row As DataRow In Connect.Data.Tables(0).Rows
+        For Each deal As Deal In deals
             Dim tableRow As New TableRow()
 
-            tableRow.Cells.Add(New TableCell() With {.Text = row("name").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("value").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("value_type").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("start_date").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("valid_until").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("date_created").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("description").ToString()})
-            tableRow.Cells.Add(New TableCell() With {.Text = row("image").ToString()})
+            tableRow.Cells.Add(New TableCell() With {.Text = deal.name})
+            tableRow.Cells.Add(New TableCell() With {.Text = deal.value.ToString()})
+            
+            ' Convert value_type to readable text
+            Dim valueTypeText As String = "Fixed"
+            If deal.value_type = 1 Then
+                valueTypeText = "Percentage"
+            End If
+            tableRow.Cells.Add(New TableCell() With {.Text = valueTypeText})
+            
+            tableRow.Cells.Add(New TableCell() With {.Text = deal.start_date.ToString("MM/dd/yyyy")})
+            tableRow.Cells.Add(New TableCell() With {.Text = deal.valid_until.ToString("MM/dd/yyyy")})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(deal.date_created.HasValue, deal.date_created.Value.ToString("MM/dd/yyyy"), "")})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(deal.description, "")})
+            tableRow.Cells.Add(New TableCell() With {.Text = If(deal.image, "")})
 
-            tableRow.Attributes.Add("data-deals_id", row("deals_id").ToString())
+            tableRow.Attributes.Add("data-deals_id", deal.deals_id.ToString())
             Table1.Rows.Add(tableRow)
         Next
     End Sub
@@ -147,5 +139,10 @@ Partial Class Pages_Admin_AdminDeals
         StartDateTxt.Text = ""
         ValidUntilTxt.Text = ""
         DescriptionTxt.Text = ""
+    End Sub
+    
+    Private Sub ShowAlert(ByVal message As String)
+        Dim script As String = "alert('" & message & "');"
+        ClientScript.RegisterStartupScript(Me.GetType(), "alertMessage", script, True)
     End Sub
 End Class

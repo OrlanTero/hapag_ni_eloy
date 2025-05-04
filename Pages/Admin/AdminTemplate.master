@@ -9,6 +9,7 @@
     <link href="./../../StyleSheets/Layout.css" rel="stylesheet" type="text/css" />
     <link href="./../../StyleSheets/Admin.css" rel="stylesheet" type="text/css" />
     <link href="./../../StyleSheets/Containers.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
     <!-- Add additional stylesheets as needed -->
@@ -198,6 +199,61 @@
             background-color: #dc3545 !important;
             color: #fff !important;
         }
+        
+        /* Navigation styles */
+        .nav-links {
+            padding: 0;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background-color: rgba(97, 159, 43, 0.1);
+            color: #619F2B;
+        }
+        
+        .nav-links a img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        
+        .nav-links a .white {
+            display: none;
+        }
+        
+        .nav-links a:hover .black, .nav-links a.active .black {
+            display: none;
+        }
+        
+        .nav-links a:hover .white, .nav-links a.active .white {
+            display: inline-block;
+        }
+        
+        .nav-links a span {
+            font-weight: 500;
+        }
+        
+        /* Fix emoji spacing in navigation */
+        .nav-links a span {
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-links a span::before {
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -264,10 +320,11 @@
                         <span>📦 Orders</span>
                     </a>
 
-                    <a href="AdminAccounts.aspx" id="navAccounts" runat="server">ACCOUNTS</a>
-                    <a href="AdminDiscounts.aspx" id="navDiscounts" runat="server">DISCOUNTS</a>
-                    <a href="AdminDeals.aspx" id="navDeals" runat="server">DEALS</a>
-                    <asp:LinkButton ID="NavLogoutButton" runat="server" CssClass="logout-btn" OnClick="LogoutButton_Click">LOGOUT</asp:LinkButton>
+                    <a href="AdminAccounts.aspx" id="navAccounts" runat="server">
+                        <img src="../../Assets/Images/icons/user-black.png" class="black" />
+                        <img src="../../Assets/Images/icons/user-white.png" class="white" />
+                        <span>👥 Accounts</span>
+                    </a>
 
                     <div class="dropdown-container">
                         <a href="javascript:void(0);" class="dropdown-toggle">
@@ -299,24 +356,36 @@
     </form>
 
     <script type="text/javascript">
-        // Mobile menu toggle
-        document.getElementById('menuToggle').addEventListener('click', function() {
-            var sidebar = document.querySelector('.admin-sidebar');
-            var mainContent = document.querySelector('.main-content');
-            
-            if (sidebar.style.width === '250px' || sidebar.style.width === '') {
-                sidebar.style.width = '0';
-                mainContent.style.marginLeft = '0';
-            } else {
-                sidebar.style.width = '250px';
-                mainContent.style.marginLeft = '250px';
-            }
-        });
-        
-        // Dropdown toggle
         document.addEventListener('DOMContentLoaded', function() {
-            var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            // Fix any potential encoding issues in the navigation text
+            var navLinks = document.querySelectorAll('.nav-links a span');
+            navLinks.forEach(function(link) {
+                // Ensure text is properly displayed
+                if (link.textContent.includes('')) {
+                    // Replace any unreadable characters
+                    var text = link.textContent;
+                    if (link.closest('a').getAttribute('href').includes('Dashboard')) {
+                        link.textContent = '📊 Dashboard';
+                    } else if (link.closest('a').getAttribute('href').includes('Menu') && !link.closest('a').getAttribute('href').includes('Categories') && !link.closest('a').getAttribute('href').includes('Types')) {
+                        link.textContent = '🍽️ Menu';
+                    } else if (link.closest('a').getAttribute('href').includes('Categories')) {
+                        link.textContent = '📑 Categories';
+                    } else if (link.closest('a').getAttribute('href').includes('Types')) {
+                        link.textContent = '🏷️ Types';
+                    } else if (link.closest('a').getAttribute('href').includes('Orders')) {
+                        link.textContent = '📦 Orders';
+                    } else if (link.closest('a').getAttribute('href').includes('Accounts')) {
+                        link.textContent = '👥 Accounts';
+                    } else if (link.closest('a').getAttribute('href').includes('Transaction')) {
+                        link.textContent = '💳 Transactions';
+                    } else if (link.textContent.includes('Administrator')) {
+                        link.textContent = '⚙️ Administrator';
+                    }
+                }
+            });
             
+            // Dropdown toggle
+            var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
             dropdownToggles.forEach(function(toggle) {
                 toggle.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -325,20 +394,20 @@
             });
             
             // Set active class based on current page
-            var currentPage = window.location.pathname.split('/').pop();
+            var currentPage = window.location.pathname.split('/').pop().toLowerCase();
             var navLinks = document.querySelectorAll('.nav-links a');
             var dropdownLinks = document.querySelectorAll('.dropdown-menu a');
             
             navLinks.forEach(function(link) {
-                var href = link.getAttribute('href');
-                if (href === currentPage) {
+                var href = link.getAttribute('href').toLowerCase();
+                if (href === currentPage || currentPage.includes(href.split('.')[0].toLowerCase())) {
                     link.classList.add('active');
                 }
             });
             
             dropdownLinks.forEach(function(link) {
-                var href = link.getAttribute('href');
-                if (href === currentPage) {
+                var href = link.getAttribute('href').toLowerCase();
+                if (href === currentPage || currentPage.includes(href.split('.')[0].toLowerCase())) {
                     link.classList.add('active');
                     link.parentElement.parentElement.classList.add('active');
                 }

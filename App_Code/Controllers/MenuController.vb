@@ -153,6 +153,11 @@ Public Class MenuController
         Return Nothing
     End Function
     
+    ' Alias for CreateCategory to match the Admin page method call
+    Public Function CreateMenuCategory(ByVal category As MenuCategory) As Boolean
+        Return CreateCategory(category)
+    End Function
+    
     Public Function CreateCategory(ByVal category As MenuCategory) As Boolean
         Dim query As String = "INSERT INTO menu_categories (category_name, description, is_active) " & _
                              "VALUES (@category_name, @description, @is_active)"
@@ -162,6 +167,11 @@ Public Class MenuController
         conn.AddParam("@is_active", If(category.is_active, 1, 0))
         
         Return conn.Query(query)
+    End Function
+    
+    ' Alias for UpdateCategory to match the Admin page method call
+    Public Function UpdateMenuCategory(ByVal category As MenuCategory) As Boolean
+        Return UpdateCategory(category)
     End Function
     
     Public Function UpdateCategory(ByVal category As MenuCategory) As Boolean
@@ -179,12 +189,30 @@ Public Class MenuController
         Return conn.Query(query)
     End Function
     
+    ' Alias for DeleteCategory to match the Admin page method call
+    Public Function DeleteMenuCategory(ByVal categoryId As Integer) As Boolean
+        Return DeleteCategory(categoryId)
+    End Function
+    
     Public Function DeleteCategory(ByVal categoryId As Integer) As Boolean
         Dim query As String = "DELETE FROM menu_categories WHERE category_id = @category_id"
         
         conn.AddParam("@category_id", categoryId)
         
         Return conn.Query(query)
+    End Function
+    
+    ' Check if a category is in use by any menu items
+    Public Function IsCategoryInUse(ByVal categoryId As Integer) As Boolean
+        Dim query As String = "SELECT COUNT(*) FROM menu WHERE category_id = @category_id"
+        conn.AddParam("@category_id", categoryId)
+        conn.Query(query)
+        
+        If conn.DataCount > 0 Then
+            Return Convert.ToInt32(conn.Data.Tables(0).Rows(0)(0)) > 0
+        End If
+        
+        Return False
     End Function
     
     ' Menu Types Functions
@@ -213,30 +241,45 @@ Public Class MenuController
         Return Nothing
     End Function
     
-    Public Function CreateType(ByVal type As MenuType) As Boolean
+    ' Alias for CreateType to match the Admin page method call
+    Public Function CreateMenuType(ByVal menuType As MenuType) As Boolean
+        Return CreateType(menuType)
+    End Function
+    
+    Public Function CreateType(ByVal menuType As MenuType) As Boolean
         Dim query As String = "INSERT INTO menu_types (type_name, description, is_active) " & _
                              "VALUES (@type_name, @description, @is_active)"
         
-        conn.AddParamWithNull("@type_name", type.type_name)
-        conn.AddParamWithNull("@description", type.description)
-        conn.AddParam("@is_active", If(type.is_active, 1, 0))
+        conn.AddParamWithNull("@type_name", menuType.type_name)
+        conn.AddParamWithNull("@description", menuType.description)
+        conn.AddParam("@is_active", If(menuType.is_active, 1, 0))
         
         Return conn.Query(query)
     End Function
     
-    Public Function UpdateType(ByVal type As MenuType) As Boolean
+    ' Alias for UpdateType to match the Admin page method call
+    Public Function UpdateMenuType(ByVal menuType As MenuType) As Boolean
+        Return UpdateType(menuType)
+    End Function
+    
+    Public Function UpdateType(ByVal menuType As MenuType) As Boolean
         Dim query As String = "UPDATE menu_types " & _
                              "SET type_name = @type_name, " & _
                              "    description = @description, " & _
                              "    is_active = @is_active " & _
                              "WHERE type_id = @type_id"
         
-        conn.AddParam("@type_id", type.type_id)
-        conn.AddParamWithNull("@type_name", type.type_name)
-        conn.AddParamWithNull("@description", type.description)
-        conn.AddParam("@is_active", If(type.is_active, 1, 0))
+        conn.AddParam("@type_id", menuType.type_id)
+        conn.AddParamWithNull("@type_name", menuType.type_name)
+        conn.AddParamWithNull("@description", menuType.description)
+        conn.AddParam("@is_active", If(menuType.is_active, 1, 0))
         
         Return conn.Query(query)
+    End Function
+    
+    ' Alias for DeleteType to match the Admin page method call
+    Public Function DeleteMenuType(ByVal typeId As Integer) As Boolean
+        Return DeleteType(typeId)
     End Function
     
     Public Function DeleteType(ByVal typeId As Integer) As Boolean
@@ -245,6 +288,19 @@ Public Class MenuController
         conn.AddParam("@type_id", typeId)
         
         Return conn.Query(query)
+    End Function
+    
+    ' Check if a type is in use by any menu items
+    Public Function IsTypeInUse(ByVal typeId As Integer) As Boolean
+        Dim query As String = "SELECT COUNT(*) FROM menu WHERE type_id = @type_id"
+        conn.AddParam("@type_id", typeId)
+        conn.Query(query)
+        
+        If conn.DataCount > 0 Then
+            Return Convert.ToInt32(conn.Data.Tables(0).Rows(0)(0)) > 0
+        End If
+        
+        Return False
     End Function
     
     ' Mapping Functions

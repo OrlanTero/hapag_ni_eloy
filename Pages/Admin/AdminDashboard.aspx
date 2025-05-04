@@ -471,8 +471,8 @@
                                 <div class="stat-card-value">
                                     <asp:Literal ID="TotalOrdersLiteral" runat="server">124</asp:Literal>
                                 </div>
-                                <div class="stat-card-change positive">
-                                    <span>↑ 12.5%</span> from last month
+                                <div id="OrdersChangeContainer" runat="server" class="stat-card-change positive">
+                                    <span><asp:Literal ID="OrdersChangeLiteral" runat="server">↑ 12.5%</asp:Literal></span> from last month
                                 </div>
                                 <div class="stat-card-icon">📊</div>
                             </div>
@@ -482,8 +482,8 @@
                                 <div class="stat-card-value">PHP
                                     <asp:Literal ID="TotalRevenueLiteral" runat="server">25,430</asp:Literal>
                                 </div>
-                                <div class="stat-card-change positive">
-                                    <span>↑ 8.3%</span> from last month
+                                <div id="RevenueChangeContainer" runat="server" class="stat-card-change positive">
+                                    <span><asp:Literal ID="RevenueChangeLiteral" runat="server">↑ 8.3%</asp:Literal></span> from last month
                                 </div>
                                 <div class="stat-card-icon">💰</div>
                             </div>
@@ -493,8 +493,8 @@
                                 <div class="stat-card-value">
                                     <asp:Literal ID="ActiveUsersLiteral" runat="server">45</asp:Literal>
                                 </div>
-                                <div class="stat-card-change positive">
-                                    <span>↑ 5.2%</span> from last month
+                                <div id="UsersChangeContainer" runat="server" class="stat-card-change positive">
+                                    <span><asp:Literal ID="UsersChangeLiteral" runat="server">↑ 5.2%</asp:Literal></span> from last month
                                 </div>
                                 <div class="stat-card-icon">👥</div>
                             </div>
@@ -504,8 +504,8 @@
                                 <div class="stat-card-value">
                                     <asp:Literal ID="MenuItemsLiteral" runat="server">78</asp:Literal>
                                 </div>
-                                <div class="stat-card-change positive">
-                                    <span>↑ 3.7%</span> from last month
+                                <div id="MenuChangeContainer" runat="server" class="stat-card-change positive">
+                                    <span><asp:Literal ID="MenuChangeLiteral" runat="server">↑ 3.7%</asp:Literal></span> from last month
                                 </div>
                                 <div class="stat-card-icon">🍔</div>
                             </div>
@@ -655,10 +655,10 @@
             var salesChart = new Chart(salesCtx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    labels: salesChartData.labels,
                     datasets: [{
                         label: 'Sales',
-                        data: [12500, 15000, 14000, 16500, 18000, 21000, 25000],
+                        data: salesChartData.data,
                         backgroundColor: 'rgba(97, 159, 43, 0.2)',
                         borderColor: '#619F2B',
                         borderWidth: 2,
@@ -686,9 +686,9 @@
             var categoriesChart = new Chart(categoriesCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Main Dishes', 'Desserts', 'Beverages', 'Appetizers', 'Sides'],
+                    labels: categoryChartData.labels,
                     datasets: [{
-                        data: [45, 20, 15, 10, 10],
+                        data: categoryChartData.data,
                         backgroundColor: [
                             '#619F2B',
                             '#FFC233',

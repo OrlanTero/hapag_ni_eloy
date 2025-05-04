@@ -4,7 +4,7 @@ Imports HapagDB
 
 Partial Class Pages_Admin_AdminMenu
     Inherits System.Web.UI.Page
-    Dim Connect As New Connection()
+    Private menuController As New MenuController()
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Not IsPostBack Then
@@ -15,225 +15,113 @@ Partial Class Pages_Admin_AdminMenu
     End Sub
 
     Private Sub LoadCategories()
-        Dim query = "SELECT category_id, category_name FROM menu_categories WHERE is_active = 1 ORDER BY category_name"
-        Connect.Query(query)
-
+        ' Use MenuController to get all categories
+        Dim categories = menuController.GetAllCategories()
+        
         CategoryDdl.Items.Clear()
         CategoryDdl.Items.Add(New ListItem("-- Select Category --", ""))
-
-        For Each row As DataRow In Connect.Data.Tables(0).Rows
-            CategoryDdl.Items.Add(New ListItem(row("category_name").ToString(), row("category_id").ToString()))
+        
+        ' Only add active categories to the dropdown
+        For Each category As MenuCategory In categories
+            If category.is_active Then
+                CategoryDdl.Items.Add(New ListItem(category.category_name, category.category_id.ToString()))
+            End If
         Next
     End Sub
 
     Private Sub LoadTypes()
-        Dim query = "SELECT type_id, type_name FROM menu_types WHERE is_active = 1 ORDER BY type_name"
-        Connect.Query(query)
-
+        ' Use MenuController to get all types
+        Dim types = menuController.GetAllTypes()
+        
         TypeDdl.Items.Clear()
         TypeDdl.Items.Add(New ListItem("-- Select Type --", ""))
-
-        For Each row As DataRow In Connect.Data.Tables(0).Rows
-            TypeDdl.Items.Add(New ListItem(row("type_name").ToString(), row("type_id").ToString()))
+        
+        ' Only add active types to the dropdown
+        For Each menuType As MenuType In types
+            If menuType.is_active Then
+                TypeDdl.Items.Add(New ListItem(menuType.type_name, menuType.type_id.ToString()))
+            End If
         Next
     End Sub
 
     Protected Sub AddBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles AddBtn.Click
-        Dim name = NameTxt.Text
-        Dim price = PriceTxt.Text
-        Dim categoryId = CategoryDdl.SelectedValue
-        Dim typeId = TypeDdl.SelectedValue
-        Dim availability = AvailabilityDdl.SelectedValue
-        Dim servings = ServingsTxt.Text
-        Dim description = DescriptionTxt.Text
-        Dim imagePath = ImagePathHidden.Value
-
-        If String.IsNullOrEmpty(name) Then
-            ShowAlert("Menu item name cannot be empty!")
+        ' Validate input
+        If Not ValidateInput() Then
             Return
         End If
-
-        If String.IsNullOrEmpty(price) Then
-            ShowAlert("Price cannot be empty!")
-            Return
-        End If
-
-        If String.IsNullOrEmpty(categoryId) Then
-            ShowAlert("Please select a category!")
-            Return
-        End If
-
-        If String.IsNullOrEmpty(typeId) Then
-            ShowAlert("Please select a type!")
-            Return
-        End If
-
-        ' Get category and type names for backward compatibility
-        Dim categoryName = CategoryDdl.SelectedItem.Text
-        Dim typeName = TypeDdl.SelectedItem.Text
-
+        
         Try
-            ' Try to insert with no_of_serving column
-            Dim query = "INSERT INTO menu (name, price, category_id, type_id, category, type, availability, no_of_serving, description, image) " & _
-                        "VALUES (@name, @price, @category_id, @type_id, @category, @type, @availability, @no_of_serving, @description, @image)"
-
-            Connect.AddParam("@name", name)
-            Connect.AddParam("@price", price)
-            Connect.AddParam("@category_id", categoryId)
-            Connect.AddParam("@type_id", typeId)
-            Connect.AddParam("@category", categoryName)
-            Connect.AddParam("@type", typeName)
-            Connect.AddParam("@availability", availability)
-            Connect.AddParam("@no_of_serving", servings)
-            Connect.AddParam("@description", description)
-            Connect.AddParam("@image", If(String.IsNullOrEmpty(imagePath), "", imagePath))
-
-            Dim insert = Connect.Query(query)
-
-            If insert Then
+            ' Create a new MenuItem object
+            Dim newMenuItem As New MenuItem()
+            newMenuItem.name = NameTxt.Text
+            newMenuItem.price = PriceTxt.Text
+            newMenuItem.category_id = Convert.ToInt32(CategoryDdl.SelectedValue)
+            newMenuItem.type_id = Convert.ToInt32(TypeDdl.SelectedValue)
+            newMenuItem.category = CategoryDdl.SelectedItem.Text
+            newMenuItem.type = TypeDdl.SelectedItem.Text
+            newMenuItem.availability = AvailabilityDdl.SelectedValue
+            newMenuItem.no_of_serving = ServingsTxt.Text
+            newMenuItem.description = DescriptionTxt.Text
+            newMenuItem.image = If(String.IsNullOrEmpty(ImagePathHidden.Value), Nothing, ImagePathHidden.Value)
+            
+            ' Use MenuController to create menu item
+            If menuController.CreateMenuItem(newMenuItem) Then
                 ShowAlert("Menu Item Added Successfully!")
             Else
                 ShowAlert("Failed to Add Menu Item!")
             End If
+            
         Catch ex As Exception
-            ' If there's an error, try without no_of_serving column
-            If ex.Message.Contains("no_of_serving") Then
-                Try
-                    Dim query = "INSERT INTO menu (name, price, category_id, type_id, category, type, availability, description, image) " & _
-                                "VALUES (@name, @price, @category_id, @type_id, @category, @type, @availability, @description, @image)"
-
-        Connect.AddParam("@name", name)
-        Connect.AddParam("@price", price)
-                    Connect.AddParam("@category_id", categoryId)
-                    Connect.AddParam("@type_id", typeId)
-                    Connect.AddParam("@category", categoryName)
-                    Connect.AddParam("@type", typeName)
-        Connect.AddParam("@availability", availability)
-                    Connect.AddParam("@description", description)
-                    Connect.AddParam("@image", If(String.IsNullOrEmpty(imagePath), DBNull.Value, imagePath))
-
-        Dim insert = Connect.Query(query)
-
-        If insert Then
-                        ShowAlert("Menu Item Added Successfully! (Note: Servings field was not saved due to database schema issue)")
-                    Else
-                        ShowAlert("Failed to Add Menu Item!")
-                    End If
-                Catch innerEx As Exception
-                    ShowAlert("Error: " & innerEx.Message)
-                End Try
-            Else
-                ShowAlert("Error: " & ex.Message)
-        End If
+            ' Show error message
+            ShowAlert("Error: " & ex.Message)
         End Try
-
+        
         ViewTable()
         ClearFormFields()
     End Sub
 
     Protected Sub EditBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles EditBtn.Click
-        Dim itemId = ItemIdTxt.Text
-        Dim name = NameTxt.Text
-        Dim price = PriceTxt.Text
-        Dim categoryId = CategoryDdl.SelectedValue
-        Dim typeId = TypeDdl.SelectedValue
-        Dim availability = AvailabilityDdl.SelectedValue
-        Dim servings = ServingsTxt.Text
-        Dim description = DescriptionTxt.Text
-        Dim imagePath = ImagePathHidden.Value
-
-        If String.IsNullOrEmpty(itemId) Then
+        ' Check if an item is selected
+        If String.IsNullOrEmpty(ItemIdTxt.Text) Then
             ShowAlert("Please select a menu item to edit!")
             Return
         End If
-
-        If String.IsNullOrEmpty(name) Then
-            ShowAlert("Menu item name cannot be empty!")
+        
+        ' Validate input
+        If Not ValidateInput() Then
             Return
         End If
-
-        If String.IsNullOrEmpty(price) Then
-            ShowAlert("Price cannot be empty!")
-            Return
-        End If
-
-        If String.IsNullOrEmpty(categoryId) Then
-            ShowAlert("Please select a category!")
-            Return
-        End If
-
-        If String.IsNullOrEmpty(typeId) Then
-            ShowAlert("Please select a type!")
-            Return
-        End If
-
-        ' Get category and type names for backward compatibility
-        Dim categoryName = CategoryDdl.SelectedItem.Text
-        Dim typeName = TypeDdl.SelectedItem.Text
-
+        
         Try
-            ' Try to update with no_of_serving column
-            Dim query = "UPDATE menu SET name = @name, price = @price, category_id = @category_id, type_id = @type_id, " & _
-                        "category = @category, type = @type, availability = @availability, no_of_serving = @no_of_serving, " & _
-                        "description = @description, image = @image WHERE item_id = @item_id"
-
-            Connect.AddParam("@name", name)
-            Connect.AddParam("@price", price)
-            Connect.AddParam("@category_id", categoryId)
-            Connect.AddParam("@type_id", typeId)
-            Connect.AddParam("@category", categoryName)
-            Connect.AddParam("@type", typeName)
-            Connect.AddParam("@availability", availability)
-            Connect.AddParam("@no_of_serving", servings)
-            Connect.AddParam("@description", description)
-            Connect.AddParam("@image", If(String.IsNullOrEmpty(imagePath), DBNull.Value, imagePath))
-            Connect.AddParam("@item_id", itemId)
-
-            Dim updateResult = Connect.Query(query)
-
-            If updateResult Then
+            ' Create MenuItem object for update
+            Dim menuItem As New MenuItem()
+            menuItem.item_id = Convert.ToInt32(ItemIdTxt.Text)
+            menuItem.name = NameTxt.Text
+            menuItem.price = PriceTxt.Text
+            menuItem.category_id = Convert.ToInt32(CategoryDdl.SelectedValue)
+            menuItem.type_id = Convert.ToInt32(TypeDdl.SelectedValue)
+            menuItem.category = CategoryDdl.SelectedItem.Text
+            menuItem.type = TypeDdl.SelectedItem.Text
+            menuItem.availability = AvailabilityDdl.SelectedValue
+            menuItem.no_of_serving = ServingsTxt.Text
+            menuItem.description = DescriptionTxt.Text
+            menuItem.image = If(String.IsNullOrEmpty(ImagePathHidden.Value), Nothing, ImagePathHidden.Value)
+            
+            ' Use MenuController to update menu item
+            If menuController.UpdateMenuItem(menuItem) Then
                 ShowAlert("Menu Item Updated Successfully!")
             Else
                 ShowAlert("Failed to Update Menu Item!")
             End If
+            
         Catch ex As Exception
-            ' If there's an error, try without no_of_serving column
-            If ex.Message.Contains("no_of_serving") Then
-                Try
-                    Dim query = "UPDATE menu SET name = @name, price = @price, category_id = @category_id, type_id = @type_id, " & _
-                                "category = @category, type = @type, availability = @availability, " & _
-                                "description = @description, image = @image WHERE item_id = @item_id"
-
-        Connect.AddParam("@name", name)
-        Connect.AddParam("@price", price)
-                    Connect.AddParam("@category_id", categoryId)
-                    Connect.AddParam("@type_id", typeId)
-                    Connect.AddParam("@category", categoryName)
-                    Connect.AddParam("@type", typeName)
-        Connect.AddParam("@availability", availability)
-                    Connect.AddParam("@description", description)
-                    Connect.AddParam("@image", If(String.IsNullOrEmpty(imagePath), DBNull.Value, imagePath))
-                    Connect.AddParam("@item_id", itemId)
-
-                    Dim updateResult = Connect.Query(query)
-
-        If updateResult Then
-                        ShowAlert("Menu Item Updated Successfully! (Note: Servings field was not saved due to database schema issue)")
-                    Else
-                        ShowAlert("Failed to Update Menu Item!")
-                    End If
-                Catch innerEx As Exception
-                    ShowAlert("Error: " & innerEx.Message)
-                End Try
-            Else
-                ShowAlert("Error: " & ex.Message)
-        End If
+            ShowAlert("Error: " & ex.Message)
         End Try
-
+        
         ViewTable()
         ClearFormFields()
     End Sub
-
+    
     Protected Sub RemoveBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles RemoveBtn.Click
         Dim itemId = ItemIdTxt.Text
 
@@ -242,16 +130,8 @@ Partial Class Pages_Admin_AdminMenu
             Return
         End If
 
-        ' Check if menu item is in use in orders
-        ' This would require a check against order_items table if you have one
-        ' For now, we'll just delete the item
-
-        Dim query = "DELETE FROM menu WHERE item_id = @item_id"
-        Connect.AddParam("@item_id", itemId)
-
-        Dim deleteResult = Connect.Query(query)
-
-        If deleteResult Then
+        ' Use MenuController to delete menu item
+        If menuController.DeleteMenuItem(Convert.ToInt32(itemId)) Then
             ShowAlert("Menu Item Deleted Successfully!")
         Else
             ShowAlert("Failed to Delete Menu Item!")
@@ -271,7 +151,6 @@ Partial Class Pages_Admin_AdminMenu
                 If fileExtension = ".jpg" OrElse fileExtension = ".jpeg" OrElse fileExtension = ".png" OrElse fileExtension = ".gif" Then
                     ' Create directory if it doesn't exist
                     Dim uploadDirectory As String = Server.MapPath("~/Assets/Images/Menu/")
-                    MsgBox(uploadDirectory)
                     If Not Directory.Exists(uploadDirectory) Then
                         Directory.CreateDirectory(uploadDirectory)
                     End If
@@ -309,16 +188,9 @@ Partial Class Pages_Admin_AdminMenu
 
     Public Sub ViewTable()
         Try
-            ' Try with no_of_serving column
-            Dim query = "SELECT m.*, mc.category_name, mt.type_name, " & _
-                        "CASE WHEN m.availability = 1 THEN 'Available' ELSE 'Not Available' END as availability_text " & _
-                        "FROM menu m " & _
-                        "LEFT JOIN menu_categories mc ON m.category_id = mc.category_id " & _
-                        "LEFT JOIN menu_types mt ON m.type_id = mt.type_id " & _
-                        "ORDER BY m.name"
-
-            Connect.Query(query)
-
+            ' Use MenuController to get all menu items
+            Dim menuItems = menuController.GetAllMenuItems()
+            
             Table1.Rows.Clear()
 
             ' Add header row
@@ -332,23 +204,60 @@ Partial Class Pages_Admin_AdminMenu
             headerRow.Cells.Add(New TableCell() With {.Text = "Image"})
             Table1.Rows.Add(headerRow)
 
-            For Each row As DataRow In Connect.Data.Tables(0).Rows
+            ' Get category and type info for better display
+            Dim categories = menuController.GetAllCategories()
+            Dim types = menuController.GetAllTypes()
+            
+            ' Create lookup dictionaries for faster access
+            Dim categoryDict As New Dictionary(Of Integer, String)
+            Dim typeDict As New Dictionary(Of Integer, String)
+            
+            For Each category As MenuCategory In categories
+                categoryDict(category.category_id) = category.category_name
+            Next
+            
+            For Each menuType As MenuType In types
+                typeDict(menuType.type_id) = menuType.type_name
+            Next
+
+            For Each item As MenuItem In menuItems
                 Dim tableRow As New TableRow()
 
-                ' Use SafeGetString for all text values
-                tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "name")})
-                tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "price")})
-                tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "category_name")})
-                tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "type_name")})
-                tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "availability_text", "Not Available")})
-                tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "no_of_serving")})
+                ' Add cells with menu item data
+                tableRow.Cells.Add(New TableCell() With {.Text = If(item.name, "")})
+                tableRow.Cells.Add(New TableCell() With {.Text = If(item.price, "")})
+                
+                ' Use dictionaries to get category and type names
+                Dim categoryName As String = ""
+                If item.category_id > 0 AndAlso categoryDict.ContainsKey(item.category_id) Then
+                    categoryName = categoryDict(item.category_id)
+                ElseIf Not String.IsNullOrEmpty(item.category) Then
+                    categoryName = item.category
+                End If
+                tableRow.Cells.Add(New TableCell() With {.Text = categoryName})
+                
+                Dim typeName As String = ""
+                If item.type_id > 0 AndAlso typeDict.ContainsKey(item.type_id) Then
+                    typeName = typeDict(item.type_id)
+                ElseIf Not String.IsNullOrEmpty(item.type) Then
+                    typeName = item.type
+                End If
+                tableRow.Cells.Add(New TableCell() With {.Text = typeName})
+                
+                ' Convert availability to text
+                Dim availabilityText As String = "Not Available"
+                If Not String.IsNullOrEmpty(item.availability) AndAlso item.availability = "1" Then
+                    availabilityText = "Available"
+                End If
+                tableRow.Cells.Add(New TableCell() With {.Text = availabilityText})
+                
+                tableRow.Cells.Add(New TableCell() With {.Text = If(item.no_of_serving, "")})
                 
                 ' Create image cell
                 Dim imageCell As New TableCell()
-                Dim imagePath = SafeGetString(row, "image")
-                If Not String.IsNullOrEmpty(imagePath) Then
+                If Not String.IsNullOrEmpty(item.image) Then
                     Dim img As New System.Web.UI.WebControls.Image()
-                    img.ImageUrl = imagePath
+                    img.ImageUrl = item.image
                     img.Width = Unit.Pixel(50)
                     img.Height = Unit.Pixel(50)
                     imageCell.Controls.Add(img)
@@ -357,82 +266,17 @@ Partial Class Pages_Admin_AdminMenu
                 End If
                 tableRow.Cells.Add(imageCell)
 
-                ' Add data attributes for JavaScript using SafeGetString
-                tableRow.Attributes.Add("data-item_id", SafeGetString(row, "item_id"))
-                tableRow.Attributes.Add("data-category_id", SafeGetString(row, "category_id"))
-                tableRow.Attributes.Add("data-type_id", SafeGetString(row, "type_id"))
-                tableRow.Attributes.Add("data-description", SafeGetString(row, "description"))
-                tableRow.Attributes.Add("data-image", SafeGetString(row, "image"))
+                ' Add data attributes for JavaScript
+                tableRow.Attributes.Add("data-item_id", item.item_id.ToString())
+                tableRow.Attributes.Add("data-category_id", If(item.category_id > 0, item.category_id.ToString(), ""))
+                tableRow.Attributes.Add("data-type_id", If(item.type_id > 0, item.type_id.ToString(), ""))
+                tableRow.Attributes.Add("data-description", If(item.description, ""))
+                tableRow.Attributes.Add("data-image", If(item.image, ""))
                 
                 Table1.Rows.Add(tableRow)
             Next
         Catch ex As Exception
-            ' If there's an error, try without no_of_serving column
-            If ex.Message.Contains("no_of_serving") Then
-                Try
-                    Dim query = "SELECT m.*, mc.category_name, mt.type_name, " & _
-                                "CASE WHEN m.availability = 1 THEN 'Available' ELSE 'Not Available' END as availability_text " & _
-                                "FROM menu m " & _
-                                "LEFT JOIN menu_categories mc ON m.category_id = mc.category_id " & _
-                                "LEFT JOIN menu_types mt ON m.type_id = mt.type_id " & _
-                                "ORDER BY m.name"
-
-        Connect.Query(query)
-
-        Table1.Rows.Clear()
-
-                    ' Add header row
-                    Dim headerRow As New TableRow()
-                    headerRow.Cells.Add(New TableCell() With {.Text = "Name"})
-                    headerRow.Cells.Add(New TableCell() With {.Text = "Price"})
-                    headerRow.Cells.Add(New TableCell() With {.Text = "Category"})
-                    headerRow.Cells.Add(New TableCell() With {.Text = "Type"})
-                    headerRow.Cells.Add(New TableCell() With {.Text = "Availability"})
-                    headerRow.Cells.Add(New TableCell() With {.Text = "Image"})
-        Table1.Rows.Add(headerRow)
-
-        For Each row As DataRow In Connect.Data.Tables(0).Rows
-            Dim tableRow As New TableRow()
-
-                        ' Use SafeGetString for all text values
-                        tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "name")})
-                        tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "price")})
-                        tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "category_name")})
-                        tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "type_name")})
-                        tableRow.Cells.Add(New TableCell() With {.Text = SafeGetString(row, "availability_text", "Not Available")})
-                        
-                        ' Create image cell
-                        Dim imageCell As New TableCell()
-                        Dim imagePath = SafeGetString(row, "image")
-                        If Not String.IsNullOrEmpty(imagePath) Then
-                            Dim img As New System.Web.UI.WebControls.Image()
-                            img.ImageUrl = imagePath
-                            img.Width = Unit.Pixel(50)
-                            img.Height = Unit.Pixel(50)
-                            imageCell.Controls.Add(img)
-                        Else
-                            imageCell.Text = "No Image"
-                        End If
-                        tableRow.Cells.Add(imageCell)
-
-                        ' Add data attributes for JavaScript using SafeGetString
-                        tableRow.Attributes.Add("data-item_id", SafeGetString(row, "item_id"))
-                        tableRow.Attributes.Add("data-category_id", SafeGetString(row, "category_id"))
-                        tableRow.Attributes.Add("data-type_id", SafeGetString(row, "type_id"))
-                        tableRow.Attributes.Add("data-description", SafeGetString(row, "description"))
-                        tableRow.Attributes.Add("data-image", SafeGetString(row, "image"))
-                        
-            Table1.Rows.Add(tableRow)
-        Next
-
-                    ' Show a message to the user about the missing column
-                    ShowAlert("Note: The 'Servings' column is missing from the database. Please run the SQL script to add it.")
-                Catch innerEx As Exception
-                    ShowAlert("Error loading menu items: " & innerEx.Message)
-                End Try
-            Else
-                ShowAlert("Error loading menu items: " & ex.Message)
-            End If
+            ShowAlert("Error loading menu items: " & ex.Message)
         End Try
     End Sub
 
@@ -449,6 +293,31 @@ Partial Class Pages_Admin_AdminMenu
         ItemImage.ImageUrl = ""
         ItemImage.Visible = False
     End Sub
+    
+    Private Function ValidateInput() As Boolean
+        ' Validate required fields
+        If String.IsNullOrEmpty(NameTxt.Text) Then
+            ShowAlert("Menu item name cannot be empty!")
+            Return False
+        End If
+
+        If String.IsNullOrEmpty(PriceTxt.Text) Then
+            ShowAlert("Price cannot be empty!")
+            Return False
+        End If
+
+        If String.IsNullOrEmpty(CategoryDdl.SelectedValue) Then
+            ShowAlert("Please select a category!")
+            Return False
+        End If
+
+        If String.IsNullOrEmpty(TypeDdl.SelectedValue) Then
+            ShowAlert("Please select a type!")
+            Return False
+        End If
+        
+        Return True
+    End Function
 
     Private Sub ShowAlert(ByVal message As String)
         alertMessage.Visible = True
@@ -465,16 +334,4 @@ Partial Class Pages_Admin_AdminMenu
         
         AlertLiteral.Text = message
     End Sub
-
-    ' Add helper function at the top of the class
-    Private Function SafeGetString(ByVal row As DataRow, ByVal columnName As String, Optional ByVal defaultValue As String = "") As String
-        Try
-            If row Is Nothing OrElse IsDBNull(row(columnName)) Then
-                Return defaultValue
-            End If
-            Return row(columnName).ToString()
-        Catch ex As Exception
-            Return defaultValue
-        End Try
-    End Function
 End Class
