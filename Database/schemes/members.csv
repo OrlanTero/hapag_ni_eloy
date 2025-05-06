@@ -1,0 +1,6 @@
+"id","name","email","phone","membership_type","status","created_at","updated_at","qr_code","pin","address","date_of_birth","gender"
+"1","John Doe","john.doe@example.com","(555) 123-4567","Standard","Active","2025-04-05 04:58:46","2025-04-05 04:58:46","MEM-1743835672373-42","123456","null","null","Male"
+"2","Jane Smith","jane.smith@example.com","(555) 987-6543","Premium","Active","2025-04-05 04:58:46","2025-04-05 04:58:46","MEM-1743874933132-426-2","1234","null","null","null"
+"3","Bob Johnson","bob.johnson@example.com","(555) 456-7890","Standard","Inactive","2025-04-05 04:58:46","2025-04-05 04:58:46","MEM-1743874933170-937-3","493137","null","null","Male"
+"4","Alice Williams","alice.williams@example.com","(555) 567-8901","Student","Active","2025-04-05 04:58:46","2025-04-05 04:58:46","MEM-1743874933181-433-4","917556","null","null","null"
+"5","Charlie Brown","charlie.brown@example.com","(555) 678-9012","Senior","Active","2025-04-05 04:58:46","2025-04-05 04:58:46","MEM-1743874933193-216-5","967669","null","null","null"

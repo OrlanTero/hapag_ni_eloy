@@ -1,0 +1,7 @@
+"id","title","author","isbn","category","status","created_at","updated_at","front_cover","back_cover","spine_cover","cover_color","publisher","publish_year","description","total_copies","available_copies"
+"1","Potato Book","Harper Lees","9780061120084","Fiction","Available","2025-04-05 04:58:45","1743904788151","null","null","null","#892bab","null","null","HAHAHAHA","2","2"
+"2","1984","George Orwell","9780451524935","Science Fiction","Available","2025-04-05 04:58:45","1743843091424","null","null","null","#6B4226","null","null","null","2","2"
+"3","The Great Gatsby","F. Scott Fitzgerald","9780743273565","Classic","Available","2025-04-05 04:58:45","1743837632508","null","null","null","#6B4226","null","null","null","5","5"
+"4","Pride and Prejudice","Jane Austen","9780141439518","Romance","Available","2025-04-05 04:58:45","1743837632508","null","null","null","#6B4226","null","null","null","3","3"
+"5","The Hobbit","J.R.R. Tolkien","9780547928227","Fantasy","Available","2025-04-05 04:58:45","1743905117314","null","null","null","#6B4226","null","null","null","4","4"
+"6","awdwa","123","awdaw","awda","Unavailable","2025-05-02 03:18:22","2025-05-02 03:18:22","null","null","null","#6B4226","awdwaaw","2005","AWdaw","1","1"

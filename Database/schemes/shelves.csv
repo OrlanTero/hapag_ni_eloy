@@ -1,0 +1,5 @@
+"id","shelf_code","name","location","description","capacity","category","created_at","updated_at","section","code"
+"1","A-01","Fiction - A","First Floor, North Wing","Fiction books, authors A-D","100","Fiction","2025-04-06 02:17:49","2025-04-06 02:17:49","null","GEN-1"
+"2","B-01","Science Fiction","First Floor, East Wing","All Science Fiction books","100","Science Fiction","2025-04-06 02:17:49","2025-04-06 02:17:49","null","GEN-2"
+"3","C-01","Non-Fiction - History","Second Floor, West Wing","History books","100","History","2025-04-06 02:17:49","2025-04-06 02:17:49","null","GEN-3"
+"4","D-01","Reference Books","Ground Floor, Central Area","Reference materials and encyclopedias","100","Reference","2025-04-06 02:17:49","2025-04-06 02:17:49","null","GEN-4"
