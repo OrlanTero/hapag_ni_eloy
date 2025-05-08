@@ -1,0 +1,582 @@
+/* Admin Orders Styles */
+
+/* Force GCash verification buttons to always be visible */
+.gcash-verification-buttons {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.gcash-verification-buttons input[type="submit"],
+.gcash-verification-buttons button,
+.gcash-panel .btn-verify,
+.gcash-panel .btn-cancel {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* GCash payment section should always be visible */
+.gcash-panel {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.order-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.order-id {
+    font-weight: bold;
+    font-size: 18px;
+    color: #333;
+}
+
+.order-date {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.order-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-processing {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* New styles for expanded order information */
+.customer-info, .order-details, .delivery-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.customer-info h4, .order-details h4, .delivery-info h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.info-label {
+    flex: 0 0 120px;
+    font-weight: 500;
+    color: #555;
+}
+
+.info-value {
+    flex: 1;
+}
+
+.order-items {
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.order-item {
+    display: flex;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.order-item.header {
+    background-color: #f2f2f2;
+    font-weight: 600;
+}
+
+.item-name {
+    flex: 2;
+    padding-right: 10px;
+}
+
+.item-quantity {
+    flex: 0.5;
+    text-align: center;
+}
+
+.item-price, .item-subtotal {
+    flex: 1;
+    text-align: right;
+}
+
+.order-summary {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.summary-row.total {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.summary-value.discount {
+    color: #dc3545;
+}
+
+.order-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-process {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-complete {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-cancel {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-delivery {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-print {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-process:hover, .btn-complete:hover, .btn-cancel:hover, .btn-delivery:hover, .btn-print:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.search-filter-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-box {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.status-dropdown {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+/* New styles for View Order functionality */
+.basic-order-info {
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.view-details-btn {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.view-details-btn:hover {
+    background-color: #138496;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.order-details-container {
+    border-top: 1px dashed #ddd;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-3 {
+    margin-top: 15px;
+}
+
+.btn-accept {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-accept:hover {
+    background-color: #218838;
+}
+
+.btn-status {
+    background-color: #17a2b8;
+    color: white;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%;
+    max-width: 500px;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.close-btn {
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.modal-footer {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    margin-left: 10px;
+}
+
+.delivery-info {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #f2f2f2;
+}
+
+/* Payment Information Styles */
+.payment-info {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #f2f2f2;
+}
+
+.payment-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+/* Style for buttons in the payment info section */
+.payment-actions .action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin: 5px 0;
+    min-width: 120px;
+}
+
+/* Ensure GCash payment buttons are displayed properly */
+.gcash-panel .payment-actions .action-btn {
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+/* Make sure the buttons are evenly spaced when in column mode */
+@media (max-width: 768px) {
+    .payment-actions {
+        flex-direction: column;
+    }
+    
+    .payment-actions .action-btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+.btn-verify {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-verify:hover {
+    background-color: #45a049;
+}
+
+.status-pending {
+    color: #e67e22;
+    font-weight: bold;
+}
+
+.status-success {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Payment Verification Modal Styles */
+.payment-verification-container {
+    margin-bottom: 20px;
+}
+
+.info-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.info-section h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+}
+
+.verification-message {
+    background-color: #f8f8f8;
+    padding: 15px;
+    border-radius: 4px;
+    border-left: 4px solid #2196F3;
+}
+
+.verification-message p {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.btn-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #45a049;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+}
+
+.modal-content {
+    max-width: 600px;
+}
+
+.word-wrap {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.payment-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.payment-info h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.payment-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.btn-verify {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-verify:hover {
+    background-color: #45a049;
+}
+
+.payment-actions.hide-buttons {
+    display: none !important;
+}
+
+/* Responsive design improvements */
+@media (max-width: 992px) {
+    .order-header {
+        flex-direction: column;
+    }
+    
+    .order-actions {
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        flex: 1 0 calc(50% - 10px);
+        text-align: center;
+    }
+    
+    .modal-content {
+        width: 90%;
+        margin: 5% auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .info-row {
+        flex-direction: column;
+    }
+    
+    .info-label {
+        flex: 0 0 100%;
+        margin-bottom: 5px;
+    }
+    
+    .order-item {
+        flex-wrap: wrap;
+    }
+    
+    .item-name {
+        flex: 0 0 100%;
+        margin-bottom: 5px;
+    }
+    
+    .action-btn {
+        flex: 0 0 100%;
+    }
+} 

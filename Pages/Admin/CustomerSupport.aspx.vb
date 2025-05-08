@@ -21,6 +21,7 @@ Partial Class Pages_Admin_CustomerSupport
 
             ' Verify user has staff or admin role
             Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
+            
             If currentUser.role.ToLower() <> "staff" AndAlso currentUser.role.ToLower() <> "admin" Then
                 System.Diagnostics.Debug.WriteLine("CustomerSupport: Access denied for user")
                 ShowAlert("This page is only accessible to staff and admin members.", False)

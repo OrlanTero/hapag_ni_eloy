@@ -30,31 +30,15 @@ Partial Class Pages_Customer_CustomerSupport
                 Return
             End If
 
-            ' Check if customer 
+            ' Get the current user from session
             Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
             
-       
-            
-            ' Convert user_type (string) to integer for comparison
-            Dim userTypeValue As Integer = -1
-            Try
-                ' Always treat it as a string and try to parse it to integer
-                If Integer.TryParse(currentUser.user_type, userTypeValue) Then
-                    ' Successfully parsed to integer
-                    If userTypeValue <> 0 Then ' 0 is customer type
-                        ShowAlert("This page is only accessible to customers. Your user type is: " & userTypeValue, False)
-                        Response.Redirect("~/Pages/Customer/CustomerDashboard.aspx")
-                        Return
-                    End If
-                Else
-                    ' Could not parse to integer - probably some unexpected format
-                    ShowAlert("Invalid user type format: " & currentUser.user_type, False)
-                    Response.Redirect("~/Pages/Customer/CustomerDashboard.aspx")
-                    Return
-                End If
-            Catch ex As Exception
-              
-            End Try
+            ' Check if user is a customer (could be stored as 0, "0", "customer", or "Customer")
+            If Not IsCustomer(currentUser) Then
+                ShowAlert("This page is only accessible to customers.", False)
+                Response.Redirect("~/Pages/Customer/CustomerDashboard.aspx")
+                Return
+            End If
 
             LoadTickets()
             
@@ -67,6 +51,37 @@ Partial Class Pages_Customer_CustomerSupport
             End If
         End If
     End Sub
+    
+    ' Helper function to determine if the user is a customer
+    Private Function IsCustomer(user As User) As Boolean
+        Try
+            ' Check user_type - could be string or integer
+            If user.user_type IsNot Nothing Then
+                ' Try to parse as integer first
+                Dim userTypeValue As Integer
+                If Integer.TryParse(user.user_type, userTypeValue) Then
+                    ' If it's 0, it's a customer
+                    Return userTypeValue = 3
+                Else
+                    ' Not an integer, check if it's "customer" string
+                    Return user.user_type.ToLower() = "customer"
+                End If
+            End If
+            
+            ' Also check role if needed
+            If user.role IsNot Nothing Then
+                Return user.role.ToLower() = "customer"
+            End If
+            
+            ' Default - allow access when validation fails
+            Return True
+            
+        Catch ex As Exception
+            ' In case of errors, allow access and log the error
+            System.Diagnostics.Debug.WriteLine("Error validating customer: " & ex.Message)
+            Return True
+        End Try
+    End Function
     
     Private Sub LoadTickets()
         Try

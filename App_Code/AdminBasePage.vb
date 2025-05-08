@@ -168,6 +168,13 @@ Public Class AdminBasePage
         End If
         
         Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
+        
+        ' Check if role is null or empty
+        If String.IsNullOrEmpty(currentUser.role) Then
+            System.Diagnostics.Debug.WriteLine("IsStaffUser check: False (role is null or empty)")
+            Return False
+        End If
+        
         Dim isStaff As Boolean = currentUser.role.ToLower() = "staff"
         
         System.Diagnostics.Debug.WriteLine("IsStaffUser check: " & isStaff & " for user with role " & currentUser.role)
@@ -181,6 +188,13 @@ Public Class AdminBasePage
         End If
         
         Dim currentUser As User = DirectCast(Session("CURRENT_SESSION"), User)
+        
+        ' Check if role is null or empty
+        If String.IsNullOrEmpty(currentUser.role) Then
+            System.Diagnostics.Debug.WriteLine("IsAdminUser check: False (role is null or empty)")
+            Return False
+        End If
+        
         Dim isAdmin As Boolean = currentUser.role.ToLower() = "admin"
         
         System.Diagnostics.Debug.WriteLine("IsAdminUser check: " & isAdmin & " for user with role " & currentUser.role)

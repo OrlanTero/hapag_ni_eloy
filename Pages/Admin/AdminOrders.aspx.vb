@@ -591,6 +591,42 @@ Partial Class Pages_Admin_AdminOrders
                         System.Diagnostics.Debug.WriteLine("Using ClientScript to register script")
                         Page.ClientScript.RegisterStartupScript(Me.GetType(), "ToggleDetails" & orderId, script, True)
                     End If
+
+                Case "PrintReceipt"
+                    Try
+                        System.Diagnostics.Debug.WriteLine("Print Receipt button clicked for order " & orderId.ToString())
+                        
+                        ' Get order details
+                        Dim order = orderController.GetOrderById(orderId)
+                        
+                        If order IsNot Nothing Then
+                            ' Get customer name
+                            Dim userController As New UserController()
+                            Dim user = userController.GetUserById(order.user_id)
+                            Dim customerName As String = If(user IsNot Nothing, user.display_name, "Customer")
+                            
+                            ' Prepare the script to call the printReceipt function
+                            Dim script As String = "printReceipt(" & orderId.ToString() & ", '" & _
+                                                  customerName.Replace("'", "\'") & "', " & _
+                                                  order.total_amount.ToString() & ", '" & _
+                                                  order.order_date.ToString("MMMM dd, yyyy hh:mm tt") & "');"
+                            
+                            ' Use the existing ScriptManager if it exists, otherwise use ClientScript
+                            Dim sm As ScriptManager = ScriptManager.GetCurrent(Page)
+                            If sm IsNot Nothing Then
+                                System.Diagnostics.Debug.WriteLine("Using ScriptManager to register script for printing")
+                                sm.RegisterStartupScript(Me, Me.GetType(), "PrintReceipt" & orderId, script, True)
+                            Else
+                                System.Diagnostics.Debug.WriteLine("Using ClientScript to register script for printing")
+                                Page.ClientScript.RegisterStartupScript(Me.GetType(), "PrintReceipt" & orderId, script, True)
+                            End If
+                        Else
+                            ShowAlert("Order not found.", "alert-danger")
+                        End If
+                    Catch ex As Exception
+                        LogError("Error printing receipt: " & ex.Message)
+                        ShowAlert("Error printing receipt: " & ex.Message, "alert-danger")
+                    End Try
             
                 Case "VerifyPayment"
                     Try
@@ -1491,5 +1527,50 @@ Partial Class Pages_Admin_AdminOrders
             System.Diagnostics.Debug.WriteLine("Stack trace: " & ex.StackTrace)
             ShowAlert("Error loading payment verification: " & ex.Message, "alert-danger")
         End Try
+    End Sub
+
+    ' Add a handler for the AJAX request to get receipt items
+    Protected Sub Page_Init(sender As Object, e As EventArgs) Handles Me.Init
+        ' Check if this is an AJAX request for receipt items
+        If Request.QueryString("handler") = "PrintReceiptItems" Then
+            Try
+                Dim orderId As Integer
+                If Integer.TryParse(Request.QueryString("orderId"), orderId) Then
+                    ' Get the order items
+                    Dim orderItems As DataTable = GetOrderItems(orderId)
+                    
+                    ' Convert to JSON
+                    Dim jsonItems As New System.Text.StringBuilder("[")
+                    
+                    For i As Integer = 0 To orderItems.Rows.Count - 1
+                        Dim row As DataRow = orderItems.Rows(i)
+                        
+                        ' Add comma separator except for the first item
+                        If i > 0 Then
+                            jsonItems.Append(",")
+                        End If
+                        
+                        ' Create a JSON object for this item
+                        jsonItems.Append("{")
+                        jsonItems.Append("""name"":""").Append(row("name").ToString().Replace("""", "\""")).Append(""",")
+                        jsonItems.Append("""quantity"":").Append(row("quantity").ToString()).Append(",")
+                        jsonItems.Append("""price"":").Append(row("price").ToString())
+                        jsonItems.Append("}")
+                    Next
+                    
+                    jsonItems.Append("]")
+                    
+                    ' Set the response content type to JSON
+                    Response.ContentType = "application/json"
+                    Response.Write(jsonItems.ToString())
+                    Response.End()
+                End If
+            Catch ex As Exception
+                ' Handle error
+                Response.ContentType = "application/json"
+                Response.Write("[]")
+                Response.End()
+            End Try
+        End If
     End Sub
 End Class
