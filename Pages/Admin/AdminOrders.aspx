@@ -371,7 +371,7 @@
                             <div class="info-row">
                                 <div class="info-label">Sender Number:</div>
                                 <div class="info-value" id="SenderNumberLiteral">Loading...</div>
-                            </div>
+                        </div>
                             <div class="info-row">
                                 <div class="info-label">Transaction Date:</div>
                                 <div class="info-value" id="TransactionDateLiteral">Loading...</div>
@@ -380,8 +380,8 @@
                                 <div class="info-label">Status:</div>
                                 <div class="info-value" id="TransactionStatusLiteral">Loading...</div>
                             </div>
-                        </div>
-                        
+                            </div>
+                    
                         <div class="verification-message">
                             <p>Please verify the payment details before approving. Once approved, the order status will be updated and the order will be ready for processing.</p>
                         </div>

@@ -1,4 +1,5 @@
 Imports System.Data.SqlClient
+Imports System.Collections.Generic
 Imports HapagDB
 
 Partial Class Pages_LoginPortal_ResetPassword
@@ -6,69 +7,125 @@ Partial Class Pages_LoginPortal_ResetPassword
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Not IsPostBack Then
-            ' Get token from query string
-            Dim token As String = Request.QueryString("token")
-            
-            ' Check if token exists
-            If String.IsNullOrEmpty(token) Then
+            Try
+                ' Get token from query string
+                Dim token As String = Request.QueryString("token")
+                
+                System.Diagnostics.Debug.WriteLine("Reset Password Page - Token from query string: " & If(token, "null"))
+                
+                ' Check if token exists
+                If String.IsNullOrEmpty(token) Then
+                    System.Diagnostics.Debug.WriteLine("Reset Password Error - No token provided")
+                    ShowError()
+                    Return
+                End If
+                
+                ' Store token in hidden field
+                tokenValue.Value = token
+                
+                ' Check user data from OTP verification
+                Dim userData As Dictionary(Of String, String) = OTPManager.GetUserData()
+                
+                System.Diagnostics.Debug.WriteLine("Reset Password - User data from session: " & 
+                    If(userData Is Nothing, "null", "found"))
+                
+                If userData Is Nothing OrElse Not userData.ContainsKey("Email") OrElse Not userData.ContainsKey("ResetToken") Then
+                    ' No user data or missing required fields
+                    System.Diagnostics.Debug.WriteLine("Reset Password Error - Missing user data or required fields")
+                    ShowError()
+                    Return
+                End If
+                
+                ' Verify token matches
+                If userData("ResetToken") <> token Then
+                    System.Diagnostics.Debug.WriteLine("Reset Password Error - Token mismatch: " & 
+                        userData("ResetToken") & " vs " & token)
+                    ShowError()
+                    Return
+                End If
+                
+                ' Data is valid, allow password reset
+                System.Diagnostics.Debug.WriteLine("Password reset session is valid for email: " & userData("Email"))
+            Catch ex As Exception
+                System.Diagnostics.Debug.WriteLine("Reset Password Error in Page_Load: " & ex.Message)
                 ShowError()
-                Return
-            End If
-            
-            ' Store token in hidden field
-            tokenValue.Value = token
-            
-            ' Verify token validity
-            If Not IsValidToken(token) Then
-                ShowError()
-                Return
-            End If
+            End Try
         End If
     End Sub
     
     Protected Sub resetPasswordBtn_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles resetPasswordBtn.Click
-        ' Get token from hidden field
-        Dim token As String = tokenValue.Value
-        
-        ' Validate token again
-        If String.IsNullOrEmpty(token) OrElse Not IsValidToken(token) Then
-            ShowError()
-            Return
-        End If
-        
-        ' Get the new password from form fields
-        Dim newPass As String = newPassword.Text.Trim()
-        Dim confirmPass As String = confirmPassword.Text.Trim()
-        
-        ' Validate passwords
-        If Not ValidatePasswords(newPass, confirmPass) Then
-            Return
-        End If
-        
-        ' Get user email associated with the token
-        Dim userEmail As String = GetEmailFromToken(token)
-        If String.IsNullOrEmpty(userEmail) Then
-            ShowError()
-            Return
-        End If
-        
-        ' Update user password in the database
-        If UpdateUserPassword(userEmail, newPass) Then
-            ' Invalidate the token
-            InvalidateToken(token)
+        Try
+            ' Get token from hidden field
+            Dim token As String = tokenValue.Value
             
-            ' Show success message
-            resetForm.Visible = False
-            successMessage.Visible = True
-            successMessage.Style("display") = "block"
-        Else
-            ' Show generic error
+            System.Diagnostics.Debug.WriteLine("Reset Password Button Click - Token: " & If(token, "null"))
+            
+            ' Get user data from session
+            Dim userData As Dictionary(Of String, String) = OTPManager.GetUserData()
+            
+            System.Diagnostics.Debug.WriteLine("Reset Password - User data from session: " & 
+                If(userData Is Nothing, "null", "found"))
+            
+            ' Validate token and user data again
+            If String.IsNullOrEmpty(token) OrElse 
+               userData Is Nothing OrElse 
+               Not userData.ContainsKey("Email") OrElse 
+               Not userData.ContainsKey("ResetToken") OrElse 
+               userData("ResetToken") <> token Then
+                System.Diagnostics.Debug.WriteLine("Reset Password Error - Token validation failed")
+                ShowError()
+                Return
+            End If
+            
+            ' Get the new password from form fields
+            Dim newPass As String = newPassword.Text.Trim()
+            Dim confirmPass As String = confirmPassword.Text.Trim()
+            
+            System.Diagnostics.Debug.WriteLine("Reset Password - Validating new password")
+            
+            ' Validate passwords
+            If Not ValidatePasswords(newPass, confirmPass) Then
+                System.Diagnostics.Debug.WriteLine("Reset Password Error - Password validation failed")
+                Return
+            End If
+            
+            ' Get user email from session
+            Dim userEmail As String = userData("Email")
+            
+            System.Diagnostics.Debug.WriteLine("Reset Password - Updating password for email: " & userEmail)
+            
+            ' Update user password in the database
+            If UpdateUserPassword(userEmail, newPass) Then
+                System.Diagnostics.Debug.WriteLine("Reset Password - Password updated successfully")
+                
+                ' Clear user data from session
+                OTPManager.ClearUserData()
+                
+                ' Show success message
+                resetForm.Visible = False
+                successMessage.Visible = True
+                successMessage.Style("display") = "block"
+            Else
+                ' Show generic error
+                System.Diagnostics.Debug.WriteLine("Reset Password Error - Failed to update password in database")
+                ClientScript.RegisterStartupScript(Me.GetType(), "errorMsg", 
+                    "alert('An error occurred while resetting your password. Please try again.');", True)
+            End If
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Reset Password Error in resetPasswordBtn_Click: " & ex.Message)
             ClientScript.RegisterStartupScript(Me.GetType(), "errorMsg", 
-                "alert('An error occurred while resetting your password. Please try again.');", True)
-        End If
+                "alert('An unexpected error occurred. Please try again later.');", True)
+        End Try
     End Sub
     
     Private Function ValidatePasswords(ByVal newPass As String, ByVal confirmPass As String) As Boolean
+        ' Check if passwords are empty
+        If String.IsNullOrEmpty(newPass) OrElse String.IsNullOrEmpty(confirmPass) Then
+            ClientScript.RegisterStartupScript(Me.GetType(), "emptyPassword", 
+                "alert('Password fields cannot be empty.');", True)
+            Return False
+        End If
+        
         ' Check if passwords match
         If newPass <> confirmPass Then
             ClientScript.RegisterStartupScript(Me.GetType(), "passwordMismatch", 
@@ -124,44 +181,6 @@ Partial Class Pages_LoginPortal_ResetPassword
         errorMessage.Style("display") = "block"
     End Sub
     
-    ' Helper function to check if token is valid and not expired
-    Private Function IsValidToken(ByVal token As String) As Boolean
-        Try
-            Dim conn As New Connection()
-            Dim query As String = "SELECT COUNT(*) FROM password_resets WHERE token = @Token AND expiration_date > @CurrentDate AND is_used = 0"
-            conn.AddParam("@Token", token)
-            conn.AddParamWithNull("@CurrentDate", DateTime.Now)
-            conn.Query(query)
-            
-            Return conn.DataCount > 0
-        Catch ex As Exception
-            ' Log error
-            System.Diagnostics.Debug.WriteLine("Error validating token: " & ex.Message)
-            Return False
-        End Try
-    End Function
-    
-    ' Helper function to get the email associated with the token
-    Private Function GetEmailFromToken(ByVal token As String) As String
-        Try
-            Dim conn As New Connection()
-            Dim query As String = "SELECT email FROM password_resets WHERE token = @Token AND expiration_date > @CurrentDate AND is_used = 0"
-            conn.AddParam("@Token", token)
-            conn.AddParamWithNull("@CurrentDate", DateTime.Now)
-            conn.Query(query)
-            
-            If conn.DataCount > 0 Then
-                Return conn.Data.Tables(0).Rows(0)("email").ToString()
-            End If
-            
-            Return String.Empty
-        Catch ex As Exception
-            ' Log error
-            System.Diagnostics.Debug.WriteLine("Error getting email from token: " & ex.Message)
-            Return String.Empty
-        End Try
-    End Function
-    
     ' Helper function to update the user's password
     Private Function UpdateUserPassword(ByVal email As String, ByVal newPassword As String) As Boolean
         Try
@@ -169,11 +188,18 @@ Partial Class Pages_LoginPortal_ResetPassword
             Dim query As String = "UPDATE users SET password = @Password WHERE email = @Email"
             
             ' Hash the password before storing (in a real system)
-            Dim hashedPassword As String = newPassword ' In a real system, hash this
+            Dim hashedPassword As String = HashPassword(newPassword)
             
             conn.AddParam("@Password", hashedPassword)
             conn.AddParam("@Email", email)
-            Return conn.Query(query)
+            
+            System.Diagnostics.Debug.WriteLine("Executing query to update password for email: " & email)
+            
+            Dim result As Boolean = conn.Query(query)
+            
+            System.Diagnostics.Debug.WriteLine("Password update query result: " & result)
+            
+            Return result
         Catch ex As Exception
             ' Log error
             System.Diagnostics.Debug.WriteLine("Error updating password: " & ex.Message)
@@ -181,26 +207,14 @@ Partial Class Pages_LoginPortal_ResetPassword
         End Try
     End Function
     
-    ' Helper function to invalidate the token after it has been used
-    Private Sub InvalidateToken(ByVal token As String)
-        Try
-            Dim conn As New Connection()
-            Dim query As String = "UPDATE password_resets SET is_used = 1 WHERE token = @Token"
-            conn.AddParam("@Token", token)
-            conn.Query(query)
-        Catch ex As Exception
-            ' Log error
-            System.Diagnostics.Debug.WriteLine("Error invalidating token: " & ex.Message)
-        End Try
-    End Sub
-    
     ' Helper function to hash the password
     Private Function HashPassword(ByVal password As String) As String
         ' TODO: Replace with proper password hashing
         ' For example using BCrypt.Net:
         ' Return BCrypt.Net.BCrypt.HashPassword(password)
         
-        ' Placeholder implementation
+        ' For demonstration only - in a real application, use a secure hashing algorithm
+        System.Diagnostics.Debug.WriteLine("Note: Using insecure password storage for demonstration")
         Return password
     End Function
 End Class 

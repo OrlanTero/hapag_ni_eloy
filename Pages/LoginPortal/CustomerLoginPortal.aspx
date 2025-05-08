@@ -333,8 +333,8 @@
         <!-- Password Recovery Overlay -->
         <div id="recoveryOverlay" class="overlay">
             <div id="passwordRecoveryPanel" class="password-recovery">
-                <h2>Password Recovery</h2>
-                <p>Enter the email address associated with your account. We'll send you a verification link to reset your password.</p>
+                <h2>Password Reset</h2>
+                <p>Enter the email address associated with your account. We'll send you a verification code (OTP) to verify your identity.</p>
                 
                 <div class="form-group">
                     <label for="recoveryEmail">Email Address</label>
@@ -342,11 +342,11 @@
                 </div>
                 
                 <div id="successMessage" class="success-message">
-                    Password recovery link has been sent to your email. Please check your inbox.
+                    A verification code has been sent to your email. Please check your inbox.
                 </div>
                 
                 <div class="recovery-buttons">
-                    <asp:Button ID="btnSendLink" runat="server" Text="Send Recovery Link" CssClass="submit-btn" OnClientClick="return simulatePasswordRecovery();" />
+                    <asp:Button ID="btnSendLink" runat="server" Text="Send Verification Code" CssClass="submit-btn" />
                     <button type="button" class="cancel-btn" onclick="hidePasswordRecovery()">Cancel</button>
             </div>
        </div>
@@ -364,23 +364,6 @@
             document.getElementById('passwordRecoveryPanel').classList.remove('active');
             document.getElementById('successMessage').classList.remove('active');
             document.getElementById('recoveryEmail').value = '';
-        }
-        
-        function simulatePasswordRecovery() {
-            // Get the email address
-            var email = document.getElementById('recoveryEmail').value;
-            
-            // Simple validation
-            if (!email || email.indexOf('@') === -1) {
-                alert('Please enter a valid email address.');
-                return false;
-            }
-            
-            // Show success message (in a real app, this would happen after server validation)
-            document.getElementById('successMessage').classList.add('active');
-            
-            // Prevent the form from submitting
-            return false;
         }
     </script>
 </body>

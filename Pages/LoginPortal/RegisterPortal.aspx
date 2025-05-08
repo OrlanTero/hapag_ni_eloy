@@ -1,4 +1,4 @@
-﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="RegisterPortal.aspx.vb" Inherits="Pages_Customer_RegisterPortal" %>
+﻿<%@ Page Language="VB" AutoEventWireup="true" CodeFile="RegisterPortal.aspx.vb" Inherits="Pages_Customer_RegisterPortal" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -123,6 +123,23 @@
             margin-top: -10px !important;
             text-align: center !important;
         }
+        
+        .validation-error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .error-summary {
+            color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -144,29 +161,56 @@
                         </h1>
                     </div>
                     <div class="body">
+                        <asp:Panel ID="ErrorSummary" runat="server" CssClass="error-summary" Visible="false">
+                            <asp:Literal ID="ErrorMessage" runat="server"></asp:Literal>
+                        </asp:Panel>
+                        
                         <div class="form-group">
                             <label for="displayName" class="required-field">Display Name</label>
                             <asp:TextBox ID="displayNameTxt" runat="server"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="rfvDisplayName" runat="server" 
+                                ControlToValidate="displayNameTxt" Display="Dynamic" 
+                                ErrorMessage="Display Name is required" CssClass="validation-error" />
                         </div>
                         <div class="form-group">
                             <label for="username" class="required-field">Username</label>
                             <asp:TextBox ID="usernameTxt" runat="server"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="rfvUsername" runat="server" 
+                                ControlToValidate="usernameTxt" Display="Dynamic" 
+                                ErrorMessage="Username is required" CssClass="validation-error" />
                         </div>
                         <div class="form-group">
                             <label for="email" class="required-field">Email Address</label>
-                            <asp:TextBox ID="emailTxt" runat="server" TextMode="SingleLine"></asp:TextBox>
+                            <asp:TextBox ID="emailTxt" runat="server"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="rfvEmail" runat="server" 
+                                ControlToValidate="emailTxt" Display="Dynamic" 
+                                ErrorMessage="Email Address is required" CssClass="validation-error" />
+                            <asp:RegularExpressionValidator ID="revEmail" runat="server" 
+                                ControlToValidate="emailTxt" Display="Dynamic" 
+                                ErrorMessage="Please enter a valid email address" 
+                                ValidationExpression="^[^@\s]+@[^@\s]+\.[^@\s]+$" CssClass="validation-error" />
                         </div>
                         <div class="form-group">
                             <label for="password" class="required-field">Password</label>
-                            <asp:TextBox ID="passwordTxt" type="password" runat="server"></asp:TextBox>
+                            <asp:TextBox ID="passwordTxt" runat="server" TextMode="Password"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="rfvPassword" runat="server" 
+                                ControlToValidate="passwordTxt" Display="Dynamic" 
+                                ErrorMessage="Password is required" CssClass="validation-error" />
+                            <div class="field-note">Password must be at least 6 characters long.</div>
                         </div>
                         <div class="form-group">
                             <label for="confirmPassword" class="required-field">Confirm Password</label>
-                            <asp:TextBox ID="confirmPasswordTxt" type="password" runat="server"></asp:TextBox>
+                            <asp:TextBox ID="confirmPasswordTxt" runat="server" TextMode="Password"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="rfvConfirmPassword" runat="server" 
+                                ControlToValidate="confirmPasswordTxt" Display="Dynamic" 
+                                ErrorMessage="Please confirm your password" CssClass="validation-error" />
+                            <asp:CompareValidator ID="cvPasswords" runat="server" 
+                                ControlToValidate="confirmPasswordTxt" ControlToCompare="passwordTxt" Display="Dynamic" 
+                                ErrorMessage="Passwords do not match" CssClass="validation-error" />
                         </div>
 
                         <div class="form-group">
-                            <asp:Button ID="Button1" Text="Create Account" runat="server" />
+                            <asp:Button ID="Button1" Text="Create Account" runat="server" OnClick="Button1_Click" />
                         </div>
 
                         <div class="form-group">

@@ -7,17 +7,26 @@ Partial Class Pages_Customer_CustomerTemplate
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Not IsPostBack Then
-            ' Check if user is logged in
-            If Session("CURRENT_SESSION") Is Nothing Then
-                Response.Redirect("~/Pages/LoginPortal/CustomerLoginPortal.aspx")
-                Return
+            ' Check if this is a page that should skip login check (like OTP verification)
+            If Session("SkipLoginRedirect") IsNot Nothing AndAlso Session("SkipLoginRedirect").ToString() = "true" Then
+                System.Diagnostics.Debug.WriteLine("Master Page: Skipping login redirect check")
+                ' Skip login check for OTP verification process
+            Else
+                ' Check if user is logged in
+                If Session("CURRENT_SESSION") Is Nothing Then
+                    System.Diagnostics.Debug.WriteLine("Master Page: No user session, redirecting to login")
+                    Response.Redirect("~/Pages/LoginPortal/CustomerLoginPortal.aspx")
+                    Return
+                End If
             End If
 
             ' Set active navigation item based on current page
             SetActiveNavItem()
             
-            ' Load cart count
-            LoadCartCount()
+            ' Load cart count - only if user is logged in
+            If Session("CURRENT_SESSION") IsNot Nothing Then
+                LoadCartCount()
+            End If
         End If
     End Sub
 
@@ -103,6 +112,15 @@ Partial Class Pages_Customer_CustomerTemplate
                 End If
             Else
                 CartCountLiteral.Text = "0"
+                ' Hide cart icon since user is not logged in (for pages like OTP verification)
+                Try
+                    Dim cartIcon As Control = FindControl("cart-icon")
+                    If cartIcon IsNot Nothing Then
+                        cartIcon.Visible = False
+                    End If
+                Catch ex As Exception
+                    ' Ignore error, just leave the cart icon visible
+                End Try
             End If
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error loading cart count: " & ex.Message)
